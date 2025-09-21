@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Database Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input:hover {
+            border-color: #0056b3;
+            background: #f8f9ff;
+        }
+
+        .parse-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .parse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .sort-select {
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #e8f4f8;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .category-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .category-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #495057, #6c757d);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .category-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .vehicle-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .vehicle-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .vehicle-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .vehicle-item:last-child {
+            border-bottom: none;
+        }
+
+        .vehicle-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .vehicle-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .vehicle-brand {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .vehicle-price {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-data h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #007bff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Scrollbar styling */
+        .vehicle-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .vehicle-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .vehicle-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .vehicle-list::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .controls {
+                padding: 15px 20px;
+            }
+            
+            .file-input-container,
+            .search-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Vehicle Database</h1>
+            <p>Browse and explore vehicle data by category</p>
+        </div>
+
+        <div class="controls">
+            <div class="file-input-container">
+                <textarea class="file-input" placeholder="Paste your vehicles.lua content here..." rows="4"></textarea>
+                <button class="parse-btn" onclick="parseVehicleData()">Parse Data</button>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search vehicles..." oninput="filterVehicles()">
+                <select class="sort-select" onchange="sortVehicles()">
+                    <option value="name">Sort by Name</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="brand">Sort by Brand</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats hidden" id="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="total-vehicles">0</div>
+                <div class="stat-label">Total Vehicles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="total-categories">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="avg-price">$0</div>
+                <div class="stat-label">Average Price</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="most-expensive">$0</div>
+                <div class="stat-label">Most Expensive</div>
+            </div>
+        </div>
+
+        <div class="content" id="content">
+            <div class="no-data">
+                <h3>No Vehicle Data</h3>
+                <p>Please paste your vehicles.lua content above and click "Parse Data" to begin.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let vehicleData = {};
+        let filteredData = {};
+
+        function parseVehicleData() {
+            const input = document.querySelector('.file-input').value;
+            
+            if (!input.trim()) {
+                alert('Please paste the vehicle data first!');
+                return;
+            }
+
+            try {
+                // Show loading
+                document.getElementById('content').innerHTML = '<div class="loading">Parsing data...</div>';
+
+                // Parse Lua-like table structure
+                vehicleData = parseLuaTable(input);
+                filteredData = { ...vehicleData };
+                
+                displayVehicles();
+                updateStats();
+                
+                // Show stats
+                document.getElementById('stats').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Parsing error:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="no-data">
+                        <h3>Parsing Error</h3>
+                        <p>Error parsing the vehicle data. Please check the format and try again.</p>
+                        <p style="color: #dc3545; font-size: 0.9em; margin-top: 10px;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function parseLuaTable(luaContent) {
+            const vehicles = {};
+            
+            // Extract vehicle entries using regex
+            const vehiclePattern = /(\w+)\s*=\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
+            let match;
+            
+            while ((match = vehiclePattern.exec(luaContent)) !== null) {
+                const vehicleKey = match[1];
+                const vehicleData = match[2];
+                
+                // Parse individual properties
+                const vehicle = {};
+                
+                // Extract name
+                const nameMatch = vehicleData.match(/name\s*=\s*['"]([^'"]*)['"]/);
+                if (nameMatch) vehicle.name = nameMatch[1];
+                
+                // Extract brand
+                const brandMatch = vehicleData.match(/brand\s*=\s*['"]([^'"]*)['"]/);
+                if (brandMatch) vehicle.brand = brandMatch[1];
+                
+                // Extract price
+                const priceMatch = vehicleData.match(/price\s*=\s*(\d+)/);
+                if (priceMatch) vehicle.price = parseInt(priceMatch[1]);
+                
+                // Extract category
+                const categoryMatch = vehicleData.match(/category\s*=\s*['"]([^'"]*)['"]/);
+                if (categoryMatch) vehicle.category = categoryMatch[1];
+                
+                // Extract type
+                const typeMatch = vehicleData.match(/type\s*=\s*['"]([^'"]*)['"]/);
+                if (typeMatch) vehicle.type = typeMatch[1];
+                
+                // Only add if we have the essential data
+                if (vehicle.name && vehicle.price && vehicle.category) {
+                    vehicles[vehicleKey] = vehicle;
+                }
+            }
+            
+            return vehicles;
+        }
+
+        function displayVehicles() {
+            const content = document.getElementById('content');
+            
+            // Group vehicles by category
+            const categories = {};
+            
+            Object.values(filteredData).forEach(vehicle => {
+                if (!categories[vehicle.category]) {
+                    categories[vehicle.category] = [];
+                }
+                categories[vehicle.category].push(vehicle);
+            });
+
+            // Sort categories alphabetically
+            const sortedCategories = Object.keys(categories).sort();
+
+            if (sortedCategories.length === 0) {
+                content.innerHTML = `
+                    <div class="no-data">
+                        <h3>No vehicles found</h3>
+                        <p>Try adjusting your search criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = sortedCategories.map(category => {
+                const vehicles = categories[category];
+                
+                return `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <span class="category-title">${category.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <span class="category-count">${vehicles.length}</span>
+                        </div>
+                        <div class="vehicle-list">
+                            ${vehicles.map(vehicle => `
+                                <div class="vehicle-item">
+                                    <div class="vehicle-info">
+                                        <div class="vehicle-name">${vehicle.name}</div>
+                                        <div class="vehicle-brand">${vehicle.brand || 'Unknown Brand'}</div>
+                                    </div>
+                                    <div class="vehicle-price">$${vehicle.price.toLocaleString()}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterVehicles() {
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+            
+            if (!searchTerm) {
+                filteredData = { ...vehicleData };
+            } else {
+                filteredData = {};
+                Object.keys(vehicleData).forEach(key => {
+                    const vehicle = vehicleData[key];
+                    if (vehicle.name.toLowerCase().includes(searchTerm) ||
+                        vehicle.brand.toLowerCase().includes(searchTerm) ||
+                        vehicle.category.toLowerCase().includes(searchTerm)) {
+                        filteredData[key] = vehicle;
+                    }
+                });
+            }
+            
+            displayVehicles();
+        }
+
+        function sortVehicles() {
+            const sortBy = document.querySelector('.sort-select').value;
+            
+            // Convert to array, sort, then convert back
+            const vehicleArray = Object.entries(filteredData);
+            
+            vehicleArray.sort((a, b) => {
+                const vehicleA = a[1];
+                const vehicleB = b[1];
+                
+                switch (sortBy) {
+                    case 'name':
+                        return vehicleA.name.localeCompare(vehicleB.name);
+                    case 'price-asc':
+                        return vehicleA.price - vehicleB.price;
+                    case 'price-desc':
+                        return vehicleB.price - vehicleA.price;
+                    case 'brand':
+                        return vehicleA.brand.localeCompare(vehicleB.brand);
+                    default:
+                        return 0;
+                }
+            });
+            
+            filteredData = Object.fromEntries(vehicleArray);
+            displayVehicles();
+        }
+
+        function updateStats() {
+            const vehicles = Object.values(vehicleData);
+            const categories = new Set(vehicles.map(v => v.category));
+            const prices = vehicles.map(v => v.price);
+            
+            const totalVehicles = vehicles.length;
+            const totalCategories = categories.size;
+            const avgPrice = totalVehicles > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / totalVehicles) : 0;
+            const maxPrice = totalVehicles > 0 ? Math.max(...prices) : 0;
+            
+            document.getElementById('total-vehicles').textContent = totalVehicles;
+            document.getElementById('total-categories').textContent = totalCategories;
+            document.getElementById('avg-price').textContent = '$' + avgPrice.toLocaleString();
+            document.getElementById('most-expensive').textContent = '$' + maxPrice.toLocaleString();
+        }
+
+        // Auto-load vehicles.lua from the same directory
+        window.addEventListener('load', function() {
+            loadVehicleFile();
+        });
+
+        async function loadVehicleFile() {
+            try {
+                // Show loading message
+                document.getElementById('content').innerHTML = '<div class="loading">Loading vehicle data...</div>';
+                
+                const response = await fetch('./vehicles.lua');
+                if (response.ok) {
+                    const luaContent = await response.text();
+                    document.querySelector('.file-input').value = luaContent;
+                    parseVehicleData();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error loading vehicles.lua:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="no-data">
+                        <h3>Could not load vehicles.lua</h3>
+                        <p>Error: ${error.message}</p>
+                        <p>Make sure vehicles.lua is in the same directory as this HTML file.</p>
+                        <p style="margin-top: 20px;"><strong>Alternative:</strong> Copy and paste your vehicles.lua content above and click "Parse Data".</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
