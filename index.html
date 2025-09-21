@@ -1,4 +1,153 @@
-
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDM Vehicle Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .title-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-2xl border-2 border-gray-700 p-6 md:p-10">
+        <div id="main-menu">
+            <div class="text-center mb-8 md:mb-12">
+                <h1 class="title-font text-3xl md:text-5xl font-extrabold text-amber-400 tracking-wide leading-tight">PREMIUM DELUXE MOTORSPORT</h1>
+                <p class="text-gray-400 mt-2 text-sm md:text-lg">Explore Our Exclusive Inventory</p>
+            </div>
+
+            <div id="vehicle-classes" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            </div>
+        </div>
+        
+        <div id="vehicle-listings" class="hidden">
+            <button id="back-button" class="bg-gray-700 hover:bg-amber-600 transition-all duration-300 text-sm md:text-base font-semibold py-2 px-4 rounded-xl mb-6">
+                &larr; Back to Categories
+            </button>
+            
+            <div class="text-center mb-6">
+                <h2 id="listings-title" class="title-font text-2xl md:text-4xl font-bold text-amber-400 tracking-wide"></h2>
+            </div>
+            
+            <div id="car-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vehicleData = {
+            "Compacts": [
+                { name: "Dilettante", price: "$25,000" },
+                { name: "Panto", price: "$85,000" },
+                { name: "Blista Compact", price: "$42,000" }
+            ],
+            "Sedans": [
+                { name: "Oracle", price: "$80,000" },
+                { name: "Sultan RS Classic", price: "$200,000" },
+                { name: "Schafter V12", price: "$116,000" }
+            ],
+            "SUVs": [
+                { name: "Cavalcade", price: "$65,000" },
+                { name: "Dubsta", price: "$75,000" },
+                { name: "Baller LE", price: "$100,000" }
+            ],
+            "Coupes": [
+                { name: "Zion Classic", price: "$815,000" },
+                { name: "F620", price: "$80,000" },
+                { name: "Oracle XS", price: "$50,000" }
+            ],
+            "Muscle": [
+                { name: "Gauntlet Classic", price: "$615,000" },
+                { name: "Vigero", price: "$65,000" },
+                { name: "Sabre Turbo", price: "$150,000" }
+            ],
+            "Sports Classics": [
+                { name: "Cheetah Classic", price: "$865,000" },
+                { name: "Stinger GT", price: "$875,000" },
+                { name: "Monroe", price: "$490,000" }
+            ],
+            "Sports": [
+                { name: "Comet Retro Custom", price: "$645,000" },
+                { name: "Pariah", price: "$1,420,000" },
+                { name: "Jester", price: "$250,000" }
+            ],
+            "Super": [
+                { name: "Nero", price: "$1,440,000" },
+                { name: "Deveste Eight", price: "$1,795,000" },
+                { name: "Autarch", price: "$1,580,000" }
+            ],
+            "Off-road": [
+                { name: "Kamacho", price: "$345,000" },
+                { name: "Brawler", price: "$715,000" },
+                { name: "Dubsta 6x6", price: "$249,000" }
+            ],
+            "Vans": [
+                { name: "Burrito", price: "$15,000" },
+                { name: "Speedo", price: "$20,000" },
+                { name: "Minivan", price: "$30,000" }
+            ]
+        };
+
+        const mainMenu = document.getElementById('main-menu');
+        const vehicleListings = document.getElementById('vehicle-listings');
+        const vehicleClassesContainer = document.getElementById('vehicle-classes');
+        const carListContainer = document.getElementById('car-list');
+        const listingsTitle = document.getElementById('listings-title');
+        const backButton = document.getElementById('back-button');
+
+        const showMainMenu = () => {
+            mainMenu.classList.remove('hidden');
+            vehicleListings.classList.add('hidden');
+        };
+
+        const showVehicleListings = (className) => {
+            mainMenu.classList.add('hidden');
+            vehicleListings.classList.remove('hidden');
+            listingsTitle.textContent = className.toUpperCase();
+            
+            carListContainer.innerHTML = '';
+
+            const cars = vehicleData[className] || [];
+
+            cars.forEach(car => {
+                const card = document.createElement('div');
+                card.className = "bg-gray-800 rounded-xl shadow-xl p-4 md:p-6 transition-all duration-300 transform hover:scale-105";
+                card.innerHTML = `
+                    <img src="https://placehold.co/400x200/2C2C2C/EAEAEA?text=${car.name.toUpperCase().replace(/\s/g, '+')}" alt="${car.name}" class="rounded-xl mb-4 w-full">
+                    <h3 class="text-lg md:text-xl font-bold text-amber-400 mb-1">${car.name}</h3>
+                    <p class="text-gray-400 text-sm md:text-base">${car.price}</p>
+                `;
+                carListContainer.appendChild(card);
+            });
+        };
+
+        const vehicleClasses = Object.keys(vehicleData);
+        vehicleClasses.forEach(className => {
+            const button = document.createElement('button');
+            button.className = "bg-gray-800 hover:bg-amber-600 transition-all duration-300 text-sm md:text-base font-semibold py-3 md:py-4 px-2 rounded-xl shadow-lg border-2 border-transparent hover:border-amber-400 transform hover:scale-105 active:scale-95 text-gray-200 hover:text-white";
+            button.textContent = className.toUpperCase();
+            
+            button.addEventListener('click', () => {
+                showVehicleListings(className);
+            });
+
+            vehicleClassesContainer.appendChild(button);
+        });
+
+        backButton.addEventListener('click', showMainMenu);
+        
+    </script>
+
+</body>
 </html>
