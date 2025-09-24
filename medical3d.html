@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Medical Scanner - GTAV RP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: #1a1a1a;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .header h1 {
+            color: #10b981;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-patient { background: #064e3b; border: 1px solid #10b981; }
+        .status-mode { background: #1e3a8a; border: 1px solid #3b82f6; }
+        .status-priority { background: #7f1d1d; border: 1px solid #ef4444; }
+
+        .reset-btn {
+            background: #374151;
+            border: 1px solid #6b7280;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #4b5563;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .body-container {
+            flex: 1;
+            background: #1a1a1a;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .body-title {
+            color: #10b981;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .viewer-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #111, #222);
+            overflow: hidden;
+        }
+
+        .biodigital-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .viewer-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            border: 1px solid #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .hotspot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(1px);
+        }
+
+        .hotspot:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 15px currentColor;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .hotspot.selected {
+            animation: pulse-hotspot 1.5s infinite;
+            transform: scale(1.8);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        @keyframes pulse-hotspot {
+            0%, 100% { box-shadow: 0 0 15px currentColor; }
+            50% { box-shadow: 0 0 25px currentColor, 0 0 35px currentColor; }
+        }
+
+        .hotspot-critical { border-color: #dc2626; }
+        .hotspot-high { border-color: #ea580c; }
+        .hotspot-moderate { border-color: #f59e0b; }
+        .hotspot-low { border-color: #16a34a; }
+
+        .controls-info {
+            color: #6b7280;
+            margin-top: 15px;
+            font-size: 14px;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+        }
+
+        .scanning-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            animation: scan 4s infinite;
+            z-index: 60;
+            border-radius: 2px;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { transform: translateY(600px); opacity: 0.8; }
+        }
+
+        .legend {
+            margin-top: 20px;
+            background: #111;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .legend h4 {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid;
+        }
+
+        .assessment-panel {
+            width: 400px;
+            background: #1a1a1a;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-header {
+            background: #111;
+            padding: 15px;
+            border-bottom: 1px solid #374151;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .panel-header h2 {
+            color: #10b981;
+            font-size: 18px;
+        }
+
+        .panel-content {
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .assessment-card {
+            background: #111;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid;
+            margin-top: 8px;
+        }
+
+        .priority-critical { background: #7f1d1d; border-color: #dc2626; color: #fca5a5; }
+        .priority-high { background: #7c2d12; border-color: #ea580c; color: #fed7aa; }
+        .priority-moderate { background: #78350f; border-color: #f59e0b; color: #fde68a; }
+        .priority-low { background: #14532d; border-color: #16a34a; color: #bbf7d0; }
+
+        .injury-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .injury-list li {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        .injury-list li:before {
+            content: "•";
+            color: #ef4444;
+            position: absolute;
+            left: 0;
+        }
+
+        .section-title {
+            color: #10b981;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .waiting-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px 20px;
+        }
+
+        .waiting-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .system-status {
+            background: #111;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .action-bar {
+            margin-top: 20px;
+            background: #1a1a1a;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .action-title {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .action-subtitle {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #374151;
+            border: 1px solid;
+            color: white;
+            padding: 12px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-red { background: #7f1d1d; border-color: #dc2626; }
+        .btn-red:hover { background: #991b1b; }
+        .btn-blue { background: #1e3a8a; border-color: #3b82f6; }
+        .btn-blue:hover { background: #1d4ed8; }
+        .btn-purple { background: #581c87; border-color: #8b5cf6; }
+        .btn-purple:hover { background: #6b21a8; }
+        .btn-green { background: #14532d; border-color: #16a34a; }
+        .btn-green:hover { background: #166534; }
+        .btn-yellow { background: #78350f; border-color: #f59e0b; }
+        .btn-yellow:hover { background: #92400e; }
+
+        .iframe-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            color: #10b981;
+            font-size: 18px;
+            animation: loadingPulse 2s infinite;
+        }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>3D MEDICAL SCANNER</h1>
+                <div class="status-bar">
+                    <span class="status-item status-patient">PATIENT: TRAUMA-001</span>
+                    <span class="status-item status-mode">STATUS: <span id="statusMode">3D ANATOMICAL VIEW</span></span>
+                    <span class="status-item status-priority">PRIORITY: MULTI-TRAUMA</span>
+                </div>
+            </div>
+            <button class="reset-btn" onclick="resetView()">RESET SCAN</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="body-container">
+            <h2 class="body-title">3D ANATOMICAL TRAUMA ASSESSMENT</h2>
+            <div class="viewer-container">
+                <div class="iframe-loading">
+                    Loading 3D Anatomical Model...
+                </div>
+                
+                <iframe 
+                    class="biodigital-iframe" 
+                    src="https://human.biodigital.com/widget/?be=2PcB&background.colors=0,0,0,1,0,0,0,1&initial.hand-hint=true&ui-fullscreen=true&ui-center=false&ui-dissect=true&ui-zoom=true&ui-help=true&ui-tools-display=primary&ui-info=true&uaid=3YfOR"
+                    title="3D Human Anatomy Model"
+                    onload="hideLoading()"
+                ></iframe>
+                
+
+            </div>
+
+            <div class="controls-info">
+                <strong>Use embedded 3D viewer controls to rotate, zoom and examine anatomy</strong><br>
+                <strong>Full anatomical model</strong> with dissection and detailed view capabilities
+            </div>
+
+            <div class="legend">
+                <h4>MEDICAL SCANNER STATUS</h4>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color" style="border-color: #10b981; background: rgba(16, 185, 129, 0.2);"></div>
+                        <span style="color: #10b981;">Scanner Active</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="border-color: #3b82f6; background: rgba(59, 130, 246, 0.2);"></div>
+                        <span style="color: #93c5fd;">Model Loaded</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.2);"></div>
+                        <span style="color: #fde68a;">Patient Ready</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="border-color: #6b7280; background: rgba(107, 114, 128, 0.2);"></div>
+                        <span style="color: #9ca3af;">Standby</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="assessment-panel">
+            <div class="panel-header">
+                <h2>MEDICAL ASSESSMENT</h2>
+            </div>
+            <div class="panel-content" id="assessmentContent">
+                <div class="waiting-state">
+                    <div class="waiting-icon">•</div>
+                    <h3 style="font-size: 18px; color: #d1d5db; margin-bottom: 15px;">3D ANATOMICAL VIEW</h3>
+                    <p style="font-size: 14px; margin-bottom: 30px;">Use the 3D anatomical model controls to examine patient anatomy. Rotate, zoom, and dissect to view internal structures and identify potential injury locations.</p>
+                    <div class="system-status">
+                        <h4 style="color: #10b981; margin-bottom: 10px;">SYSTEM STATUS:</h4>
+                        <p style="margin: 5px 0;">Scanner: ONLINE</p>
+                        <p style="margin: 5px 0;">Anatomical Model: LOADED</p>
+                        <p style="margin: 5px 0;">Patient: MULTI-TRAUMA</p>
+                        <p style="margin: 5px 0;">View: 3D ANATOMICAL</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <div class="action-header">
+            <h3 class="action-title">EMERGENCY PROTOCOLS</h3>
+            <div class="action-subtitle">Click to simulate EMS procedures</div>
+        </div>
+        <div class="action-grid">
+            <button class="action-btn btn-red">CALL BACKUP</button>
+            <button class="action-btn btn-blue">GIVE MORPHINE</button>
+            <button class="action-btn btn-purple">CPR</button>
+            <button class="action-btn btn-green">BANDAGE</button>
+            <button class="action-btn btn-yellow">CALL HOSPITAL</button>
+        </div>
+    </div>
+
+    <script>
+        function hideLoading() {
+            const loading = document.querySelector('.iframe-loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }
+
+        function resetView() {
+            document.getElementById('statusMode').textContent = '3D ANATOMICAL VIEW';
+            
+            // Reset assessment panel to default view
+            document.getElementById('assessmentContent').innerHTML = `
+                <div class="waiting-state">
+                    <div class="waiting-icon">•</div>
+                    <h3 style="font-size: 18px; color: #d1d5db; margin-bottom: 15px;">3D ANATOMICAL VIEW</h3>
+                    <p style="font-size: 14px; margin-bottom: 30px;">Use the 3D anatomical model controls to examine patient anatomy. Rotate, zoom, and dissect to view internal structures and identify potential injury locations.</p>
+                    <div class="system-status">
+                        <h4 style="color: #10b981; margin-bottom: 10px;">SYSTEM STATUS:</h4>
+                        <p style="margin: 5px 0;">Scanner: ONLINE</p>
+                        <p style="margin: 5px 0;">Anatomical Model: LOADED</p>
+                        <p style="margin: 5px 0;">Patient: MULTI-TRAUMA</p>
+                        <p style="margin: 5px 0;">View: 3D ANATOMICAL</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
