@@ -105,6 +105,19 @@
             margin-bottom: -15px;
             z-index: 10;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease;
+        }
+
+        .mixer-motor.vibrating {
+            animation: motorVibrate 0.1s infinite;
+        }
+
+        @keyframes motorVibrate {
+            0% { transform: translateX(0px) translateY(0px); }
+            25% { transform: translateX(0.5px) translateY(0.5px); }
+            50% { transform: translateX(0px) translateY(1px); }
+            75% { transform: translateX(-0.5px) translateY(0.5px); }
+            100% { transform: translateX(0px) translateY(0px); }
         }
 
         .motor-top {
@@ -223,21 +236,106 @@
         }
 
         .barrel-legs {
-            display: flex;
-            justify-content: space-between;
-            width: 280px;
-            margin-top: 15px;
             position: relative;
+            width: 300px;
+            height: 70px;
+            margin-top: 10px;
             z-index: 5;
         }
 
-        .leg {
-            width: 16px;
-            height: 60px;
-            background: linear-gradient(180deg, #7f8c8d 0%, #34495e 100%);
-            border-radius: 8px;
-            border: 2px solid #2c3e50;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+        .leg-assembly {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .leg-assembly.front-left { left: 20px; }
+        .leg-assembly.front-right { right: 20px; }
+        .leg-assembly.back-left { left: 60px; }
+        .leg-assembly.back-right { right: 60px; }
+
+        .mounting-bracket {
+            width: 30px;
+            height: 8px;
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            border-radius: 4px;
+            border: 1px solid #1a252f;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .mounting-bracket::before {
+            content: "";
+            position: absolute;
+            left: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: #1a252f;
+            border-radius: 50%;
+            box-shadow: 18px 0 0 #1a252f;
+        }
+
+        .leg-post {
+            width: 12px;
+            height: 50px;
+            background: linear-gradient(135deg, #7f8c8d 0%, #34495e 60%, #2c3e50 100%);
+            border-radius: 6px;
+            border: 1px solid #2c3e50;
+            box-shadow: 
+                2px 0 6px rgba(0,0,0,0.4),
+                inset -2px 0 3px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .leg-post::after {
+            content: "";
+            position: absolute;
+            left: -1px;
+            top: 2px;
+            width: 2px;
+            height: 46px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 1px;
+        }
+
+        .leg-foot {
+            width: 24px;
+            height: 6px;
+            background: linear-gradient(45deg, #2c3e50, #1a252f);
+            border-radius: 3px;
+            border: 1px solid #1a252f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .support-brace {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 220px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, #34495e 20%, #34495e 80%, transparent 100%);
+            border-radius: 1px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .cross-brace {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%) rotate(15deg);
+            width: 180px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #2c3e50 30%, #2c3e50 70%, transparent 100%);
+            border-radius: 1px;
+            opacity: 0.8;
+        }
+
+        .cross-brace.reverse {
+            transform: translateX(-50%) rotate(-15deg);
         }
 
         .fire-container {
@@ -252,21 +350,58 @@
         }
 
         .fire-gif {
-            width: 300px;
-            height: 300px;
-            background-image: url('fire.gif');
+            position: absolute;
             background-size: cover;
             background-position: center bottom;
             background-repeat: no-repeat;
             border-radius: 0 0 20px 20px;
             opacity: 0;
-            transition: opacity 0.5s ease;
-            filter: brightness(1.2) contrast(1.1);
+            transition: opacity 0.3s ease;
+            filter: blur(5px) brightness(222.1%);
             z-index: 2;
         }
 
         .fire-gif.active {
             opacity: 1;
+        }
+
+        .flame-low {
+            width: 200px;
+            height: 300px;
+            background-image: url('fire.gif');
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .flame-medium {
+            width: 260px;
+            height: 300px;
+            background-image: url('fire.gif');
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            filter: blur(5px) brightness(222.1%)
+        }
+
+        .flame-high {
+            width: 300px;
+            height: 300px;
+            background-image: url('fire.gif');
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            filter: blur(5px) brightness(222.1%)
+        }
+
+        .flame-max {
+            width: 340px;
+            height: 320px;
+            background-image: url('fire.gif');
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            filter: blur(5px) brightness(222.1%)
         }
 
         .burner-base {
@@ -299,8 +434,79 @@
         .controls-section {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
             min-width: 220px;
+        }
+
+        .progress-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-container {
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #2c3e50;
+            border-radius: 6px;
+            border: 1px solid #1a252f;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .reaction-progress {
+            background: linear-gradient(90deg, #27ae60, #2ecc71, #58d68d);
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+        }
+
+        .fuel-level {
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #f1c40f);
+            box-shadow: 0 0 15px rgba(241, 196, 64, 0.6);
+        }
+
+        .fuel-level.low {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+            animation: lowFuelPulse 1s infinite alternate;
+        }
+
+        @keyframes lowFuelPulse {
+            0% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .progress-percentage {
+            text-align: center;
+            color: #ecf0f1;
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 12px;
         }
 
         .control-group {
@@ -454,21 +660,61 @@
             </div>
 
             <div class="barrel-legs">
-                <div class="leg"></div>
-                <div class="leg"></div>
-                <div class="leg"></div>
-                <div class="leg"></div>
+                <div class="leg-assembly front-left">
+                    <div class="mounting-bracket"></div>
+                    <div class="leg-post"></div>
+                    <div class="leg-foot"></div>
+                </div>
+                <div class="leg-assembly front-right">
+                    <div class="mounting-bracket"></div>
+                    <div class="leg-post"></div>
+                    <div class="leg-foot"></div>
+                </div>
+                <div class="leg-assembly back-left">
+                    <div class="mounting-bracket"></div>
+                    <div class="leg-post"></div>
+                    <div class="leg-foot"></div>
+                </div>
+                <div class="leg-assembly back-right">
+                    <div class="mounting-bracket"></div>
+                    <div class="leg-post"></div>
+                    <div class="leg-foot"></div>
+                </div>
+                <div class="support-brace"></div>
+                <div class="cross-brace"></div>
+                <div class="cross-brace reverse"></div>
             </div>
 
             <div class="fire-container">
                 <div class="burner-base">
                     <div class="burner-grates"></div>
                 </div>
-                <div class="fire-gif" id="fireGif"></div>
+                <div class="fire-gif flame-low" id="flameLow"></div>
+                <div class="fire-gif flame-medium" id="flameMedium"></div>
+                <div class="fire-gif flame-high" id="flameHigh"></div>
+                <div class="fire-gif flame-max" id="flameMax"></div>
             </div>
         </div>
 
         <div class="controls-section">
+            <div class="progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-label">Reaction Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill reaction-progress" id="reactionProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-percentage" id="reactionPercentage">0%</div>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-label">Fuel Level</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill fuel-level" id="fuelLevel" style="width: 100%"></div>
+                    </div>
+                    <div class="progress-percentage" id="fuelPercentage">100%</div>
+                </div>
+            </div>
+
             <div class="control-group">
                 <div class="control-label">Heat Control</div>
                 <input type="range" class="slider" id="heatSlider" min="0" max="100" value="0" oninput="updateHeat(this.value)">
@@ -487,12 +733,26 @@
         let currentSpeed = 0;
         let currentHeat = 0;
         let itemCount = 0;
+        let reactionProgress = 0;
+        let fuelLevel = 100;
+        let reactionInterval;
+        let fuelConsumptionInterval;
 
         function updateMixingSpeed(speed) {
             currentSpeed = speed;
             document.getElementById('speed').textContent = speed + ' RPM';
             document.getElementById('mixingDisplay').textContent = speed + ' RPM';
             document.getElementById('speedSlider').value = speed;
+            
+            const motor = document.querySelector('.mixer-motor');
+            if (speed > 50) {
+                motor.classList.add('vibrating');
+                // Increase vibration intensity with speed
+                const intensity = Math.min(speed / 100, 3);
+                motor.style.animationDuration = Math.max(0.05, 0.2 - (intensity * 0.05)) + 's';
+            } else {
+                motor.classList.remove('vibrating');
+            }
         }
 
         function updateHeat(heat) {
@@ -502,20 +762,55 @@
             document.getElementById('heatLevel').textContent = heat + '%';
             document.getElementById('heatDisplay').textContent = heat + '%';
             
-            const fireGif = document.getElementById('fireGif');
-            const steamEffect = document.getElementById('steamEffect');
+            // Multiple flame levels
+            const flameLow = document.getElementById('flameLow');
+            const flameMedium = document.getElementById('flameMedium');
+            const flameHigh = document.getElementById('flameHigh');
+            const flameMax = document.getElementById('flameMax');
             
+            // Reset all flames
+            [flameLow, flameMedium, flameHigh, flameMax].forEach(flame => {
+                flame.classList.remove('active');
+            });
+            
+            // Activate flames based on heat level
             if (heat > 15) {
-                fireGif.classList.add('active');
-            } else {
-                fireGif.classList.remove('active');
+                flameLow.classList.add('active');
+            }
+            if (heat > 40) {
+                flameMedium.classList.add('active');
+            }
+            if (heat > 65) {
+                flameHigh.classList.add('active');
+            }
+            if (heat > 85) {
+                flameMax.classList.add('active');
             }
 
             // Show steam when hot
+            const steamEffect = document.getElementById('steamEffect');
             if (heat > 60) {
                 steamEffect.classList.add('active');
             } else {
                 steamEffect.classList.remove('active');
+            }
+
+            // Start/stop fuel consumption
+            if (heat > 10) {
+                if (!fuelConsumptionInterval) {
+                    startFuelConsumption();
+                }
+            } else {
+                stopFuelConsumption();
+            }
+
+            // Start/stop reaction progress
+            if (heat > 30 && currentSpeed > 100 && itemCount > 0) {
+                if (!reactionInterval) {
+                    startReactionProgress();
+                }
+            } else {
+                stopReactionProgress();
             }
         }
 
@@ -532,6 +827,73 @@
                     barrel.style.transform = 'translateX(0px)';
                 }, 100);
             }, 100);
+
+            // Check if reaction should start
+            if (currentHeat > 30 && currentSpeed > 100) {
+                if (!reactionInterval) {
+                    startReactionProgress();
+                }
+            }
+        }
+
+        function startReactionProgress() {
+            reactionInterval = setInterval(() => {
+                if (reactionProgress < 100 && fuelLevel > 0) {
+                    // Reaction speed depends on heat and mixing speed
+                    const reactionSpeed = (currentHeat / 100) * (currentSpeed / 300) * 0.5;
+                    reactionProgress = Math.min(100, reactionProgress + reactionSpeed);
+                    
+                    document.getElementById('reactionProgress').style.width = reactionProgress + '%';
+                    document.getElementById('reactionPercentage').textContent = Math.round(reactionProgress) + '%';
+                    
+                    if (reactionProgress >= 100) {
+                        stopReactionProgress();
+                        // Reaction complete - you could trigger completion event here
+                    }
+                }
+            }, 100);
+        }
+
+        function stopReactionProgress() {
+            if (reactionInterval) {
+                clearInterval(reactionInterval);
+                reactionInterval = null;
+            }
+        }
+
+        function startFuelConsumption() {
+            fuelConsumptionInterval = setInterval(() => {
+                if (fuelLevel > 0) {
+                    // Fuel consumption rate based on heat level
+                    const consumptionRate = (currentHeat / 100) * 0.1;
+                    fuelLevel = Math.max(0, fuelLevel - consumptionRate);
+                    
+                    const fuelElement = document.getElementById('fuelLevel');
+                    fuelElement.style.width = fuelLevel + '%';
+                    document.getElementById('fuelPercentage').textContent = Math.round(fuelLevel) + '%';
+                    
+                    // Warning when fuel is low
+                    if (fuelLevel < 20) {
+                        fuelElement.classList.add('low');
+                    } else {
+                        fuelElement.classList.remove('low');
+                    }
+                    
+                    // Auto shut off when no fuel
+                    if (fuelLevel <= 0) {
+                        document.getElementById('heatSlider').value = 0;
+                        updateHeat(0);
+                        stopFuelConsumption();
+                    }
+                }
+            }, 100);
+        }
+
+        function stopFuelConsumption() {
+            if (fuelConsumptionInterval) {
+                clearInterval(fuelConsumptionInterval);
+                fuelConsumptionInterval = null;
+            }
         }
 
         // FiveM integration helpers
@@ -549,12 +911,28 @@
             addItem();
         };
 
+        window.refillFuel = function() {
+            fuelLevel = 100;
+            document.getElementById('fuelLevel').style.width = '100%';
+            document.getElementById('fuelPercentage').textContent = '100%';
+            document.getElementById('fuelLevel').classList.remove('low');
+        };
+
+        window.resetReaction = function() {
+            reactionProgress = 0;
+            document.getElementById('reactionProgress').style.width = '0%';
+            document.getElementById('reactionPercentage').textContent = '0%';
+            stopReactionProgress();
+        };
+
         window.getValues = function() {
             return {
                 mixingSpeed: currentSpeed,
                 heat: currentHeat,
                 temperature: 20 + Math.round(currentHeat * 1.5),
-                itemCount: itemCount
+                itemCount: itemCount,
+                reactionProgress: Math.round(reactionProgress),
+                fuelLevel: Math.round(fuelLevel)
             };
         };
 
