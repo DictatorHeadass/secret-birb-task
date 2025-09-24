@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steel Barrel Cooker - FiveM</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .minigame-container {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #3498db;
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .item-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hexagon-item {
+            width: 120px;
+            height: 104px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .hexagon-item:hover {
+            transform: scale(1.05);
+        }
+
+        .hexagon-shape {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            position: relative;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            border: 2px solid #2980b9;
+        }
+
+        .hexagon-shape:before,
+        .hexagon-shape:after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            border: inherit;
+        }
+
+        .hexagon-shape:before {
+            transform: rotate(60deg);
+        }
+
+        .hexagon-shape:after {
+            transform: rotate(-60deg);
+        }
+
+        .item-text {
+            position: relative;
+            z-index: 10;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cooking-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .mixer-motor {
+            width: 100px;
+            height: 80px;
+            background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+            border-radius: 10px 10px 20px 20px;
+            border: 3px solid #3498db;
+            position: relative;
+            margin-bottom: -15px;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .motor-top {
+            width: 70px;
+            height: 25px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 12px;
+            margin: 15px auto 10px auto;
+            position: relative;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .motor-vents {
+            width: 60px;
+            height: 3px;
+            background: #2c3e50;
+            margin: 3px auto;
+            border-radius: 1px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .steel-barrel {
+            width: 300px;
+            height: 280px;
+            background: radial-gradient(ellipse at 30% 20%, #bdc3c7, #95a5a6 40%, #7f8c8d 70%, #2c3e50 100%);
+            border-radius: 20px;
+            position: relative;
+            border: 4px solid #34495e;
+            box-shadow: 
+                inset 0 0 30px rgba(0,0,0,0.4),
+                0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .barrel-bands {
+            position: absolute;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #34495e 0%, #2c3e50 50%, #34495e 100%);
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .band-top { top: 40px; }
+        .band-middle { top: 50%; transform: translateY(-50%); }
+        .band-bottom { bottom: 40px; }
+
+        .barrel-lid {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            height: 30px;
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            border-radius: 25px;
+            border: 3px solid #34495e;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .lid-handle {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 16px;
+            background: #34495e;
+            border-radius: 8px;
+            border: 2px solid #2c3e50;
+        }
+
+        .mixing-shaft {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 200px;
+            background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+            border-radius: 6px;
+            z-index: 5;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+        }
+
+        .control-panel {
+            position: absolute;
+            left: -70px;
+            top: 50px;
+            width: 60px;
+            height: 120px;
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .control-title {
+            font-size: 9px;
+            color: #ecf0f1;
+            text-align: center;
+            margin-bottom: 15px;
+            line-height: 1.1;
+            font-weight: bold;
+        }
+
+        .speed-slider-vertical {
+            writing-mode: bt-lr;
+            -webkit-appearance: slider-vertical;
+            width: 35px;
+            height: 80px;
+            background: #2c3e50;
+            outline: none;
+            border-radius: 15px;
+            border: 1px solid #3498db;
+        }
+
+        .barrel-legs {
+            display: flex;
+            justify-content: space-between;
+            width: 280px;
+            margin-top: 15px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .leg {
+            width: 16px;
+            height: 60px;
+            background: linear-gradient(180deg, #7f8c8d 0%, #34495e 100%);
+            border-radius: 8px;
+            border: 2px solid #2c3e50;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+        }
+
+        .fire-container {
+            width: 320px;
+            height: 120px;
+            position: relative;
+            margin-top: -20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1;
+        }
+
+        .fire-gif {
+            width: 300px;
+            height: 300px;
+            background-image: url('fire.gif');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            border-radius: 0 0 20px 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            filter: brightness(1.2) contrast(1.1);
+            z-index: 2;
+        }
+
+        .fire-gif.active {
+            opacity: 1;
+        }
+
+        .burner-base {
+            position: absolute;
+            bottom: 0;
+            width: 300px;
+            height: 20px;
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            border-radius: 10px;
+            border: 2px solid #1a252f;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        }
+
+        .burner-grates {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            right: 20px;
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                #2c3e50 0px,
+                #2c3e50 15px,
+                transparent 15px,
+                transparent 25px
+            );
+            border-radius: 4px;
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            min-width: 220px;
+        }
+
+        .control-group {
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .control-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            background: #2c3e50;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            border: 1px solid #3498db;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+            border: 2px solid #fff;
+        }
+
+        .value-display {
+            text-align: center;
+            color: #3498db;
+            font-weight: bold;
+            margin-top: 12px;
+            font-size: 18px;
+        }
+
+        .stats {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.95);
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            border: 2px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .stats div {
+            margin: 8px 0;
+            font-weight: bold;
+        }
+
+        .steam-effect {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 40px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .steam-effect.active {
+            opacity: 0.7;
+            animation: steam 2s infinite ease-in-out;
+        }
+
+        @keyframes steam {
+            0% { transform: translateX(-50%) translateY(0px) scale(1); opacity: 0.7; }
+            50% { transform: translateX(-50%) translateY(-10px) scale(1.2); opacity: 0.4; }
+            100% { transform: translateX(-50%) translateY(-20px) scale(1.5); opacity: 0; }
+        }
+
+        .steam-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: rise 3s infinite ease-out;
+        }
+
+        @keyframes rise {
+            0% { bottom: 0; opacity: 0.8; transform: scale(1); }
+            100% { bottom: 40px; opacity: 0; transform: scale(2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="minigame-container">
+        <div class="stats">
+            <div>Temperature: <span id="temp">20°C</span></div>
+            <div>Mixing Speed: <span id="speed">0 RPM</span></div>
+            <div>Heat Level: <span id="heatLevel">0%</span></div>
+            <div>Items Added: <span id="itemCount">0</span></div>
+        </div>
+
+        <div class="item-section">
+            <div class="hexagon-item" onclick="addItem()">
+                <div class="hexagon-shape">
+                    <div class="item-text">item.png<br>Click to Add</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cooking-section">
+            <div class="mixer-motor">
+                <div class="motor-top"></div>
+                <div class="motor-vents"></div>
+                <div class="motor-vents"></div>
+                <div class="motor-vents"></div>
+                <div class="motor-vents"></div>
+            </div>
+
+            <div class="steel-barrel" id="steelBarrel">
+                <div class="barrel-lid">
+                    <div class="lid-handle"></div>
+                </div>
+                <div class="barrel-bands band-top"></div>
+                <div class="barrel-bands band-middle"></div>
+                <div class="barrel-bands band-bottom"></div>
+                
+                <div class="steam-effect" id="steamEffect">
+                    <div class="steam-particle" style="left: 20px; animation-delay: 0s;"></div>
+                    <div class="steam-particle" style="left: 30px; animation-delay: 0.3s;"></div>
+                    <div class="steam-particle" style="left: 40px; animation-delay: 0.6s;"></div>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="control-title">Mixing Speed Controls</div>
+                    <input type="range" class="speed-slider-vertical" id="speedSlider" min="0" max="300" value="0" oninput="updateMixingSpeed(this.value)" orient="vertical">
+                </div>
+                <div class="mixing-shaft"></div>
+            </div>
+
+            <div class="barrel-legs">
+                <div class="leg"></div>
+                <div class="leg"></div>
+                <div class="leg"></div>
+                <div class="leg"></div>
+            </div>
+
+            <div class="fire-container">
+                <div class="burner-base">
+                    <div class="burner-grates"></div>
+                </div>
+                <div class="fire-gif" id="fireGif"></div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <div class="control-label">Heat Control</div>
+                <input type="range" class="slider" id="heatSlider" min="0" max="100" value="0" oninput="updateHeat(this.value)">
+                <div class="value-display" id="heatDisplay">0%</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">Mixing Speed</div>
+                <input type="range" class="slider" id="mixingSlider" min="0" max="300" value="0" oninput="updateMixingSpeed(this.value)">
+                <div class="value-display" id="mixingDisplay">0 RPM</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSpeed = 0;
+        let currentHeat = 0;
+        let itemCount = 0;
+
+        function updateMixingSpeed(speed) {
+            currentSpeed = speed;
+            document.getElementById('speed').textContent = speed + ' RPM';
+            document.getElementById('mixingDisplay').textContent = speed + ' RPM';
+            document.getElementById('speedSlider').value = speed;
+        }
+
+        function updateHeat(heat) {
+            currentHeat = heat;
+            const temp = 20 + Math.round(heat * 1.5);
+            document.getElementById('temp').textContent = temp + '°C';
+            document.getElementById('heatLevel').textContent = heat + '%';
+            document.getElementById('heatDisplay').textContent = heat + '%';
+            
+            const fireGif = document.getElementById('fireGif');
+            const steamEffect = document.getElementById('steamEffect');
+            
+            if (heat > 15) {
+                fireGif.classList.add('active');
+            } else {
+                fireGif.classList.remove('active');
+            }
+
+            // Show steam when hot
+            if (heat > 60) {
+                steamEffect.classList.add('active');
+            } else {
+                steamEffect.classList.remove('active');
+            }
+        }
+
+        function addItem() {
+            itemCount++;
+            document.getElementById('itemCount').textContent = itemCount;
+            
+            // Visual feedback - slight barrel shake
+            const barrel = document.getElementById('steelBarrel');
+            barrel.style.transform = 'translateX(2px)';
+            setTimeout(() => {
+                barrel.style.transform = 'translateX(-2px)';
+                setTimeout(() => {
+                    barrel.style.transform = 'translateX(0px)';
+                }, 100);
+            }, 100);
+        }
+
+        // FiveM integration helpers
+        window.setMixingSpeed = function(speed) {
+            document.getElementById('mixingSlider').value = speed;
+            updateMixingSpeed(speed);
+        };
+
+        window.setHeat = function(heat) {
+            document.getElementById('heatSlider').value = heat;
+            updateHeat(heat);
+        };
+
+        window.addItemProgrammatically = function() {
+            addItem();
+        };
+
+        window.getValues = function() {
+            return {
+                mixingSpeed: currentSpeed,
+                heat: currentHeat,
+                temperature: 20 + Math.round(currentHeat * 1.5),
+                itemCount: itemCount
+            };
+        };
+
+        // Initialize
+        updateMixingSpeed(0);
+        updateHeat(0);
+    </script>
+</body>
+</html>
