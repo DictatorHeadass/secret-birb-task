@@ -93,40 +93,81 @@
             border: 2px solid #374151;
             border-radius: 10px;
             background: #111;
-            padding: 20px;
+            padding: 40px;
+            width: 400px;
+            height: 600px;
         }
 
-        .body-image {
-            width: 300px;
-            height: auto;
-            display: block;
-        }
-
-        .body-part {
+        .body-part-image {
             position: absolute;
-            border: 2px solid transparent;
-            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
+            filter: brightness(0.9);
         }
 
-        .body-part:hover {
-            background: rgba(16, 185, 129, 0.3);
-            border-color: #10b981;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        .body-part-image:hover {
+            filter: brightness(1.2) drop-shadow(0 0 10px #10b981);
         }
 
-        .body-part.selected {
-            border-color: #fff;
-            background: rgba(220, 38, 38, 0.4);
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
-            animation: pulse 1.5s infinite;
+        .body-part-image.selected {
+            filter: brightness(1.3) drop-shadow(0 0 15px #fff);
+            animation: pulse-selected 1.5s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        @keyframes pulse-selected {
+            0%, 100% { 
+                filter: brightness(1.3) drop-shadow(0 0 15px #fff);
+            }
+            50% { 
+                filter: brightness(1.5) drop-shadow(0 0 25px #fff) drop-shadow(0 0 35px #10b981);
+            }
+        }
+
+        /* Individual body part positioning and sizing */
+        .head-image {
+            top: 30px;
+            left: 52%;
+            transform: translateX(-50%);
+            width: 80px;
+            z-index: 10;
+        }
+
+        .torso-image {
+            top: 100px;
+            left: 50%;
+            transform: translateX(-45%);
+            width: 150px;
+            z-index: 5;
+        }
+
+        .left-arm-image {
+            top: 122px;
+            left: 115px;
+            width: 45px;
+            z-index: 4;
+        }
+
+        .right-arm-image {
+            top: 95px;
+            right: 95px;
+            width: 55px;
+            z-index: 4;
+        }
+
+        .left-leg-image {
+            top: 258px;
+            left: 47%;
+            transform: translateX(-70%);
+            width: 55px;
+            z-index: 3;
+        }
+
+        .right-leg-image {
+            top: 258px;
+            left: 49%;
+            transform: translateX(25%);
+            width: 55px;
+            z-index: 3;
         }
 
         .scanning-line {
@@ -135,7 +176,7 @@
             height: 2px;
             background: linear-gradient(90deg, transparent, #10b981, transparent);
             animation: scan 4s infinite;
-            z-index: 10;
+            z-index: 15;
         }
 
         @keyframes scan {
@@ -338,20 +379,30 @@
         .btn-green:hover { background: #166534; }
         .btn-yellow { background: #78350f; border-color: #f59e0b; }
         .btn-yellow:hover { background: #92400e; }
+
+        .controls-info {
+            color: #6b7280;
+            margin-top: 15px;
+            font-size: 14px;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1>🏥 EMERGENCY MEDICAL SCANNER</h1>
+                <h1>EMERGENCY MEDICAL SCANNER</h1>
                 <div class="status-bar">
                     <span class="status-item status-patient">PATIENT: TRAUMA-001</span>
                     <span class="status-item status-mode">STATUS: <span id="statusMode">OVERVIEW</span></span>
                     <span class="status-item status-priority">PRIORITY: MULTI-TRAUMA</span>
                 </div>
             </div>
-            <button class="reset-btn" onclick="resetView()">🔄 RESET SCAN</button>
+            <button class="reset-btn" onclick="resetView()">RESET SCAN</button>
         </div>
     </div>
 
@@ -359,26 +410,20 @@
         <div class="body-container">
             <h2 class="body-title">BODY TRAUMA ASSESSMENT</h2>
             <div class="body-diagram">
-                <img src="noboneskeleton.png" class="body-image" alt="Human Body Anatomy" />
-                
-                 <!-- Clickable body parts overlays -->
-                <div class="body-part" id="head" style="top: 47px; left: 158px; width: 30px; height: 40px;" onclick="selectPart('head')"></div>
-                <div class="body-part" id="neck" style="top: 80px; left: 158px; width: 30px; height: 20px; border-radius: 15px;" onclick="selectPart('neck')"></div>
-                <div class="body-part" id="chest" style="top: 95px; left: 150px; width: 45px; height: 50px;" onclick="selectPart('chest')"></div>
-                <div class="body-part" id="abdomen" style="top: 140px; left: 152px; width: 40px; height: 25px;" onclick="selectPart('abdomen')"></div>
-                <div class="body-part" id="pelvis" style="top: 155px; left: 158px; width: 30px; height: 30px;" onclick="selectPart('pelvis')"></div>
-                
-                <div class="body-part" id="leftArm" style="top: 95px; left: 135px; width: 15px; height: 50px;" onclick="selectPart('leftArm')"></div>
-                <div class="body-part" id="rightArm" style="top: 95px; left: 195px; width: 15px; height: 50px;" onclick="selectPart('rightArm')"></div>
-                <div class="body-part" id="leftHand" style="top: 132px; left: 132px; width: 13px; height: 50px;" onclick="selectPart('leftHand')"></div>
-                <div class="body-part" id="rightHand" style="top: 132px; left: 199px; width: 13px; height: 50px;" onclick="selectPart('rightHand')"></div>
-                
-                <div class="body-part" id="leftLeg" style="top: 172px; left: 150px; width: 18px; height: 40px;" onclick="selectPart('leftLeg')"></div>
-                <div class="body-part" id="rightLeg" style="top: 172px; left: 178px; width: 18px; height: 40px;" onclick="selectPart('rightLeg')"></div>
-                <div class="body-part" id="leftKnee" style="top: 200px; left: 148px; width: 20px; height: 20px;" onclick="selectPart('leftKnee')"></div>
-                <div class="body-part" id="rightKnee" style="top: 200px; left: 178px; width: 20px; height: 20px;" onclick="selectPart('rightKnee')"></div>
+                <!-- Individual Body Part Images -->
+                <img src="head.png" class="body-part-image head-image" id="head" onclick="selectPart('head')" alt="Head">
+                <img src="torso.png" class="body-part-image torso-image" id="torso" onclick="selectPart('torso')" alt="Torso">
+                <img src="leftarm.png" class="body-part-image left-arm-image" id="leftarm" onclick="selectPart('leftarm')" alt="Left Arm">
+                <img src="rightarm.png" class="body-part-image right-arm-image" id="rightarm" onclick="selectPart('rightarm')" alt="Right Arm">
+                <img src="leftleg.png" class="body-part-image left-leg-image" id="leftleg" onclick="selectPart('leftleg')" alt="Left Leg">
+                <img src="rightleg.png" class="body-part-image right-leg-image" id="rightleg" onclick="selectPart('rightleg')" alt="Right Leg">
                 
                 <div class="scanning-line"></div>
+            </div>
+
+            <div class="controls-info">
+                <strong>Click on any body part</strong> to view detailed injury assessment and treatment protocols<br>
+                <strong>Different colored highlights</strong> indicate injury severity levels
             </div>
 
             <div class="legend">
@@ -406,18 +451,18 @@
 
         <div class="assessment-panel">
             <div class="panel-header">
-                <h2>🩺 MEDICAL ASSESSMENT</h2>
+                <h2>MEDICAL ASSESSMENT</h2>
             </div>
             <div class="panel-content" id="assessmentContent">
                 <div class="waiting-state">
-                    <div class="waiting-icon">🖱️</div>
+                    <div class="waiting-icon">•</div>
                     <h3 style="font-size: 18px; color: #d1d5db; margin-bottom: 15px;">AWAITING SELECTION</h3>
-                    <p style="font-size: 14px; margin-bottom: 30px;">Click on any highlighted body region to view detailed injury assessment and treatment protocols.</p>
+                    <p style="font-size: 14px; margin-bottom: 30px;">Click on any body part to view detailed injury assessment and treatment protocols.</p>
                     <div class="system-status">
                         <h4 style="color: #10b981; margin-bottom: 10px;">SYSTEM STATUS:</h4>
-                        <p style="margin: 5px 0;">🟢 Scanner: ONLINE</p>
-                        <p style="margin: 5px 0;">🟢 Database: CONNECTED</p>
-                        <p style="margin: 5px 0;">🟡 Patient: MULTI-TRAUMA</p>
+                        <p style="margin: 5px 0;">Scanner: ONLINE</p>
+                        <p style="margin: 5px 0;">Database: CONNECTED</p>
+                        <p style="margin: 5px 0;">Patient: MULTI-TRAUMA</p>
                     </div>
                 </div>
             </div>
@@ -426,15 +471,15 @@
 
     <div class="action-bar">
         <div class="action-header">
-            <h3 class="action-title">🚨 EMERGENCY PROTOCOLS</h3>
+            <h3 class="action-title">EMERGENCY PROTOCOLS</h3>
             <div class="action-subtitle">Click to simulate EMS procedures</div>
         </div>
         <div class="action-grid">
-            <button class="action-btn btn-red">🚨 CALL BACKUP</button>
-            <button class="action-btn btn-blue">💉 GIVE MORPHINE</button>
-            <button class="action-btn btn-purple">🫁 CPR</button>
-            <button class="action-btn btn-green">🩹 BANDAGE</button>
-            <button class="action-btn btn-yellow">📞 AIRLIFT</button>
+            <button class="action-btn btn-red">CALL BACKUP</button>
+            <button class="action-btn btn-blue">GIVE MORPHINE</button>
+            <button class="action-btn btn-purple">CPR</button>
+            <button class="action-btn btn-green">BANDAGE</button>
+            <button class="action-btn btn-yellow">AIRLIFT</button>
         </div>
     </div>
 
@@ -449,39 +494,15 @@
                 priority: "critical",
                 color: "#dc2626"
             },
-            neck: {
-                name: "Neck Area",
-                injuries: ["Knife wound to neck", "Whiplash from high-speed collision", "Strangulation marks visible"],
-                vitals: "Breathing difficulty, pulse weak but stable",
-                treatment: "Stabilize neck, control bleeding, monitor airway",
-                priority: "high",
-                color: "#ea580c"
-            },
-            chest: {
-                name: "Chest Area",
-                injuries: ["Gunshot wound to chest", "Broken ribs from motorcycle crash", "Stabbed multiple times"],
+            torso: {
+                name: "Torso & Chest",
+                injuries: ["Gunshot wound to chest", "Broken ribs from motorcycle crash", "Stab wound to abdomen"],
                 vitals: "Difficulty breathing, chest pain, blood in mouth",
                 treatment: "Seal wound, oxygen therapy, prepare for surgery",
                 priority: "critical",
                 color: "#dc2626"
             },
-            abdomen: {
-                name: "Stomach/Abdomen", 
-                injuries: ["Gunshot wound to stomach", "Stab wound to abdomen", "Internal bleeding from crash"],
-                vitals: "Low blood pressure, rapid pulse, severe pain",
-                treatment: "Control bleeding, IV fluids, emergency surgery needed",
-                priority: "critical",
-                color: "#dc2626"
-            },
-            pelvis: {
-                name: "Hip/Pelvis Area",
-                injuries: ["Broken pelvis from car accident", "Gunshot wound to hip", "Crushed by falling object"],
-                vitals: "Unable to move legs, severe pain, possible nerve damage",
-                treatment: "Stabilize pelvis, pain medication, careful transport",
-                priority: "high",
-                color: "#ea580c"
-            },
-            leftArm: {
+            leftarm: {
                 name: "Left Arm",
                 injuries: ["Gunshot wound to arm", "Broken arm from fight", "Severe road rash from bike crash"],
                 vitals: "Heavy bleeding, arm bent at wrong angle",
@@ -489,7 +510,7 @@
                 priority: "high",
                 color: "#ea580c"
             },
-            rightArm: {
+            rightarm: {
                 name: "Right Arm", 
                 injuries: ["Broken wrist from fall", "Cut arm on broken glass", "Bruising from baseball bat"],
                 vitals: "Moderate bleeding, can move fingers, swollen",
@@ -497,23 +518,7 @@
                 priority: "moderate",
                 color: "#f59e0b"
             },
-            leftHand: {
-                name: "Left Hand",
-                injuries: ["Shot in hand during robbery", "Fingers broken in car door", "Burns from explosion"],
-                vitals: "Missing finger, severe burns, unable to grip",
-                treatment: "Control bleeding, treat burns, pain medication",
-                priority: "moderate",
-                color: "#f59e0b"
-            },
-            rightHand: {
-                name: "Right Hand",
-                injuries: ["Cuts from broken window", "Sprained wrist", "Minor burns from fire"],
-                vitals: "Small cuts, can move hand, minor swelling",
-                treatment: "Clean cuts, bandage, ice pack",
-                priority: "low",
-                color: "#16a34a"
-            },
-            leftLeg: {
+            leftleg: {
                 name: "Left Leg",
                 injuries: ["Gunshot wound to thigh", "Leg broken in motorcycle accident", "Crushed leg under car"],
                 vitals: "Massive bleeding, bone visible, leg twisted",
@@ -521,29 +526,13 @@
                 priority: "critical", 
                 color: "#dc2626"
             },
-            rightLeg: {
+            rightleg: {
                 name: "Right Leg",
                 injuries: ["Broken leg from jumping off building", "Road rash from bike crash", "Kicked repeatedly during fight"],
                 vitals: "Moderate pain, can't walk, bruising severe",
                 treatment: "Splint leg, pain medication, clean wounds",
                 priority: "moderate",
                 color: "#f59e0b"
-            },
-            leftKnee: {
-                name: "Left Knee",
-                injuries: ["Kneecap shot during gang fight", "Knee twisted in car crash", "Hit with crowbar"],
-                vitals: "Severe swelling, can't bend knee, very painful",
-                treatment: "Ice pack, knee brace, strong pain meds",
-                priority: "moderate",
-                color: "#f59e0b"
-            },
-            rightKnee: {
-                name: "Right Knee", 
-                injuries: ["Minor scrapes from fall", "Bruised knee", "Small cut from glass"],
-                vitals: "Minor pain, can walk slowly, small cuts",
-                treatment: "Clean wound, bandage, rest",
-                priority: "low",
-                color: "#16a34a"
             }
         };
 
@@ -572,13 +561,13 @@
                 <div class="assessment-card" style="border-left-color: ${data.color};">
                     <h3 style="font-size: 18px; color: #10b981; margin-bottom: 8px;">${data.name}</h3>
                     <div class="priority-badge priority-${data.priority}">
-                        🚨 ${data.priority.toUpperCase()} PRIORITY
+                        ${data.priority.toUpperCase()} PRIORITY
                     </div>
                 </div>
 
                 <div class="assessment-card" style="border-left-color: #374151;">
                     <div class="section-title">
-                        🩹 INJURIES IDENTIFIED:
+                        INJURIES IDENTIFIED:
                     </div>
                     <ul class="injury-list">
                         ${data.injuries.map(injury => `<li>${injury}</li>`).join('')}
@@ -587,21 +576,21 @@
 
                 <div class="assessment-card" style="border-left-color: #374151;">
                     <div class="section-title">
-                        📊 VITAL SIGNS & ASSESSMENT:
+                        VITAL SIGNS & ASSESSMENT:
                     </div>
                     <p style="color: #d1d5db; font-size: 14px; line-height: 1.5;">${data.vitals}</p>
                 </div>
 
                 <div class="assessment-card" style="border-left-color: #374151;">
                     <div class="section-title">
-                        ⚡ TREATMENT PROTOCOL:
+                        TREATMENT PROTOCOL:
                     </div>
                     <p style="color: #d1d5db; font-size: 14px; line-height: 1.5;">${data.treatment}</p>
                 </div>
 
                 <div class="assessment-card" style="border-left-color: #3b82f6; background: #1e3a8a;">
                     <div class="section-title">
-                        📋 EMS RECOMMENDATION:
+                        EMS RECOMMENDATION:
                     </div>
                     <p style="color: #bfdbfe; font-size: 14px; line-height: 1.5;">
                         ${getEMSRecommendation(data.priority)}
@@ -613,13 +602,13 @@
         function getEMSRecommendation(priority) {
             switch(priority) {
                 case 'critical':
-                    return "🚁 EMERGENCY! Rush to hospital immediately. Call for backup and clear the roads!";
+                    return "EMERGENCY! Rush to hospital immediately. Call for backup and clear the roads!";
                 case 'high':
-                    return "🚑 High priority transport. Get them to the hospital fast, keep them stable.";
+                    return "High priority transport. Get them to the hospital fast, keep them stable.";
                 case 'moderate':
-                    return "🏥 Standard ambulance transport. Monitor patient, treat wounds en route.";
+                    return "Standard ambulance transport. Monitor patient, treat wounds en route.";
                 case 'low':
-                    return "🩹 Minor injuries. Basic first aid and transport when convenient.";
+                    return "Minor injuries. Basic first aid and transport when convenient.";
                 default:
                     return "Follow standard medical protocols.";
             }
@@ -636,37 +625,18 @@
             // Reset assessment panel
             document.getElementById('assessmentContent').innerHTML = `
                 <div class="waiting-state">
-                    <div class="waiting-icon">🖱️</div>
+                    <div class="waiting-icon">•</div>
                     <h3 style="font-size: 18px; color: #d1d5db; margin-bottom: 15px;">AWAITING SELECTION</h3>
-                    <p style="font-size: 14px; margin-bottom: 30px;">Click on any highlighted body region to view detailed injury assessment and treatment protocols.</p>
+                    <p style="font-size: 14px; margin-bottom: 30px;">Click on any body part to view detailed injury assessment and treatment protocols.</p>
                     <div class="system-status">
                         <h4 style="color: #10b981; margin-bottom: 10px;">SYSTEM STATUS:</h4>
-                        <p style="margin: 5px 0;">🟢 Scanner: ONLINE</p>
-                        <p style="margin: 5px 0;">🟢 Database: CONNECTED</p>
-                        <p style="margin: 5px 0;">🟡 Patient: MULTI-TRAUMA</p>
+                        <p style="margin: 5px 0;">Scanner: ONLINE</p>
+                        <p style="margin: 5px 0;">Database: CONNECTED</p>
+                        <p style="margin: 5px 0;">Patient: MULTI-TRAUMA</p>
                     </div>
                 </div>
             `;
         }
-
-        // Initialize priority colors for body parts
-        document.addEventListener('DOMContentLoaded', function() {
-            Object.keys(injuryData).forEach(partId => {
-                const element = document.getElementById(partId);
-                if (element) {
-                    const priority = injuryData[partId].priority;
-                    let borderColor;
-                    switch(priority) {
-                        case 'critical': borderColor = '#dc2626'; break;
-                        case 'high': borderColor = '#ea580c'; break;
-                        case 'moderate': borderColor = '#f59e0b'; break;
-                        case 'low': borderColor = '#16a34a'; break;
-                        default: borderColor = '#6b7280';
-                    }
-                    element.style.borderColor = borderColor;
-                }
-            });
-        });
     </script>
 </body>
 </html>
