@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Medical Scanner - GTAV RP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: #1a1a1a;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .header h1 {
+            color: #10b981;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-patient { background: #064e3b; border: 1px solid #10b981; }
+        .status-mode { background: #1e3a8a; border: 1px solid #3b82f6; }
+        .status-priority { background: #7f1d1d; border: 1px solid #ef4444; }
+
+        .reset-btn {
+            background: #374151;
+            border: 1px solid #6b7280;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #4b5563;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .body-container {
+            flex: 1;
+            background: #1a1a1a;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .body-title {
+            color: #10b981;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .body-diagram {
+            position: relative;
+            display: inline-block;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            background: #111;
+            padding: 20px;
+        }
+
+        .body-image {
+            width: 300px;
+            height: auto;
+            display: block;
+        }
+
+        .body-part {
+            position: absolute;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .body-part:hover {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+
+        .body-part.selected {
+            border-color: #fff;
+            background: rgba(220, 38, 38, 0.4);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .scanning-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            animation: scan 4s infinite;
+            z-index: 10;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0.8; }
+        }
+
+        .legend {
+            margin-top: 20px;
+            background: #111;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .legend h4 {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid;
+        }
+
+        .assessment-panel {
+            width: 400px;
+            background: #1a1a1a;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-header {
+            background: #111;
+            padding: 15px;
+            border-bottom: 1px solid #374151;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .panel-header h2 {
+            color: #10b981;
+            font-size: 18px;
+        }
+
+        .panel-content {
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .assessment-card {
+            background: #111;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid;
+            margin-top: 8px;
+        }
+
+        .priority-critical { background: #7f1d1d; border-color: #dc2626; color: #fca5a5; }
+        .priority-high { background: #7c2d12; border-color: #ea580c; color: #fed7aa; }
+        .priority-moderate { background: #78350f; border-color: #f59e0b; color: #fde68a; }
+        .priority-low { background: #14532d; border-color: #16a34a; color: #bbf7d0; }
+
+        .injury-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .injury-list li {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        .injury-list li:before {
+            content: "•";
+            color: #ef4444;
+            position: absolute;
+            left: 0;
+        }
+
+        .section-title {
+            color: #10b981;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .waiting-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px 20px;
+        }
+
+        .waiting-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .system-status {
+            background: #111;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .action-bar {
+            margin-top: 20px;
+            background: #1a1a1a;
+            border: 2px solid #374151;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .action-title {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .action-subtitle {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #374151;
+            border: 1px solid;
+            color: white;
+            padding: 12px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-red { background: #7f1d1d; border-color: #dc2626; }
+        .btn-red:hover { background: #991b1b; }
+        .btn-blue { background: #1e3a8a; border-color: #3b82f6; }
+        .btn-blue:hover { background: #1d4ed8; }
+        .btn-purple { background: #581c87; border-color: #8b5cf6; }
+        .btn-purple:hover { background: #6b21a8; }
+        .btn-green { background: #14532d; border-color: #16a34a; }
+        .btn-green:hover { background: #166534; }
+        .btn-yellow { background: #78350f; border-color: #f59e0b; }
+        .btn-yellow:hover { background: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>🏥 EMERGENCY MEDICAL SCANNER</h1>
+                <div class="status-bar">
+                    <span class="status-item status-patient">PATIENT: TRAUMA-001</span>
+                    <span class="status-item status-mode">STATUS: <span id="statusMode">OVERVIEW</span></span>
+                    <span class="status-item status-priority">PRIORITY: MULTI-TRAUMA</span>
+                </div>
+            </div>
+            <button class="reset-btn" onclick="resetView()">🔄 RESET SCAN</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="body-container">
+            <h2 class="body-title">BODY TRAUMA ASSESSMENT</h2>
+            <div class="body-diagram">
+                <img src="noboneskeleton.png" class="body-image" alt="Human Body Anatomy" />
+                
+                <!-- Clickable body parts overlays -->
+                <div class="body-part" id="head" style="top: 15px; left: 125px; width: 50px; height: 60px;" onclick="selectPart('head')"></div>
+                <div class="body-part" id="neck" style="top: 65px; left: 135px; width: 30px; height: 25px; border-radius: 15px;" onclick="selectPart('neck')"></div>
+                <div class="body-part" id="chest" style="top: 95px; left: 110px; width: 80px; height: 90px;" onclick="selectPart('chest')"></div>
+                <div class="body-part" id="abdomen" style="top: 165px; left: 115px; width: 70px; height: 80px;" onclick="selectPart('abdomen')"></div>
+                <div class="body-part" id="pelvis" style="top: 240px; left: 120px; width: 60px; height: 40px;" onclick="selectPart('pelvis')"></div>
+                
+                <div class="body-part" id="leftArm" style="top: 105px; left: 65px; width: 30px; height: 70px;" onclick="selectPart('leftArm')"></div>
+                <div class="body-part" id="rightArm" style="top: 105px; left: 205px; width: 30px; height: 70px;" onclick="selectPart('rightArm')"></div>
+                <div class="body-part" id="leftHand" style="top: 175px; left: 53px; width: 24px; height: 60px;" onclick="selectPart('leftHand')"></div>
+                <div class="body-part" id="rightHand" style="top: 175px; left: 223px; width: 24px; height: 60px;" onclick="selectPart('rightHand')"></div>
+                
+                <div class="body-part" id="leftLeg" style="top: 285px; left: 112px; width: 36px; height: 90px;" onclick="selectPart('leftLeg')"></div>
+                <div class="body-part" id="rightLeg" style="top: 285px; left: 152px; width: 36px; height: 90px;" onclick="selectPart('rightLeg')"></div>
+                <div class="body-part" id="leftKnee" style="top: 350px; left: 115px; width: 30px; height: 30px;" onclick="selectPart('leftKnee')"></div>
+                <div class="body-part" id="rightKnee" style="top: 350px; left: 155px; width: 30px; height: 30px;" onclick="selectPart('rightKnee')"></div>
+                
+                <div class="scanning-line"></div>
+            </div>
+
+            <div class="legend">
+                <h4>TRIAGE PRIORITY LEVELS</h4>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #dc2626; border-color: #ef4444;"></div>
+                        <span style="color: #fca5a5;">CRITICAL - Immediate</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ea580c; border-color: #f97316;"></div>
+                        <span style="color: #fed7aa;">HIGH - Urgent</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b; border-color: #fbbf24;"></div>
+                        <span style="color: #fde68a;">MODERATE - Delayed</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #16a34a; border-color: #22c55e;"></div>
+                        <span style="color: #bbf7d0;">LOW - Minor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="assessment-panel">
+            <div class="panel-header">
+                <h2>🩺 MEDICAL ASSESSMENT</h2>
+            </div>
+            <div class="panel-content" id="assessmentContent">
+                <div class="waiting-state">
+                    <div class="waiting-icon">🖱️</div>
+                    <h3 style="font-size: 18px; color: #d1d5db; margin-bottom: 15px;">AWAITING SELECTION</h3>
+                    <p style="font-size: 14px; margin-bottom: 30px;">Click on any highlighted body region to view detailed injury assessment and treatment protocols.</p>
+                    <div class="system-status">
+                        <h4 style="color: #10b981; margin-bottom: 10px;">SYSTEM STATUS:</h4>
+                        <p style="margin: 5px 0;">🟢 Scanner: ONLINE</p>
+                        <p style="margin: 5px 0;">🟢 Database: CONNECTED</p>
+                        <p style="margin: 5px 0;">🟡 Patient: MULTI-TRAUMA</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <div class="action-header">
+            <h3 class="action-title">🚨 EMERGENCY PROTOCOLS</h3>
+            <div class="action-subtitle">Click to simulate EMS procedures</div>
+        </div>
+        <div class="action-grid">
+            <button class="action-btn btn-red">🚁 ALS BACKUP</button>
+            <button class="action-btn btn-blue">💉 IV ACCESS</button>
+            <button class="action-btn btn-purple">🫁 INTUBATE</button>
+            <button class="action-btn btn-green">🦴 SPLINT</button>
+            <button class="action-btn btn-yellow">🫀 MONITOR</button>
+        </div>
+    </div>
+
+    <script>
+        // Medical data for each body part
+        const injuryData = {
+            head: {
+                name: "Head & Skull",
+                injuries: ["Blunt force trauma to temporal region", "Possible skull fracture", "Concussion with brief LOC"],
+                vitals: "GCS: 13/15, Pupils: 4mm reactive, BP: 160/95",
+                treatment: "C-spine immobilization, O2 therapy, frequent neuro checks",
+                priority: "critical",
+                color: "#dc2626"
+            },
+            neck: {
+                name: "Cervical Spine & Neck",
+                injuries: ["C-spine injury suspected", "Neck pain and stiffness", "Possible whiplash"],
+                vitals: "No neurological deficits noted, full sensation",
+                treatment: "Cervical collar applied, backboard immobilization",
+                priority: "high",
+                color: "#ea580c"
+            },
+            chest: {
+                name: "Chest & Thorax",
+                injuries: ["Multiple rib fractures (ribs 5-7)", "Pneumothorax suspected", "Chest wall contusion"],
+                vitals: "RR: 28, SpO2: 89%, diminished breath sounds left",
+                treatment: "High-flow O2, chest seal, prepare for decompression",
+                priority: "critical",
+                color: "#dc2626"
+            },
+            abdomen: {
+                name: "Abdominal Region", 
+                injuries: ["Penetrating abdominal wound", "Possible internal hemorrhage", "Peritoneal irritation"],
+                vitals: "BP: 85/55, HR: 120, abdomen rigid and distended",
+                treatment: "Large bore IV x2, fluid resuscitation, rapid transport",
+                priority: "critical",
+                color: "#dc2626"
+            },
+            pelvis: {
+                name: "Pelvic Region",
+                injuries: ["Unstable pelvic fracture", "Significant pelvic pain", "Possible bladder injury"],
+                vitals: "Unable to bear weight, hip deformity noted",
+                treatment: "Pelvic binder applied, avoid log rolling",
+                priority: "high",
+                color: "#ea580c"
+            },
+            leftArm: {
+                name: "Left Arm & Shoulder",
+                injuries: ["Open humeral fracture", "Radial artery laceration", "Severe hemorrhage"],
+                vitals: "Weak radial pulse, CRT >4sec, active bleeding",
+                treatment: "Hemostatic gauze, pressure bandage, splint",
+                priority: "high",
+                color: "#ea580c"
+            },
+            rightArm: {
+                name: "Right Arm & Shoulder", 
+                injuries: ["Closed radius/ulna fracture", "Wrist deformity", "Moderate pain"],
+                vitals: "Good pulse, sensation intact, some swelling",
+                treatment: "Splinting, pain management, ice pack",
+                priority: "moderate",
+                color: "#f59e0b"
+            },
+            leftHand: {
+                name: "Left Hand & Forearm",
+                injuries: ["Multiple finger fractures", "Deep lacerations on palm", "Possible tendon damage"],
+                vitals: "Good circulation, limited mobility",
+                treatment: "Wound cleaning, splinting, pain management",
+                priority: "moderate",
+                color: "#f59e0b"
+            },
+            rightHand: {
+                name: "Right Hand & Forearm",
+                injuries: ["Minor abrasions", "Possible wrist sprain", "Swelling present"],
+                vitals: "Good pulse, full sensation maintained",
+                treatment: "Ice, elevation, elastic bandage",
+                priority: "low",
+                color: "#16a34a"
+            },
+            leftLeg: {
+                name: "Left Thigh & Hip",
+                injuries: ["Femoral shaft fracture", "Possible arterial injury", "Severe deformity"],
+                vitals: "Weak pedal pulse, leg shortened and rotated",
+                treatment: "Traction splint, IV access, pain management",
+                priority: "critical", 
+                color: "#dc2626"
+            },
+            rightLeg: {
+                name: "Right Thigh & Hip",
+                injuries: ["Contusion to quadriceps", "Hip pain", "Limited mobility"],
+                vitals: "Good pulse, some swelling and tenderness",
+                treatment: "Pain management, ice, gentle immobilization",
+                priority: "moderate",
+                color: "#f59e0b"
+            },
+            leftKnee: {
+                name: "Left Knee",
+                injuries: ["Torn ACL suspected", "Knee instability", "Significant swelling"],
+                vitals: "Good pulse below injury, painful on movement",
+                treatment: "Knee immobilizer, ice, pain management",
+                priority: "moderate",
+                color: "#f59e0b"
+            },
+            rightKnee: {
+                name: "Right Knee", 
+                injuries: ["Minor knee contusion", "Slight swelling", "Full range of motion"],
+                vitals: "No instability, good strength",
+                treatment: "Ice, rest, monitor for changes",
+                priority: "low",
+                color: "#16a34a"
+            }
+        };
+
+        let selectedPart = null;
+
+        function selectPart(partId) {
+            // Remove previous selection
+            if (selectedPart) {
+                document.getElementById(selectedPart).classList.remove('selected');
+            }
+            
+            // Select new part
+            selectedPart = partId;
+            document.getElementById(partId).classList.add('selected');
+            document.getElementById('statusMode').textContent = 'DETAIL';
+            
+            // Update assessment panel
+            updateAssessmentPanel(partId);
+        }
+
+        function updateAssessmentPanel(partId) {
+            const data = injuryData[partId];
+            const content = document.getElementById('assessmentContent');
+            
+            content.innerHTML = `
+                <div class="assessment-card" style="border-left-color: ${data.color};">
+                    <h3 style="font-size: 18px; color: #10b981; margin-bottom: 8px;">${data.name}</h3>
+                    <div class="priority-badge priority-${data.priority}">
+                        🚨 ${data.priority.toUpperCase()} PRIORITY
+                    </div>
+                </div>
+
+                <div class="assessment-card" style="border-left-color: #374151;">
+                    <div class="section-title">
+                        🩹 INJURIES IDENTIFIED:
+                    </div>
+                    <ul class="injury-list">
+                        ${data.injuries.map(injury => `<li>${injury}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="assessment-card" style="border-left-color: #374151;">
+                    <div class="section-title">
+                        📊 VITAL SIGNS & ASSESSMENT:
+                    </div>
+                    <p style="color: #d1d5db; font-size: 14px; line-height: 1.5;">${data.vitals}</p>
+                </div>
+
+                <div class="assessment-card" style="border-left-color: #374151;">
+                    <div class="section-title">
+                        ⚡ TREATMENT PROTOCOL:
+                    </div>
+                    <p style="color: #d1d5db; font-size: 14px; line-height: 1.5;">${data.treatment}</p>
+                </div>
+
+                <div class="assessment-card" style="border-left-color: #3b82f6; background: #1e3a8a;">
+                    <div class="section-title">
+                        📋 EMS RECOMMENDATION:
+                    </div>
+                    <p style="color: #bfdbfe; font-size: 14px; line-height: 1.5;">
+                        ${getEMSRecommendation(data.priority)}
+                    </p>
+                </div>
+            `;
+        }
+
+        function getEMSRecommendation(priority) {
+            switch(priority) {
+                case 'critical':
+                    return "🚁 IMMEDIATE ALS transport required. Consider helicopter EVAC. Notify trauma center.";
+                case 'high':
+                    return "🚑 Priority transport with continuous monitoring. ALS interventions en route.";
+                case 'moderate':
+                    return "🏥 Standard transport. BLS care sufficient. Monitor for deterioration.";
+                case 'low':
+                    return "🩹 Minor treatment. Transport when ready. Basic first aid measures.";
+                default:
+                    return "Standard medical protocols apply.";
+            }
+        }
+
+        function resetView() {
+            if (selectedPart) {
+                document.getElementById(selectedPart).classList.remove('selected');
+                selectedPart = null;
+            }
+            
+            document.getElementById('statusMode').textContent = 'OVERVIEW';
+            
+            // Reset assessment panel
+            document.getElementById('assessmentContent').innerHTML = `
+                <div class="waiting-state">
+                    <div class="waiting-icon">🖱️</div>
+                    <h3 style="font-size: 18px; color: #d1d5db; margin-bottom: 15px;">AWAITING SELECTION</h3>
+                    <p style="font-size: 14px; margin-bottom: 30px;">Click on any highlighted body region to view detailed injury assessment and treatment protocols.</p>
+                    <div class="system-status">
+                        <h4 style="color: #10b981; margin-bottom: 10px;">SYSTEM STATUS:</h4>
+                        <p style="margin: 5px 0;">🟢 Scanner: ONLINE</p>
+                        <p style="margin: 5px 0;">🟢 Database: CONNECTED</p>
+                        <p style="margin: 5px 0;">🟡 Patient: MULTI-TRAUMA</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize priority colors for body parts
+        document.addEventListener('DOMContentLoaded', function() {
+            Object.keys(injuryData).forEach(partId => {
+                const element = document.getElementById(partId);
+                if (element) {
+                    const priority = injuryData[partId].priority;
+                    let borderColor;
+                    switch(priority) {
+                        case 'critical': borderColor = '#dc2626'; break;
+                        case 'high': borderColor = '#ea580c'; break;
+                        case 'moderate': borderColor = '#f59e0b'; break;
+                        case 'low': borderColor = '#16a34a'; break;
+                        default: borderColor = '#6b7280';
+                    }
+                    element.style.borderColor = borderColor;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
