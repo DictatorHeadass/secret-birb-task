@@ -32,60 +32,69 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 30px;
         }
 
-        .hexagon-item {
-            width: 120px;
-            height: 104px;
+        .item-slot {
             position: relative;
             cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .hexagon-item:hover {
-            transform: scale(1.05);
-        }
-
-        .hexagon-shape {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            position: relative;
-            border-radius: 12px;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-            border: 2px solid #2980b9;
         }
 
-        .hexagon-shape:before,
-        .hexagon-shape:after {
-            content: "";
-            position: absolute;
+        .item-slot:hover {
+            transform: scale(1.05);
+        }
+
+        .item-slot.active {
+            animation: clickFlash 0.5s ease;
+        }
+
+        @keyframes clickFlash {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .item-frame {
+            width: 140px;
+            height: 140px;
+        }
+
+        .propane-frame {
+            width: 120px;
+            height: 120px;
+            margin-top: 20px;
+        }
+
+        .item-image {
             width: 100%;
             height: 100%;
-            background: inherit;
-            border-radius: inherit;
-            border: inherit;
+            object-fit: contain;
+            display: block;
         }
 
-        .hexagon-shape:before {
-            transform: rotate(60deg);
-        }
-
-        .hexagon-shape:after {
-            transform: rotate(-60deg);
-        }
-
-        .item-text {
-            position: relative;
-            z-index: 10;
+        .slot-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(52, 152, 219, 0.8);
             color: white;
-            font-size: 14px;
             font-weight: bold;
-            text-align: center;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .item-slot:hover .slot-overlay {
+            opacity: 1;
         }
 
         .cooking-section {
@@ -357,7 +366,7 @@
             border-radius: 0 0 20px 20px;
             opacity: 0;
             transition: opacity 0.3s ease;
-            filter: blur(5px) brightness(222.1%);
+            filter: brightness(10.2) blur(5px) contrast(1.1);
             z-index: 2;
         }
 
@@ -367,7 +376,7 @@
 
         .flame-low {
             width: 200px;
-            height: 300px;
+            height: 200px;
             background-image: url('fire.gif');
             bottom: 0;
             left: 50%;
@@ -376,12 +385,12 @@
 
         .flame-medium {
             width: 260px;
-            height: 300px;
+            height: 260px;
             background-image: url('fire.gif');
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            filter: blur(5px) brightness(222.1%)
+            filter: brightness(1.3) blur(5px) contrast(1.2) hue-rotate(10deg);
         }
 
         .flame-high {
@@ -391,17 +400,17 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            filter: blur(5px) brightness(222.1%)
+            filter: brightness(1.4) blur(5px) contrast(1.3) hue-rotate(20deg);
         }
 
         .flame-max {
             width: 340px;
-            height: 320px;
+            height: 340px;
             background-image: url('fire.gif');
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            filter: blur(5px) brightness(222.1%)
+            filter: brightness(1.5) blur(5px) contrast(1.4) hue-rotate(30deg) saturate(1.3);
         }
 
         .burner-base {
@@ -619,13 +628,18 @@
             <div>Mixing Speed: <span id="speed">0 RPM</span></div>
             <div>Heat Level: <span id="heatLevel">0%</span></div>
             <div>Items Added: <span id="itemCount">0</span></div>
+            <div>Propane Tanks: <span id="propaneCount">0</span></div>
         </div>
 
         <div class="item-section">
-            <div class="hexagon-item" onclick="addItem()">
-                <div class="hexagon-shape">
-                    <div class="item-text">item.png<br>Click to Add</div>
-                </div>
+            <div class="item-slot" id="itemSlot" onclick="addItem()">
+                <img src="item.png" alt="Item Frame" class="item-image item-frame">
+                <div class="slot-overlay">Click to Add</div>
+            </div>
+            
+            <div class="item-slot" id="propaneSlot" onclick="addPropane()">
+                <img src="propane.png" alt="Propane Slot" class="item-image propane-frame">
+                <div class="slot-overlay">Click to Add</div>
             </div>
         </div>
 
@@ -733,6 +747,7 @@
         let currentSpeed = 0;
         let currentHeat = 0;
         let itemCount = 0;
+        let propaneCount = 0;
         let reactionProgress = 0;
         let fuelLevel = 100;
         let reactionInterval;
@@ -818,6 +833,13 @@
             itemCount++;
             document.getElementById('itemCount').textContent = itemCount;
             
+            // Visual feedback for item slot
+            const itemSlot = document.getElementById('itemSlot');
+            itemSlot.classList.add('active');
+            setTimeout(() => {
+                itemSlot.classList.remove('active');
+            }, 500);
+            
             // Visual feedback - slight barrel shake
             const barrel = document.getElementById('steelBarrel');
             barrel.style.transform = 'translateX(2px)';
@@ -834,6 +856,34 @@
                     startReactionProgress();
                 }
             }
+        }
+
+        function addPropane() {
+            propaneCount++;
+            document.getElementById('propaneCount').textContent = propaneCount;
+            
+            // Visual feedback for propane slot
+            const propaneSlot = document.getElementById('propaneSlot');
+            propaneSlot.classList.add('active');
+            setTimeout(() => {
+                propaneSlot.classList.remove('active');
+            }, 500);
+            
+            // Add fuel to the system
+            fuelLevel = Math.min(100, fuelLevel + 25);
+            document.getElementById('fuelLevel').style.width = fuelLevel + '%';
+            document.getElementById('fuelPercentage').textContent = Math.round(fuelLevel) + '%';
+            document.getElementById('fuelLevel').classList.remove('low');
+            
+            // Visual feedback - slight barrel shake
+            const barrel = document.getElementById('steelBarrel');
+            barrel.style.transform = 'translateY(-2px)';
+            setTimeout(() => {
+                barrel.style.transform = 'translateY(2px)';
+                setTimeout(() => {
+                    barrel.style.transform = 'translateY(0px)';
+                }, 100);
+            }, 100);
         }
 
         function startReactionProgress() {
@@ -911,6 +961,10 @@
             addItem();
         };
 
+        window.addPropaneProgrammatically = function() {
+            addPropane();
+        };
+
         window.refillFuel = function() {
             fuelLevel = 100;
             document.getElementById('fuelLevel').style.width = '100%';
@@ -931,6 +985,7 @@
                 heat: currentHeat,
                 temperature: 20 + Math.round(currentHeat * 1.5),
                 itemCount: itemCount,
+                propaneCount: propaneCount,
                 reactionProgress: Math.round(reactionProgress),
                 fuelLevel: Math.round(fuelLevel)
             };
