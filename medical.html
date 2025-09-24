@@ -361,7 +361,7 @@
             <div class="body-diagram">
                 <img src="noboneskeleton.png" class="body-image" alt="Human Body Anatomy" />
                 
-                <!-- Clickable body parts overlays -->
+                 <!-- Clickable body parts overlays -->
                 <div class="body-part" id="head" style="top: 47px; left: 158px; width: 30px; height: 40px;" onclick="selectPart('head')"></div>
                 <div class="body-part" id="neck" style="top: 80px; left: 158px; width: 30px; height: 20px; border-radius: 15px;" onclick="selectPart('neck')"></div>
                 <div class="body-part" id="chest" style="top: 95px; left: 150px; width: 45px; height: 50px;" onclick="selectPart('chest')"></div>
@@ -430,118 +430,118 @@
             <div class="action-subtitle">Click to simulate EMS procedures</div>
         </div>
         <div class="action-grid">
-            <button class="action-btn btn-red">🚁 ALS BACKUP</button>
-            <button class="action-btn btn-blue">💉 IV ACCESS</button>
-            <button class="action-btn btn-purple">🫁 INTUBATE</button>
-            <button class="action-btn btn-green">🦴 SPLINT</button>
-            <button class="action-btn btn-yellow">🫀 MONITOR</button>
+            <button class="action-btn btn-red">🚨 CALL BACKUP</button>
+            <button class="action-btn btn-blue">💉 GIVE MORPHINE</button>
+            <button class="action-btn btn-purple">🫁 CPR</button>
+            <button class="action-btn btn-green">🩹 BANDAGE</button>
+            <button class="action-btn btn-yellow">📞 AIRLIFT</button>
         </div>
     </div>
 
     <script>
-        // Medical data for each body part
+        // Medical data for each body part - GTA V RP Scenarios
         const injuryData = {
             head: {
                 name: "Head & Skull",
-                injuries: ["Blunt force trauma to temporal region", "Possible skull fracture", "Concussion with brief LOC"],
-                vitals: "GCS: 13/15, Pupils: 4mm reactive, BP: 160/95",
-                treatment: "C-spine immobilization, O2 therapy, frequent neuro checks",
+                injuries: ["Gunshot wound to the head", "Severe head trauma from car crash", "Unconscious - beaten with baseball bat"],
+                vitals: "Patient unconscious, weak pulse, blood loss severe",
+                treatment: "Control bleeding, oxygen, transport immediately to hospital",
                 priority: "critical",
                 color: "#dc2626"
             },
             neck: {
-                name: "Cervical Spine & Neck",
-                injuries: ["C-spine injury suspected", "Neck pain and stiffness", "Possible whiplash"],
-                vitals: "No neurological deficits noted, full sensation",
-                treatment: "Cervical collar applied, backboard immobilization",
+                name: "Neck Area",
+                injuries: ["Knife wound to neck", "Whiplash from high-speed collision", "Strangulation marks visible"],
+                vitals: "Breathing difficulty, pulse weak but stable",
+                treatment: "Stabilize neck, control bleeding, monitor airway",
                 priority: "high",
                 color: "#ea580c"
             },
             chest: {
-                name: "Chest & Thorax",
-                injuries: ["Multiple rib fractures (ribs 5-7)", "Pneumothorax suspected", "Chest wall contusion"],
-                vitals: "RR: 28, SpO2: 89%, diminished breath sounds left",
-                treatment: "High-flow O2, chest seal, prepare for decompression",
+                name: "Chest Area",
+                injuries: ["Gunshot wound to chest", "Broken ribs from motorcycle crash", "Stabbed multiple times"],
+                vitals: "Difficulty breathing, chest pain, blood in mouth",
+                treatment: "Seal wound, oxygen therapy, prepare for surgery",
                 priority: "critical",
                 color: "#dc2626"
             },
             abdomen: {
-                name: "Abdominal Region", 
-                injuries: ["Penetrating abdominal wound", "Possible internal hemorrhage", "Peritoneal irritation"],
-                vitals: "BP: 85/55, HR: 120, abdomen rigid and distended",
-                treatment: "Large bore IV x2, fluid resuscitation, rapid transport",
+                name: "Stomach/Abdomen", 
+                injuries: ["Gunshot wound to stomach", "Stab wound to abdomen", "Internal bleeding from crash"],
+                vitals: "Low blood pressure, rapid pulse, severe pain",
+                treatment: "Control bleeding, IV fluids, emergency surgery needed",
                 priority: "critical",
                 color: "#dc2626"
             },
             pelvis: {
-                name: "Pelvic Region",
-                injuries: ["Unstable pelvic fracture", "Significant pelvic pain", "Possible bladder injury"],
-                vitals: "Unable to bear weight, hip deformity noted",
-                treatment: "Pelvic binder applied, avoid log rolling",
+                name: "Hip/Pelvis Area",
+                injuries: ["Broken pelvis from car accident", "Gunshot wound to hip", "Crushed by falling object"],
+                vitals: "Unable to move legs, severe pain, possible nerve damage",
+                treatment: "Stabilize pelvis, pain medication, careful transport",
                 priority: "high",
                 color: "#ea580c"
             },
             leftArm: {
-                name: "Left Arm & Shoulder",
-                injuries: ["Open humeral fracture", "Radial artery laceration", "Severe hemorrhage"],
-                vitals: "Weak radial pulse, CRT >4sec, active bleeding",
-                treatment: "Hemostatic gauze, pressure bandage, splint",
+                name: "Left Arm",
+                injuries: ["Gunshot wound to arm", "Broken arm from fight", "Severe road rash from bike crash"],
+                vitals: "Heavy bleeding, arm bent at wrong angle",
+                treatment: "Stop bleeding, splint arm, pain medication",
                 priority: "high",
                 color: "#ea580c"
             },
             rightArm: {
-                name: "Right Arm & Shoulder", 
-                injuries: ["Closed radius/ulna fracture", "Wrist deformity", "Moderate pain"],
-                vitals: "Good pulse, sensation intact, some swelling",
-                treatment: "Splinting, pain management, ice pack",
+                name: "Right Arm", 
+                injuries: ["Broken wrist from fall", "Cut arm on broken glass", "Bruising from baseball bat"],
+                vitals: "Moderate bleeding, can move fingers, swollen",
+                treatment: "Clean wound, splint, bandage",
                 priority: "moderate",
                 color: "#f59e0b"
             },
             leftHand: {
-                name: "Left Hand & Forearm",
-                injuries: ["Multiple finger fractures", "Deep lacerations on palm", "Possible tendon damage"],
-                vitals: "Good circulation, limited mobility",
-                treatment: "Wound cleaning, splinting, pain management",
+                name: "Left Hand",
+                injuries: ["Shot in hand during robbery", "Fingers broken in car door", "Burns from explosion"],
+                vitals: "Missing finger, severe burns, unable to grip",
+                treatment: "Control bleeding, treat burns, pain medication",
                 priority: "moderate",
                 color: "#f59e0b"
             },
             rightHand: {
-                name: "Right Hand & Forearm",
-                injuries: ["Minor abrasions", "Possible wrist sprain", "Swelling present"],
-                vitals: "Good pulse, full sensation maintained",
-                treatment: "Ice, elevation, elastic bandage",
+                name: "Right Hand",
+                injuries: ["Cuts from broken window", "Sprained wrist", "Minor burns from fire"],
+                vitals: "Small cuts, can move hand, minor swelling",
+                treatment: "Clean cuts, bandage, ice pack",
                 priority: "low",
                 color: "#16a34a"
             },
             leftLeg: {
-                name: "Left Thigh & Hip",
-                injuries: ["Femoral shaft fracture", "Possible arterial injury", "Severe deformity"],
-                vitals: "Weak pedal pulse, leg shortened and rotated",
-                treatment: "Traction splint, IV access, pain management",
+                name: "Left Leg",
+                injuries: ["Gunshot wound to thigh", "Leg broken in motorcycle accident", "Crushed leg under car"],
+                vitals: "Massive bleeding, bone visible, leg twisted",
+                treatment: "Tourniquet, splint, immediate transport",
                 priority: "critical", 
                 color: "#dc2626"
             },
             rightLeg: {
-                name: "Right Thigh & Hip",
-                injuries: ["Contusion to quadriceps", "Hip pain", "Limited mobility"],
-                vitals: "Good pulse, some swelling and tenderness",
-                treatment: "Pain management, ice, gentle immobilization",
+                name: "Right Leg",
+                injuries: ["Broken leg from jumping off building", "Road rash from bike crash", "Kicked repeatedly during fight"],
+                vitals: "Moderate pain, can't walk, bruising severe",
+                treatment: "Splint leg, pain medication, clean wounds",
                 priority: "moderate",
                 color: "#f59e0b"
             },
             leftKnee: {
                 name: "Left Knee",
-                injuries: ["Torn ACL suspected", "Knee instability", "Significant swelling"],
-                vitals: "Good pulse below injury, painful on movement",
-                treatment: "Knee immobilizer, ice, pain management",
+                injuries: ["Kneecap shot during gang fight", "Knee twisted in car crash", "Hit with crowbar"],
+                vitals: "Severe swelling, can't bend knee, very painful",
+                treatment: "Ice pack, knee brace, strong pain meds",
                 priority: "moderate",
                 color: "#f59e0b"
             },
             rightKnee: {
                 name: "Right Knee", 
-                injuries: ["Minor knee contusion", "Slight swelling", "Full range of motion"],
-                vitals: "No instability, good strength",
-                treatment: "Ice, rest, monitor for changes",
+                injuries: ["Minor scrapes from fall", "Bruised knee", "Small cut from glass"],
+                vitals: "Minor pain, can walk slowly, small cuts",
+                treatment: "Clean wound, bandage, rest",
                 priority: "low",
                 color: "#16a34a"
             }
@@ -613,15 +613,15 @@
         function getEMSRecommendation(priority) {
             switch(priority) {
                 case 'critical':
-                    return "🚁 IMMEDIATE ALS transport required. Consider helicopter EVAC. Notify trauma center.";
+                    return "🚁 EMERGENCY! Rush to hospital immediately. Call for backup and clear the roads!";
                 case 'high':
-                    return "🚑 Priority transport with continuous monitoring. ALS interventions en route.";
+                    return "🚑 High priority transport. Get them to the hospital fast, keep them stable.";
                 case 'moderate':
-                    return "🏥 Standard transport. BLS care sufficient. Monitor for deterioration.";
+                    return "🏥 Standard ambulance transport. Monitor patient, treat wounds en route.";
                 case 'low':
-                    return "🩹 Minor treatment. Transport when ready. Basic first aid measures.";
+                    return "🩹 Minor injuries. Basic first aid and transport when convenient.";
                 default:
-                    return "Standard medical protocols apply.";
+                    return "Follow standard medical protocols.";
             }
         }
 
