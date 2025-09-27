@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeInvader - Debug Terminal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: transparent;
+            color: #00ff88;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #ffffff;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .circuit-board {
+            background: rgba(10, 10, 15, 0.95);
+            border: none;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .matrix-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            opacity: 0.4;
+        }
+
+        .matrix-stream {
+            position: absolute;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            color: #00ff88;
+            text-align: center;
+            white-space: pre-line;
+            line-height: 1.2;
+            animation: matrixDrop linear infinite;
+        }
+
+        .matrix-char {
+            display: block;
+            transition: opacity 0.1s ease;
+        }
+
+        .matrix-char.fade {
+            opacity: 0.3;
+        }
+
+        .matrix-char.bright {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes matrixDrop {
+            0% {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px));
+                opacity: 0;
+            }
+        }
+
+        .circuit-board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 100, 0, 0.025) 0%, transparent 50%);
+            animation: orbGlow 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes orbGlow {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 0.3;
+            }
+            33% { 
+                transform: scale(1.1) rotate(120deg);
+                opacity: 0.6;
+            }
+            66% { 
+                transform: scale(0.9) rotate(240deg);
+                opacity: 0.4;
+            }
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .circuit-node {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            font-size: 22px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .circuit-node::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .circuit-node:hover {
+            border-color: rgba(0, 255, 136, 0.8);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 136, 0.4),
+                0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px) scale(1.05);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+        }
+
+        .circuit-node:hover::before {
+            left: 100%;
+        }
+
+        .circuit-node.active {
+            background: linear-gradient(135deg, #00ff88, #00cc70);
+            color: #000;
+            border-color: #00ff88;
+            box-shadow: 
+                0 0 40px rgba(0, 255, 136, 0.8),
+                0 15px 40px rgba(0, 0, 0, 0.4);
+            animation: nodeActive 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .circuit-node.target {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.9), rgba(255, 140, 0, 0.7));
+            border-color: #ff6b00;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+            animation: targetPulse 1.5s ease-in-out infinite;
+            color: #fff;
+        }
+
+        .circuit-node.path {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.9), rgba(0, 150, 255, 0.7));
+            border-color: #0066ff;
+            box-shadow: 0 0 25px rgba(0, 102, 255, 0.6);
+            color: #fff;
+        }
+
+        .circuit-node.blocked {
+            background: linear-gradient(135deg, rgba(255, 50, 50, 0.9), rgba(255, 0, 0, 0.7));
+            border-color: #ff3232;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        @keyframes nodeActive {
+            0% { transform: translateY(-2px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.15); }
+            100% { transform: translateY(-2px) scale(1); }
+        }
+
+        @keyframes targetPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+            }
+            50% { 
+                transform: scale(1.08); 
+                box-shadow: 0 0 40px rgba(255, 107, 0, 0.9);
+            }
+        }
+
+        .sequence-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .sequence-display h3 {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .sequence {
+            font-size: 1.6em;
+            font-weight: 600;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+
+        .control-panel {
+            background: rgba(13, 27, 13, 0.95);
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .timer-display {
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #ff6b00;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
+        }
+
+        .timer {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #ff6b00;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 1);
+            margin-bottom: 10px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .timer.critical {
+            color: #ff0000;
+            animation: timerCritical 0.5s ease-in-out infinite;
+        }
+
+        @keyframes timerCritical {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #66ffaa;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00ff88, #007a3d);
+            border: none;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #007a3d, #00ff88);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+            transform: translateY(-3px);
+        }
+
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #fff;
+        }
+
+        .btn.danger:hover {
+            background: linear-gradient(135deg, #cc0000, #ff0000);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+        }
+
+        .result-panel {
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .result-panel.success {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .result-panel.failure {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .result-panel h3 {
+            color: #00ff88;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .payment-display {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 1);
+            margin: 15px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .puzzle-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .circuit-node {
+                width: 50px;
+                height: 50px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .puzzle-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .timer {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LIFEINVADER DEBUG TERMINAL</h1>
+            <p>maybe a hint here?</p>
+        </div>
+
+        <div class="game-container">
+            <div class="circuit-board">
+                <div class="matrix-background" id="matrixBackground"></div>
+                <div class="puzzle-grid" id="puzzleGrid"></div>
+                
+                <div class="sequence-display">
+                    <h3>DEBUG SEQUENCE</h3>
+                    <div class="sequence" id="targetSequence">INIT...</div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="timer-display">
+                    <div class="timer" id="timer">45.00</div>
+                    <div style="color: #ff6b00; font-weight: 700;">DEBUG TIMEOUT</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="score">0</div>
+                        <div class="stat-label">SCORE</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="level">1</div>
+                        <div class="stat-label">LEVEL</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="sequence">0/0</div>
+                        <div class="stat-label">PROGRESS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="payment">$0</div>
+                        <div class="stat-label">PAYMENT</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="startGame()" id="startBtn">START DEBUG</button>
+                    <button class="btn danger" onclick="resetGame()" id="resetBtn">RESET</button>
+                </div>
+
+                <div class="result-panel" id="resultPanel">
+                    <div>
+                        <h3>DEBUG TERMINAL READY</h3>
+                        <p>Start the debugging sequence!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            isPlaying: false,
+            currentLevel: 1,
+            score: 0,
+            timeLeft: 45,
+            difficulty: 'hard',
+            targetSequence: [],
+            playerSequence: [],
+            gridSize: 8,
+            gameTimer: null,
+            nodePositions: [],
+            randomLetters: [],
+            matrixStreams: [],
+            matrixAnimationId: null
+        };
+
+        const difficulties = {
+            hard: { time: 45, sequenceLength: 6, payment: 1500, bonus: 100 }
+        };
+
+        // Enhanced Matrix rain effect
+        class MatrixStream {
+            constructor(x, speed) {
+                this.x = x;
+                this.speed = speed;
+                this.characters = this.generateCharacters();
+                this.y = -this.characters.length * 20;
+                this.element = this.createElement();
+                this.lastUpdate = 0;
+                this.charUpdateInterval = 100 + Math.random() * 200; // Random character change speed
+            }
+
+            generateCharacters() {
+                const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZαβγδεζηθικλμνξοπρστυφχψω';
+                const length = 12 + Math.random() * 8; // 12-20 characters
+                const result = [];
+                
+                for (let i = 0; i < length; i++) {
+                    result.push({
+                        char: chars[Math.floor(Math.random() * chars.length)],
+                        opacity: Math.max(0.1, 1 - (i / length)) // Fade toward tail
+                    });
+                }
+                return result;
+            }
+
+            createElement() {
+                const element = document.createElement('div');
+                element.className = 'matrix-stream';
+                element.style.left = this.x + 'px';
+                element.style.transform = `translateY(${this.y}px)`;
+                
+                this.updateElement();
+                return element;
+            }
+
+            updateElement() {
+                if (!this.element) return;
+                
+                let html = '';
+                this.characters.forEach((charObj, index) => {
+                    const isHead = index === 0;
+                    const isTail = index > this.characters.length * 0.7;
+                    
+                    let className = 'matrix-char';
+                    if (isHead) className += ' bright';
+                    if (isTail) className += ' fade';
+                    
+                    html += `<span class="${className}" style="opacity: ${charObj.opacity}; text-shadow: 0 0 ${isHead ? 8 : 3}px rgba(0, 255, 136, ${isHead ? 1 : 0.6})">${charObj.char}</span>`;
+                });
+                this.element.innerHTML = html;
+            }
+
+            update(currentTime) {
+                if (!this.element) return false;
+                
+                // Update position
+                this.y += this.speed;
+                this.element.style.transform = `translateY(${this.y}px)`;
+
+                // Randomly change characters
+                if (currentTime - this.lastUpdate > this.charUpdateInterval) {
+                    this.changeRandomCharacters();
+                    this.lastUpdate = currentTime;
+                }
+
+                // Check if stream is off screen
+                return this.y < window.innerHeight + 100;
+            }
+
+            changeRandomCharacters() {
+                const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZαβγδεζηθικλμνξοπρστυφχψω';
+                const changeCount = 1 + Math.random() * 3; // Change 1-3 characters
+                
+                for (let i = 0; i < changeCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * this.characters.length);
+                    this.characters[randomIndex].char = chars[Math.floor(Math.random() * chars.length)];
+                }
+                this.updateElement();
+            }
+
+            remove() {
+                if (this.element && this.element.parentNode) {
+                    this.element.parentNode.removeChild(this.element);
+                }
+                this.element = null;
+            }
+        }
+
+        function createMatrixRain() {
+            const matrixBackground = document.getElementById('matrixBackground');
+            if (!matrixBackground) {
+                console.log('Matrix background not found, retrying...');
+                setTimeout(createMatrixRain, 100);
+                return;
+            }
+            
+            const streamCount = 10;
+            const containerWidth = matrixBackground.offsetWidth || 800;
+            
+            // Create initial streams
+            for (let i = 0; i < streamCount; i++) {
+                const x = (i / streamCount) * containerWidth + Math.random() * 50;
+                const speed = 1 + Math.random() * 2; // 1-3 pixels per frame
+                const stream = new MatrixStream(x, speed);
+                
+                matrixBackground.appendChild(stream.element);
+                gameState.matrixStreams.push(stream);
+            }
+        }
+
+        function updateMatrixRain() {
+            const currentTime = Date.now();
+            const matrixBackground = document.getElementById('matrixBackground');
+            
+            if (!matrixBackground) {
+                stopMatrixEffect();
+                return;
+            }
+            
+            // Update existing streams
+            gameState.matrixStreams = gameState.matrixStreams.filter(stream => {
+                const stillVisible = stream.update(currentTime);
+                if (!stillVisible) {
+                    stream.remove();
+                    return false;
+                }
+                return true;
+            });
+
+            // Add new streams occasionally
+            if (Math.random() < 0.03 && gameState.matrixStreams.length < 15) {
+                const containerWidth = matrixBackground.offsetWidth || 800;
+                const x = Math.random() * containerWidth;
+                const speed = 1 + Math.random() * 2;
+                const stream = new MatrixStream(x, speed);
+                
+                matrixBackground.appendChild(stream.element);
+                gameState.matrixStreams.push(stream);
+            }
+
+            // Continue animation
+            if (gameState.matrixAnimationId) {
+                gameState.matrixAnimationId = requestAnimationFrame(updateMatrixRain);
+            }
+        }
+
+        function startMatrixEffect() {
+            stopMatrixEffect();
+            
+            // Ensure DOM is ready
+            setTimeout(() => {
+                const matrixBackground = document.getElementById('matrixBackground');
+                if (matrixBackground) {
+                    createMatrixRain();
+                    gameState.matrixAnimationId = requestAnimationFrame(updateMatrixRain);
+                } else {
+                    console.log('Matrix background element not found');
+                }
+            }, 200);
+        }
+
+        function stopMatrixEffect() {
+            // Cancel animation frame
+            if (gameState.matrixAnimationId) {
+                cancelAnimationFrame(gameState.matrixAnimationId);
+                gameState.matrixAnimationId = null;
+            }
+            
+            // Remove all streams
+            if (gameState.matrixStreams) {
+                gameState.matrixStreams.forEach(stream => stream.remove());
+                gameState.matrixStreams = [];
+            }
+            
+            // Clear DOM
+            const matrixBackground = document.getElementById('matrixBackground');
+            if (matrixBackground) {
+                matrixBackground.innerHTML = '';
+            }
+        }
+
+        // Function to generate random letters (allowing repeats for large grids)
+        function generateRandomLetters(count) {
+            // Using a subset of letters that are visually distinct
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+            const randomLetters = [];
+            
+            // Generate random letters (with repeats allowed since we need 64 letters)
+            for (let i = 0; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * letters.length);
+                randomLetters.push(letters[randomIndex]);
+            }
+            
+            return randomLetters;
+        }
+
+        function initializeGame() {
+            createPuzzleGrid();
+            updateDisplay();
+            startMatrixEffect();
+        }
+
+        function createPuzzleGrid() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            gameState.nodePositions = [];
+
+            // Generate random letters for the entire grid
+            const totalNodes = gameState.gridSize * gameState.gridSize;
+            gameState.randomLetters = generateRandomLetters(totalNodes);
+
+            for (let i = 0; i < totalNodes; i++) {
+                const node = document.createElement('div');
+                node.className = 'circuit-node';
+                node.dataset.index = i;
+                node.addEventListener('click', () => handleNodeClick(i));
+                
+                // Assign random letter
+                const letter = gameState.randomLetters[i];
+                node.textContent = letter;
+                node.dataset.letter = letter;
+                
+                grid.appendChild(node);
+                gameState.nodePositions.push(node);
+            }
+        }
+
+        function setDifficulty(level) {
+            // Fixed to hard difficulty only
+            gameState.difficulty = 'hard';
+            
+            // Update timer display
+            const config = difficulties['hard'];
+            document.getElementById('timer').textContent = config.time.toFixed(2);
+        }
+
+        function startGame() {
+            if (gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            gameState.currentLevel = 1;
+            gameState.score = 0;
+            gameState.playerSequence = [];
+            
+            const config = difficulties[gameState.difficulty];
+            gameState.timeLeft = config.time;
+            
+            // Regenerate random letters for new game
+            createPuzzleGrid();
+            generateSequence();
+            startTimer();
+            updateDisplay();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('resultPanel').innerHTML = `
+                <div>
+                    <h3>⚡ DEBUG SEQUENCE ACTIVE ⚡</h3>
+                    <p>Click the nodes with the letters shown in the sequence above!</p>
+                </div>
+            `;
+        }
+
+        function generateSequence() {
+            const config = difficulties[gameState.difficulty];
+            gameState.targetSequence = [];
+            
+            // Clear previous highlights
+            gameState.nodePositions.forEach(node => {
+                node.classList.remove('target', 'path', 'blocked', 'active');
+            });
+            
+            // Generate random sequence of node indices
+            const availableNodes = Array.from({length: gameState.gridSize * gameState.gridSize}, (_, i) => i);
+            
+            for (let i = 0; i < config.sequenceLength; i++) {
+                const randomIndex = Math.floor(Math.random() * availableNodes.length);
+                const nodeIndex = availableNodes.splice(randomIndex, 1)[0];
+                gameState.targetSequence.push(nodeIndex);
+            }
+            
+            // Add some blocked nodes for difficulty
+            const blockedCount = Math.floor(gameState.gridSize * gameState.gridSize * 0.15);
+            for (let i = 0; i < blockedCount; i++) {
+                if (availableNodes.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * availableNodes.length);
+                    const nodeIndex = availableNodes.splice(randomIndex, 1)[0];
+                    gameState.nodePositions[nodeIndex].classList.add('blocked');
+                    gameState.nodePositions[nodeIndex].textContent = '✗';
+                }
+            }
+            
+            // Highlight target sequence briefly
+            displaySequence();
+        }
+
+        function displaySequence() {
+            const sequenceElement = document.getElementById('targetSequence');
+            let sequenceText = '';
+            
+            gameState.targetSequence.forEach((nodeIndex, i) => {
+                const node = gameState.nodePositions[nodeIndex];
+                const letter = node.dataset.letter;
+                const position = `${Math.floor(nodeIndex / gameState.gridSize) + 1}-${(nodeIndex % gameState.gridSize) + 1}`;
+                sequenceText += `${letter}(${position})` + (i < gameState.targetSequence.length - 1 ? ' → ' : '');
+                
+                // Briefly highlight the target nodes
+                setTimeout(() => {
+                    node.classList.add('target');
+                }, i * 500);
+            });
+            
+            sequenceElement.textContent = sequenceText;
+            
+            // Remove highlights after showing sequence
+            setTimeout(() => {
+                gameState.nodePositions.forEach(node => {
+                    node.classList.remove('target');
+                });
+            }, gameState.targetSequence.length * 500 + 2000);
+        }
+
+        function handleNodeClick(nodeIndex) {
+            if (!gameState.isPlaying) return;
+            
+            const node = gameState.nodePositions[nodeIndex];
+            
+            // Can't click blocked nodes
+            if (node.classList.contains('blocked')) {
+                // Penalty for clicking blocked nodes
+                gameState.timeLeft -= 2;
+                node.style.animation = 'none';
+                setTimeout(() => {
+                    node.style.animation = '';
+                }, 10);
+                return;
+            }
+            
+            const expectedIndex = gameState.targetSequence[gameState.playerSequence.length];
+            
+            if (nodeIndex === expectedIndex) {
+                // Correct node clicked
+                gameState.playerSequence.push(nodeIndex);
+                node.classList.add('path');
+                node.classList.add('active');
+                
+                setTimeout(() => {
+                    node.classList.remove('active');
+                }, 500);
+                
+                // Add score
+                const config = difficulties[gameState.difficulty];
+                gameState.score += config.bonus;
+                
+                if (gameState.playerSequence.length === gameState.targetSequence.length) {
+                    // Sequence completed!
+                    completeLevel();
+                }
+            } else {
+                // Wrong node clicked - penalty
+                gameState.timeLeft -= 5;
+                node.style.background = 'linear-gradient(135deg, #ff0000, #cc0000)';
+                setTimeout(() => {
+                    node.style.background = '';
+                }, 500);
+            }
+            
+            updateDisplay();
+        }
+
+        function completeLevel() {
+            gameState.currentLevel++;
+            gameState.playerSequence = [];
+            
+            const config = difficulties[gameState.difficulty];
+            gameState.timeLeft = Math.min(gameState.timeLeft + 10, config.time); // Bonus time
+            
+            setTimeout(() => {
+                // Regenerate letters for increased difficulty
+                createPuzzleGrid();
+                generateSequence();
+            }, 1000);
+            
+            document.getElementById('resultPanel').innerHTML = `
+                <div class="success">
+                    <h3>🎉 LEVEL ${gameState.currentLevel - 1} COMPLETE! 🎉</h3>
+                    <p>+10 seconds bonus time! New random sequence loading...</p>
+                </div>
+            `;
+        }
+
+        function startTimer() {
+            gameState.gameTimer = setInterval(() => {
+                gameState.timeLeft -= 0.01;
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame(false);
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 10);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = gameState.timeLeft.toFixed(2);
+            
+            if (gameState.timeLeft <= 10) {
+                timerElement.classList.add('critical');
+            } else {
+                timerElement.classList.remove('critical');
+            }
+        }
+
+        function endGame(success) {
+            gameState.isPlaying = false;
+            clearInterval(gameState.gameTimer);
+            
+            document.getElementById('startBtn').disabled = false;
+            
+            const config = difficulties[gameState.difficulty];
+            let payment = 0;
+            
+            if (success || gameState.currentLevel > 1) {
+                const levelBonus = (gameState.currentLevel - 1) * 500;
+                const timeBonus = Math.floor(gameState.timeLeft * 20);
+                payment = config.payment + levelBonus + timeBonus;
+            }
+            
+            const resultPanel = document.getElementById('resultPanel');
+            
+            if (success) {
+                resultPanel.className = 'result-panel success';
+                resultPanel.innerHTML = `
+                    <div>
+                        <h3>🎉 DEBUG SEQUENCE SUCCESSFUL! 🎉</h3>
+                        <p>Levels Completed: ${gameState.currentLevel - 1}</p>
+                        <p>Final Score: ${gameState.score}</p>
+                        <div class="payment-display">PAYMENT: $${payment}</div>
+                    </div>
+                `;
+            } else {
+                resultPanel.className = 'result-panel failure';
+                resultPanel.innerHTML = `
+                    <div>
+                        <h3>⌛ DEBUG TIMEOUT ⌛</h3>
+                        <p>Debug sequence failed!</p>
+                        <p>Levels Completed: ${gameState.currentLevel - 1}</p>
+                        <div class="payment-display">PAYMENT: $${payment}</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('payment').textContent = `$${payment}`;
+        }
+
+        function resetGame() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.gameTimer);
+            
+            gameState.currentLevel = 1;
+            gameState.score = 0;
+            gameState.playerSequence = [];
+            gameState.targetSequence = [];
+            
+            const config = difficulties[gameState.difficulty];
+            gameState.timeLeft = config.time;
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('targetSequence').textContent = 'INIT...';
+            document.getElementById('payment').textContent = '$0';
+            
+            // Regenerate the grid with new random letters
+            createPuzzleGrid();
+            
+            // Restart matrix effect
+            stopMatrixEffect();
+            startMatrixEffect();
+            
+            updateDisplay();
+            
+            document.getElementById('resultPanel').className = 'result-panel';
+            document.getElementById('resultPanel').innerHTML = `
+                <div>
+                    <h3>DEBUG TERMINAL READY</h3>
+                    <p>Start the debugging sequence!</p>
+                </div>
+            `;
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.currentLevel;
+            document.getElementById('sequence').textContent = 
+                `${gameState.playerSequence.length}/${gameState.targetSequence.length}`;
+            
+            if (!gameState.isPlaying) {
+                updateTimerDisplay();
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeGame);
+    </script>
+</body>
+</html>
