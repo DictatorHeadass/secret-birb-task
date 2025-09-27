@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeInvader - Server Configuration</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: transparent;
+            color: #00ff88;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+        }
+
+        .terminal-window {
+            background: rgba(10, 10, 15, 0.95);
+            border: none;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .terminal-header {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .terminal-header h3 {
+            color: #fff;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .terminal-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+        }
+
+        .server-rack {
+            background: linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(30, 30, 40, 0.9));
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 500px;
+            position: relative;
+            backdrop-filter: blur(15px);
+        }
+
+        .rack-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rack-slot {
+            width: 80px;
+            height: 60px;
+            background: rgba(50, 50, 60, 0.8);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .rack-slot.valid-drop {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .rack-slot.occupied {
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: rgba(100, 100, 120, 0.8);
+        }
+
+        .server-module {
+            width: 70px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .server-module:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+            z-index: 1000;
+        }
+
+        .server-module.dragging {
+            opacity: 0.8;
+            transform: scale(1.1) rotate(5deg);
+            z-index: 1000;
+        }
+
+        .module-cpu {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            border-color: #ff4757;
+            color: #fff;
+        }
+
+        .module-ram {
+            background: linear-gradient(135deg, #4ecdc4, #26de81);
+            border-color: #26de81;
+            color: #fff;
+        }
+
+        .module-storage {
+            background: linear-gradient(135deg, #45b7d1, #3742fa);
+            border-color: #3742fa;
+            color: #fff;
+        }
+
+        .module-network {
+            background: linear-gradient(135deg, #ffa726, #ff7043);
+            border-color: #ff7043;
+            color: #fff;
+        }
+
+        .module-power {
+            background: linear-gradient(135deg, #ab47bc, #7b1fa2);
+            border-color: #7b1fa2;
+            color: #fff;
+        }
+
+        .available-modules {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .target-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .target-display h4 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .target-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .target-slot {
+            width: 40px;
+            height: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 20px;
+        }
+
+        .timer-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff6b00;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.3);
+        }
+
+        .timer {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #ff6b00;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 1);
+            margin-bottom: 10px;
+        }
+
+        .timer.critical {
+            color: #ff0000;
+            animation: timerCritical 0.5s ease-in-out infinite;
+        }
+
+        @keyframes timerCritical {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00ff88, #007a3d);
+            border: none;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #007a3d, #00ff88);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+            transform: translateY(-3px);
+        }
+
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #fff;
+        }
+
+        .btn.danger:hover {
+            background: linear-gradient(135deg, #cc0000, #ff0000);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc70);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .failure-popup, .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(20, 20, 30, 0.98);
+            border: 3px solid;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            min-width: 400px;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            animation: popupAppear 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        .failure-popup {
+            border-color: #ff3232;
+            box-shadow: 0 0 60px rgba(255, 50, 50, 0.4), 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .success-popup {
+            border-color: #00ff88;
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.4), 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        @keyframes popupAppear {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(1.1) rotate(-10deg);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            animation: overlayFade 0.4s ease forwards;
+        }
+
+        @keyframes overlayFade {
+            to { opacity: 1; }
+        }
+
+        .popup h2 {
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .failure-popup h2 {
+            color: #ff3232;
+        }
+
+        .success-popup h2 {
+            color: #00ff88;
+        }
+
+        .popup p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            color: #fff;
+        }
+
+        .popup .payment-display {
+            font-size: 3em;
+            font-weight: 900;
+            margin: 25px 0;
+            text-shadow: 0 0 30px currentColor;
+        }
+
+        .failure-popup .payment-display {
+            color: #ff3232;
+        }
+
+        .success-popup .payment-display {
+            color: #00ff88;
+        }
+
+        .popup .close-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .popup .close-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-container">
+            <!-- Available Modules Panel -->
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <h3>Available Modules</h3>
+                    <p>Drag modules to configure server</p>
+                </div>
+                
+                <div class="available-modules" id="availableModules">
+                    <!-- Modules will be generated here -->
+                </div>
+
+                <div class="target-display">
+                    <h4>Target Configuration</h4>
+                    <div class="target-grid" id="targetGrid">
+                        <!-- Target pattern will be shown here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Rack Panel -->
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <h3>Server Rack Configuration</h3>
+                    <p>Build the target server setup</p>
+                </div>
+                
+                <div class="server-rack">
+                    <div class="rack-grid" id="rackGrid">
+                        <!-- Rack slots will be generated here -->
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Panel -->
+            <div class="stats-panel">
+                <div class="timer-display">
+                    <div class="timer" id="timer">60.00</div>
+                    <div style="color: #ff6b00; font-weight: 700;">DEPLOYMENT TIME</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="level">1</div>
+                        <div class="stat-label">SERVER LEVEL</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="progress">0/12</div>
+                        <div class="stat-label">MODULES PLACED</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="payment">$0</div>
+                        <div class="stat-label">PAYMENT</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="startGame()" id="startBtn">START CONFIG</button>
+                    <button class="btn danger" onclick="resetGame()" id="resetBtn">RESET</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            isPlaying: false,
+            currentLevel: 1,
+            timeLeft: 60,
+            targetConfiguration: [],
+            placedModules: [],
+            draggedElement: null,
+            gameTimer: null,
+            totalSlots: 12
+        };
+
+        const moduleTypes = {
+            CPU: { class: 'module-cpu', symbol: 'CPU', color: '#ff4757' },
+            RAM: { class: 'module-ram', symbol: 'RAM', color: '#26de81' },
+            SSD: { class: 'module-storage', symbol: 'SSD', color: '#3742fa' },
+            NET: { class: 'module-network', symbol: 'NET', color: '#ff7043' },
+            PWR: { class: 'module-power', symbol: 'PWR', color: '#7b1fa2' }
+        };
+
+        function initializeGame() {
+            createRackGrid();
+            updateDisplay();
+        }
+
+        function createRackGrid() {
+            const rackGrid = document.getElementById('rackGrid');
+            rackGrid.innerHTML = '';
+            gameState.placedModules = new Array(gameState.totalSlots).fill(null);
+
+            for (let i = 0; i < gameState.totalSlots; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'rack-slot';
+                slot.dataset.index = i;
+                
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('drop', handleDrop);
+                slot.addEventListener('dragleave', handleDragLeave);
+                
+                rackGrid.appendChild(slot);
+            }
+        }
+
+        function generateTargetConfiguration() {
+            gameState.targetConfiguration = new Array(gameState.totalSlots).fill(null);
+            const moduleTypeNames = Object.keys(moduleTypes);
+            
+            // Start with easier configurations, increase difficulty with levels
+            const difficultyFactor = Math.min(gameState.currentLevel, 5);
+            const fillCount = Math.max(3, Math.floor(4 + difficultyFactor * 1.5)); // 3-10 modules
+            
+            const positions = [];
+            
+            // Get random positions
+            while (positions.length < fillCount) {
+                const pos = Math.floor(Math.random() * gameState.totalSlots);
+                if (!positions.includes(pos)) {
+                    positions.push(pos);
+                }
+            }
+            
+            // Fill positions with random module types
+            positions.forEach(pos => {
+                const randomType = moduleTypeNames[Math.floor(Math.random() * moduleTypeNames.length)];
+                gameState.targetConfiguration[pos] = randomType;
+            });
+            
+            displayTargetConfiguration();
+            
+            // Generate enough modules to complete the configuration
+            generateMatchingModules();
+        }
+
+        function generateMatchingModules() {
+            const container = document.getElementById('availableModules');
+            container.innerHTML = '';
+            
+            // Count required modules from target configuration
+            const requiredModules = {};
+            gameState.targetConfiguration.forEach(moduleType => {
+                if (moduleType) {
+                    requiredModules[moduleType] = (requiredModules[moduleType] || 0) + 1;
+                }
+            });
+            
+            // Generate exactly the modules needed plus a few extras
+            Object.entries(requiredModules).forEach(([moduleType, count]) => {
+                for (let i = 0; i < count; i++) {
+                    createModule(container, moduleType, `required-${moduleType}-${i}`);
+                }
+            });
+            
+            // Add 2-3 extra random modules for complexity
+            const moduleTypeNames = Object.keys(moduleTypes);
+            const extraCount = 2 + Math.floor(Math.random() * 2);
+            
+            for (let i = 0; i < extraCount; i++) {
+                const randomType = moduleTypeNames[Math.floor(Math.random() * moduleTypeNames.length)];
+                createModule(container, randomType, `extra-${i}`);
+            }
+        }
+
+        function createModule(container, moduleType, id) {
+            const moduleConfig = moduleTypes[moduleType];
+            
+            const module = document.createElement('div');
+            module.className = `server-module ${moduleConfig.class}`;
+            module.draggable = true;
+            module.textContent = moduleConfig.symbol;
+            module.dataset.type = moduleType;
+            module.dataset.id = id;
+            
+            module.addEventListener('dragstart', handleDragStart);
+            module.addEventListener('dragend', handleDragEnd);
+            
+            container.appendChild(module);
+        }
+
+        function displayTargetConfiguration() {
+            const targetGrid = document.getElementById('targetGrid');
+            targetGrid.innerHTML = '';
+            
+            gameState.targetConfiguration.forEach((moduleType, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'target-slot';
+                
+                if (moduleType) {
+                    const config = moduleTypes[moduleType];
+                    slot.textContent = config.symbol;
+                    slot.style.background = config.color;
+                    slot.style.color = '#fff';
+                } else {
+                    slot.style.background = 'rgba(255, 255, 255, 0.1)';
+                }
+                
+                targetGrid.appendChild(slot);
+            });
+        }
+
+        function handleDragStart(e) {
+            gameState.draggedElement = e.target;
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            if (e.target && e.target.classList) {
+                e.target.classList.remove('dragging');
+            }
+            gameState.draggedElement = null;
+            
+            // Remove all drop indicators
+            document.querySelectorAll('.rack-slot').forEach(slot => {
+                if (slot && slot.classList) {
+                    slot.classList.remove('valid-drop');
+                }
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            if (e.target && e.target.classList) {
+                e.target.classList.add('valid-drop');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.target && e.target.classList) {
+                e.target.classList.remove('valid-drop');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (e.target && e.target.classList) {
+                e.target.classList.remove('valid-drop');
+            }
+            
+            if (!gameState.draggedElement || !gameState.isPlaying) return;
+            
+            const slotIndex = parseInt(e.target.dataset.index);
+            if (isNaN(slotIndex)) return;
+            
+            const moduleType = gameState.draggedElement.dataset.type;
+            
+            // Check if slot is already occupied
+            if (gameState.placedModules[slotIndex]) return;
+            
+            // Place the module
+            gameState.placedModules[slotIndex] = moduleType;
+            
+            // Create module in rack
+            const moduleConfig = moduleTypes[moduleType];
+            const rackModule = document.createElement('div');
+            rackModule.className = `server-module ${moduleConfig.class}`;
+            rackModule.textContent = moduleConfig.symbol;
+            rackModule.style.position = 'absolute';
+            rackModule.style.top = '5px';
+            rackModule.style.left = '5px';
+            rackModule.style.width = '70px';
+            rackModule.style.height = '50px';
+            
+            // Add click handler to remove module
+            rackModule.addEventListener('click', () => removeModule(slotIndex, rackModule));
+            rackModule.style.cursor = 'pointer';
+            rackModule.title = 'Click to remove';
+            
+            e.target.appendChild(rackModule);
+            if (e.target.classList) {
+                e.target.classList.add('occupied');
+            }
+            
+            // Remove from available modules
+            if (gameState.draggedElement && gameState.draggedElement.parentNode) {
+                gameState.draggedElement.remove();
+            }
+            
+            checkCompletion();
+            updateDisplay();
+        }
+
+        function removeModule(slotIndex, rackModule) {
+            if (!gameState.isPlaying) return;
+            
+            const moduleType = gameState.placedModules[slotIndex];
+            if (!moduleType) return;
+            
+            // Remove from rack
+            gameState.placedModules[slotIndex] = null;
+            const slot = document.querySelector(`[data-index="${slotIndex}"]`);
+            if (slot && slot.classList) {
+                slot.classList.remove('occupied');
+            }
+            if (rackModule && rackModule.parentNode) {
+                rackModule.remove();
+            }
+            
+            // Add back to available modules
+            const container = document.getElementById('availableModules');
+            if (container) {
+                createModule(container, moduleType, `returned-${Date.now()}`);
+            }
+            
+            checkCompletion();
+            updateDisplay();
+        }
+
+        function checkCompletion() {
+            // Check if configuration matches target
+            let matches = 0;
+            let totalRequired = 0;
+            
+            for (let i = 0; i < gameState.totalSlots; i++) {
+                if (gameState.targetConfiguration[i]) {
+                    totalRequired++;
+                    if (gameState.placedModules[i] === gameState.targetConfiguration[i]) {
+                        matches++;
+                    }
+                }
+            }
+            
+            const progress = totalRequired > 0 ? (matches / totalRequired) * 100 : 0;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            if (matches === totalRequired && totalRequired > 0) {
+                completeLevel();
+            }
+        }
+
+        function completeLevel() {
+            gameState.currentLevel++;
+            gameState.timeLeft = Math.min(gameState.timeLeft + 15, 60); // Bonus time
+            
+            setTimeout(() => {
+                // Reset for next level
+                createRackGrid();
+                generateTargetConfiguration(); // This will also generate matching modules
+                updateDisplay();
+            }, 1500);
+        }
+
+        function startGame() {
+            if (gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            gameState.currentLevel = 1;
+            gameState.timeLeft = 60;
+            
+            generateTargetConfiguration();
+            startTimer();
+            updateDisplay();
+            
+            document.getElementById('startBtn').disabled = true;
+        }
+
+        function startTimer() {
+            gameState.gameTimer = setInterval(() => {
+                gameState.timeLeft -= 0.01;
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame(false);
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 10);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = gameState.timeLeft.toFixed(2);
+            
+            if (gameState.timeLeft <= 10) {
+                timerElement.classList.add('critical');
+            } else {
+                timerElement.classList.remove('critical');
+            }
+        }
+
+        function endGame(success) {
+            gameState.isPlaying = false;
+            clearInterval(gameState.gameTimer);
+            
+            document.getElementById('startBtn').disabled = false;
+            
+            // Calculate payment
+            let payment = 0;
+            if (success || gameState.currentLevel > 1) {
+                const basePayment = 1200;
+                const levelBonus = (gameState.currentLevel - 1) * 400;
+                const timeBonus = Math.floor(gameState.timeLeft * 15);
+                payment = basePayment + levelBonus + timeBonus;
+            }
+            
+            document.getElementById('payment').textContent = `$${payment}`;
+            
+            // Show popup
+            showResultPopup(success, payment);
+        }
+
+        function showResultPopup(success, payment) {
+            const overlay = document.createElement('div');
+            overlay.className = 'popup-overlay';
+            overlay.onclick = () => closePopup();
+            
+            const popup = document.createElement('div');
+            popup.className = success ? 'success-popup' : 'failure-popup';
+            popup.id = 'gamePopup';
+            
+            if (success) {
+                popup.innerHTML = `
+                    <h2>🎉 SERVER DEPLOYED! 🎉</h2>
+                    <p>Server configuration completed successfully!</p>
+                    <p>Servers Configured: ${gameState.currentLevel - 1}</p>
+                    <div class="payment-display">$${payment}</div>
+                    <button class="close-btn" onclick="closePopup()">Continue</button>
+                `;
+            } else {
+                popup.innerHTML = `
+                    <h2>❌ DEPLOYMENT FAILED ❌</h2>
+                    <p>Server configuration timeout!</p>
+                    <p>Servers Configured: ${gameState.currentLevel - 1}</p>
+                    <div class="payment-display">$${payment}</div>
+                    <button class="close-btn" onclick="closePopup()">Try Again</button>
+                `;
+            }
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('gamePopup');
+            const overlay = document.querySelector('.popup-overlay');
+            
+            if (popup) {
+                popup.style.animation = 'none';
+                popup.style.transform = 'translate(-50%, -50%) scale(0)';
+                popup.style.opacity = '0';
+                setTimeout(() => popup.remove(), 200);
+            }
+            
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 200);
+            }
+        }
+
+        function resetGame() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.gameTimer);
+            
+            gameState.currentLevel = 1;
+            gameState.timeLeft = 60;
+            gameState.targetConfiguration = [];
+            gameState.placedModules = [];
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('payment').textContent = '$0';
+            document.getElementById('progressFill').style.width = '0%';
+            
+            createRackGrid();
+            document.getElementById('targetGrid').innerHTML = '';
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('level').textContent = gameState.currentLevel;
+            
+            const placedCount = gameState.placedModules.filter(module => module !== null).length;
+            const requiredCount = gameState.targetConfiguration.filter(module => module !== null).length;
+            document.getElementById('progress').textContent = `${placedCount}/${requiredCount}`;
+            
+            if (!gameState.isPlaying) {
+                updateTimerDisplay();
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeGame);
+    </script>
+</body>
+</html>
