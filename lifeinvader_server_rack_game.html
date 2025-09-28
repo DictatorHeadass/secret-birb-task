@@ -342,6 +342,11 @@
             animation: timerCritical 0.5s ease-in-out infinite;
         }
 
+        .timer.paused {
+            color: #888;
+            animation: none;
+        }
+
         @keyframes timerCritical {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -434,6 +439,27 @@
             width: 0%;
             transition: width 0.3s ease;
             border-radius: 4px;
+        }
+
+        .level-complete-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 255, 136, 0.95);
+            color: #000;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: 900;
+            z-index: 500;
+            animation: levelCompleteAnim 2s ease;
+        }
+
+        @keyframes levelCompleteAnim {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
         }
 
         .failure-popup, .success-popup {
@@ -642,6 +668,7 @@
     <script>
         let gameState = {
             isPlaying: false,
+            isPaused: false,
             isPreviewing: false,
             currentLevel: 1,
             timeLeft: 60,
@@ -827,7 +854,7 @@
                 e.target.classList.remove('valid-drop');
             }
             
-            if (!gameState.draggedElement || !gameState.isPlaying) return;
+            if (!gameState.draggedElement || !gameState.isPlaying || gameState.isPaused) return;
             if (!e.target || !e.target.dataset) return;
             
             const slotIndex = parseInt(e.target.dataset.index);
@@ -916,7 +943,7 @@
         }
 
         function removeModule(slotIndex, rackModule) {
-            if (!gameState.isPlaying) return;
+            if (!gameState.isPlaying || gameState.isPaused) return;
             
             const moduleType = gameState.placedModules[slotIndex];
             if (!moduleType) return;
@@ -939,6 +966,28 @@
             
             checkCompletion();
             updateDisplay();
+        }
+
+        function pauseGame() {
+            gameState.isPaused = true;
+            clearInterval(gameState.gameTimer);
+            
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.classList.add('paused');
+            }
+        }
+
+        function resumeGame() {
+            if (!gameState.isPlaying || !gameState.isPaused) return;
+            
+            gameState.isPaused = false;
+            startTimer();
+            
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.classList.remove('paused');
+            }
         }
 
         function checkCompletion() {
@@ -964,25 +1013,47 @@
         }
 
         function completeLevel() {
-            gameState.currentLevel++;
-            gameState.timeLeft = Math.min(gameState.timeLeft + 15, 60); // Bonus time
+            // Pause the timer immediately
+            pauseGame();
             
-            // Hide manual temporarily
-            document.getElementById('targetDisplay').style.display = 'none';
-            document.getElementById('manualBtn').disabled = true;
-            if (gameState.manualTimeout) {
-                clearTimeout(gameState.manualTimeout);
-                gameState.manualTimeout = null;
-            }
+            // Show completion message
+            showLevelCompleteMessage();
             
+            // Add bonus time after a delay
             setTimeout(() => {
+                gameState.currentLevel++;
+                gameState.timeLeft = Math.min(gameState.timeLeft + 15, 60); // Bonus time
+                
+                // Hide manual temporarily
+                document.getElementById('targetDisplay').style.display = 'none';
+                document.getElementById('manualBtn').disabled = true;
+                if (gameState.manualTimeout) {
+                    clearTimeout(gameState.manualTimeout);
+                    gameState.manualTimeout = null;
+                }
+                
                 // Reset for next level
                 createRackGrid();
                 generateTargetConfiguration();
                 
                 // Show new configuration preview
                 showConfigurationPreview();
-            }, 1500);
+            }, 2000); // Wait 2 seconds to show completion
+        }
+
+        function showLevelCompleteMessage() {
+            const message = document.createElement('div');
+            message.className = 'level-complete-message';
+            message.textContent = `LEVEL ${gameState.currentLevel} COMPLETE! +15s BONUS`;
+            
+            const rackContainer = document.querySelector('.server-rack');
+            rackContainer.appendChild(message);
+            
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.remove();
+                }
+            }, 2000);
         }
 
         function startGame() {
@@ -1009,8 +1080,10 @@
             const content = document.createElement('div');
             content.className = 'preview-content';
             
+            const levelText = gameState.currentLevel === 1 ? 'STARTING CONFIGURATION' : `LEVEL ${gameState.currentLevel} CONFIGURATION`;
+            
             content.innerHTML = `
-                <h2>📋 SERVER CONFIGURATION</h2>
+                <h2>📋 ${levelText}</h2>
                 <p>Memorize this configuration. You'll have 5 seconds to study it.</p>
                 <div class="preview-grid" id="previewGrid"></div>
                 <div class="countdown-display" id="previewCountdown">5</div>
@@ -1066,7 +1139,9 @@
 
         function startActualGame() {
             gameState.isPlaying = true;
-            gameState.gameEnded = false; // Reset the ended flag
+            gameState.isPaused = false;
+            gameState.gameEnded = false;
+            
             startTimer();
             updateDisplay();
             
@@ -1078,7 +1153,7 @@
         }
 
         function showManual() {
-            if (!gameState.isPlaying || gameState.manualTimeout) return;
+            if (!gameState.isPlaying || gameState.manualTimeout || gameState.isPaused) return;
             
             // Deduct time
             gameState.timeLeft = Math.max(0, gameState.timeLeft - 5);
@@ -1101,8 +1176,13 @@
         }
 
         function startTimer() {
+            // Clear any existing timer
+            if (gameState.gameTimer) {
+                clearInterval(gameState.gameTimer);
+            }
+            
             gameState.gameTimer = setInterval(() => {
-                if (!gameState.isPlaying || gameState.gameEnded) {
+                if (!gameState.isPlaying || gameState.gameEnded || gameState.isPaused) {
                     clearInterval(gameState.gameTimer);
                     return;
                 }
@@ -1122,7 +1202,7 @@
             const timerElement = document.getElementById('timer');
             timerElement.textContent = gameState.timeLeft.toFixed(2);
             
-            if (gameState.timeLeft <= 10) {
+            if (gameState.timeLeft <= 10 && !gameState.isPaused) {
                 timerElement.classList.add('critical');
             } else {
                 timerElement.classList.remove('critical');
@@ -1131,6 +1211,7 @@
 
         function endGame(success) {
             gameState.isPlaying = false;
+            gameState.gameEnded = true;
             clearInterval(gameState.gameTimer);
             
             document.getElementById('startBtn').disabled = false;
@@ -1169,7 +1250,7 @@
                 `;
             } else {
                 popup.innerHTML = `
-                    <h2>❌ DEPLOYMENT FAILED ❌</h2>
+                    <h2>⏰ DEPLOYMENT FAILED ⏰</h2>
                     <p>Server configuration timeout!</p>
                     <p>Servers Configured: ${gameState.currentLevel - 1}</p>
                     <div class="payment-display">${payment}</div>
@@ -1200,8 +1281,9 @@
 
         function resetGame() {
             gameState.isPlaying = false;
+            gameState.isPaused = false;
             gameState.isPreviewing = false;
-            gameState.gameEnded = false; // Reset ended flag
+            gameState.gameEnded = false;
             clearInterval(gameState.gameTimer);
             
             if (gameState.manualTimeout) {
@@ -1230,6 +1312,7 @@
             
             createRackGrid();
             document.getElementById('targetGrid').innerHTML = '';
+            document.getElementById('availableModules').innerHTML = '';
             updateDisplay();
         }
 
