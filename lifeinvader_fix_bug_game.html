@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeInvader - Security Scanner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background: transparent;
+            color: #00ff88;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            height: 90vh;
+        }
+        
+        .scanner-window {
+            background: rgba(10, 10, 15, 0.95);
+            border: 3px solid #ff6b00;
+            border-radius: 20px;
+            padding: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+        }
+        
+        .scanner-header {
+            background: rgba(255, 107, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 107, 0, 0.4);
+        }
+        
+        .scanner-header h3 {
+            color: #ff6b00;
+            font-size: 1.4em;
+            margin: 0 0 5px 0;
+            text-shadow: 0 0 10px rgba(255, 107, 0, 0.8);
+        }
+        
+        .scanner-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            font-size: 0.9em;
+        }
+        
+        .code-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            border-radius: 12px;
+            height: calc(100% - 100px);
+            overflow: hidden;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.6;
+            user-select: none;
+        }
+        
+        .code-lines {
+            position: absolute;
+            width: 100%;
+            padding: 20px;
+            animation: scroll 25s linear infinite;
+        }
+        
+        .code-lines.paused {
+            animation-play-state: paused;
+        }
+        
+        @keyframes scroll {
+            from { transform: translateY(100%); }
+            to { transform: translateY(-100%); }
+        }
+        
+        .code-line {
+            padding: 4px 0;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .line-number {
+            color: #666;
+            width: 40px;
+            margin-right: 15px;
+            text-align: right;
+        }
+        
+        .code-content {
+            flex: 1;
+        }
+        
+        .vulnerability {
+            background: rgba(255, 50, 50, 0.3);
+            border-left: 4px solid #ff3232;
+            cursor: pointer;
+            animation: vulnPulse 2s ease-in-out infinite;
+        }
+        
+        .vulnerability:hover {
+            background: rgba(255, 50, 50, 0.5);
+            transform: scale(1.02);
+        }
+        
+        @keyframes vulnPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 50, 50, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(255, 50, 50, 0.8); }
+        }
+        
+        .vulnerability.fixed {
+            background: rgba(50, 255, 50, 0.3);
+            border-left-color: #32ff32;
+            cursor: default;
+            animation: fixedFlash 0.6s ease;
+            pointer-events: none;
+        }
+        
+        @keyframes fixedFlash {
+            0%, 100% { background: rgba(50, 255, 50, 0.3); }
+            50% { background: rgba(50, 255, 50, 0.8); }
+        }
+        
+        .vuln-tag {
+            background: #ff3232;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+            animation: tagBlink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes tagBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .control-panel {
+            background: rgba(10, 10, 15, 0.95);
+            border: 3px solid #00ff88;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            display: grid;
+            grid-template-rows: auto auto auto 1fr auto;
+            gap: 20px;
+        }
+        
+        .timer-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff6b00;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.3);
+        }
+        
+        .timer {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #ff6b00;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 1);
+            margin: 0 0 10px 0;
+        }
+        
+        .timer.critical {
+            color: #ff0000;
+            animation: timerCritical 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes timerCritical {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .stat {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+            margin: 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 5px 0 0 0;
+        }
+        
+        .vulnerability-types {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .vulnerability-types h4 {
+            color: #ff6b00;
+            margin: 0 0 15px 0;
+            text-align: center;
+        }
+        
+        .vuln-type {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .vuln-type:last-child {
+            border-bottom: none;
+        }
+        
+        .vuln-name {
+            font-size: 0.9em;
+            color: #fff;
+        }
+        
+        .vuln-count {
+            background: #ff3232;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #00ff88, #007a3d);
+            border: none;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #007a3d, #00ff88);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+            transform: translateY(-3px);
+        }
+        
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn.danger {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #fff;
+        }
+        
+        .btn.danger:hover {
+            background: linear-gradient(135deg, #cc0000, #ff0000);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+        }
+        
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(20, 20, 30, 0.98);
+            border: 3px solid;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            min-width: 400px;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .popup.success {
+            border-color: #00ff88;
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.4);
+        }
+        
+        .popup.failure {
+            border-color: #ff3232;
+            box-shadow: 0 0 60px rgba(255, 50, 50, 0.4);
+        }
+        
+        .popup h2 {
+            font-size: 2.5em;
+            font-weight: 900;
+            margin: 0 0 20px 0;
+            text-shadow: 0 0 20px currentColor;
+        }
+        
+        .popup.success h2 {
+            color: #00ff88;
+        }
+        
+        .popup.failure h2 {
+            color: #ff3232;
+        }
+        
+        .popup p {
+            font-size: 1.2em;
+            margin: 0 0 15px 0;
+            opacity: 0.9;
+            color: #fff;
+        }
+        
+        .popup-payment {
+            font-size: 3em;
+            font-weight: 900;
+            margin: 25px 0;
+            text-shadow: 0 0 30px currentColor;
+        }
+        
+        .popup.success .popup-payment {
+            color: #00ff88;
+        }
+        
+        .popup.failure .popup-payment {
+            color: #ff3232;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="scanner-window">
+            <h3 style="color: #ff6b00; text-align: center;">Security Vulnerability Scanner</h3>
+            <div class="code-display">
+                <div class="code-lines" id="codeLines"></div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="timer" id="timer">90.00</div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="score">0</div>
+                    <div>Score</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="fixed">0</div>
+                    <div>Fixed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="level">1</div>
+                    <div>Level</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="payment">$0</div>
+                    <div>Payment</div>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn" id="startBtn">Start Scan</button>
+                <button class="btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <h2 id="popupTitle">Game Over</h2>
+        <p id="popupText">Results here</p>
+        <div id="popupPayment" style="font-size: 2em; margin: 20px 0;">$0</div>
+        <button class="btn" id="closeBtn">Close</button>
+    </div>
+
+    <script>
+        // Game variables
+        var game = {
+            playing: false,
+            ended: false,
+            level: 1,
+            time: 90,
+            score: 0,
+            fixed: 0,
+            timer: null,
+            lines: [],
+            vulns: []
+        };
+
+        // Code patterns
+        var vulnerabilities = [
+            'query = "SELECT * FROM users WHERE id = " + userID',
+            'element.innerHTML = userInput',
+            'if (password == "admin123") login()',
+            'strcpy(buffer, userInput)'
+        ];
+
+        var normalCode = [
+            'var username = ""',
+            'function checkLogin() {',
+            'if (username != "") {',
+            'return true',
+            '}',
+            'var users = []',
+            'console.log("test")',
+            'function validate() {'
+        ];
+
+        // Main functions
+        function startScan() {
+            if (game.playing) return;
+            
+            game.playing = true;
+            game.ended = false;
+            game.level = 1;
+            game.score = 0;
+            game.fixed = 0;
+            game.time = 90;
+            
+            generateCode();
+            startTimer();
+            updateDisplay();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('codeLines').classList.remove('paused');
+        }
+
+        function resetGame() {
+            game.playing = false;
+            game.ended = false;
+            clearInterval(game.timer);
+            
+            game.level = 1;
+            game.score = 0;
+            game.fixed = 0;
+            game.time = 90;
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('codeLines').classList.add('paused');
+            document.getElementById('codeLines').innerHTML = '';
+            hidePopup();
+            updateDisplay();
+            generateCode();
+        }
+
+        function generateCode() {
+            game.lines = [];
+            game.vulns = [];
+            
+            for (var i = 0; i < 40; i++) {
+                if (Math.random() < 0.2) {
+                    var vuln = vulnerabilities[Math.floor(Math.random() * vulnerabilities.length)];
+                    game.lines.push({
+                        num: i + 1,
+                        code: vuln,
+                        vuln: true,
+                        fixed: false
+                    });
+                    game.vulns.push(game.lines.length - 1);
+                } else {
+                    var code = normalCode[Math.floor(Math.random() * normalCode.length)];
+                    game.lines.push({
+                        num: i + 1,
+                        code: code,
+                        vuln: false
+                    });
+                }
+            }
+            
+            displayCode();
+        }
+
+        function displayCode() {
+            var container = document.getElementById('codeLines');
+            container.innerHTML = '';
+            
+            for (var i = 0; i < game.lines.length; i++) {
+                var line = game.lines[i];
+                var div = document.createElement('div');
+                div.className = 'code-line';
+                
+                if (line.vuln) {
+                    div.className += ' vulnerability';
+                    if (line.fixed) {
+                        div.className += ' fixed';
+                    } else {
+                        div.onclick = function(index) {
+                            return function() { fixVuln(index); };
+                        }(i);
+                    }
+                }
+                
+                div.innerHTML = '<span class="line-number">' + line.num + '</span><span>' + line.code + '</span>';
+                container.appendChild(div);
+            }
+        }
+
+        function fixVuln(index) {
+            if (!game.playing || game.lines[index].fixed) return;
+            
+            game.lines[index].fixed = true;
+            game.fixed++;
+            game.score += 100;
+            
+            var lineDiv = document.querySelectorAll('.code-line')[index];
+            lineDiv.className += ' fixed';
+            lineDiv.onclick = null;
+            
+            updateDisplay();
+            
+            var remaining = 0;
+            for (var i = 0; i < game.lines.length; i++) {
+                if (game.lines[i].vuln && !game.lines[i].fixed) {
+                    remaining++;
+                }
+            }
+            
+            if (remaining === 0) {
+                nextLevel();
+            }
+        }
+
+        function nextLevel() {
+            game.level++;
+            game.time = Math.min(game.time + 20, 90);
+            
+            setTimeout(function() {
+                generateCode();
+                updateDisplay();
+            }, 1000);
+        }
+
+        function startTimer() {
+            game.timer = setInterval(function() {
+                if (!game.playing || game.ended) {
+                    clearInterval(game.timer);
+                    return;
+                }
+                
+                game.time -= 0.01;
+                
+                if (game.time <= 0) {
+                    game.time = 0;
+                    endGame();
+                } else {
+                    updateTimer();
+                }
+            }, 10);
+        }
+
+        function updateTimer() {
+            document.getElementById('timer').textContent = game.time.toFixed(2);
+        }
+
+        function endGame() {
+            if (game.ended) return;
+            
+            game.playing = false;
+            game.ended = true;
+            clearInterval(game.timer);
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('codeLines').classList.add('paused');
+            
+            var payment = game.fixed * 150 + game.score;
+            document.getElementById('payment').textContent = '$' + payment;
+            
+            showPopup('Security Breach!', 'Scan timeout - vulnerabilities remain!', payment);
+        }
+
+        function showPopup(title, text, payment) {
+            document.getElementById('popupTitle').textContent = title;
+            document.getElementById('popupText').textContent = text;
+            document.getElementById('popupPayment').textContent = '$' + payment;
+            document.getElementById('overlay').className = 'overlay show';
+            document.getElementById('popup').className = 'popup show';
+        }
+
+        function hidePopup() {
+            document.getElementById('overlay').className = 'overlay';
+            document.getElementById('popup').className = 'popup';
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = game.score;
+            document.getElementById('fixed').textContent = game.fixed;
+            document.getElementById('level').textContent = game.level;
+            updateTimer();
+        }
+
+        // Event listeners
+        document.getElementById('startBtn').onclick = startScan;
+        document.getElementById('resetBtn').onclick = resetGame;
+        document.getElementById('closeBtn').onclick = hidePopup;
+        document.getElementById('overlay').onclick = hidePopup;
+
+        // Initialize
+        window.onload = function() {
+            generateCode();
+            updateDisplay();
+        };
+    </script>
+</body>
+</html>
