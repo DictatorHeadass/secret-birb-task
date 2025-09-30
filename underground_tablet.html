@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+</html><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -448,6 +448,37 @@
             background: rgba(25, 25, 25, 0.9);
         }
 
+        .select-field {
+            width: 100%;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 13px 16px;
+            border-radius: 8px;
+            color: #e5e5e5;
+            font-size: 14px;
+            margin-top: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3e%3cpolyline points="6 9 12 15 18 9"%3e%3c/polyline%3e%3c/svg%3e');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            padding-right: 40px;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(25, 25, 25, 0.9);
+        }
+
+        .select-field option {
+            background: #1a1a1a;
+            color: #e5e5e5;
+            padding: 12px;
+        }
+
         .chat-container {
             max-height: 180px;
             overflow-y: auto;
@@ -503,6 +534,17 @@
             letter-spacing: 0.5px;
         }
 
+        .crew-badge {
+            background: rgba(100, 150, 255, 0.15);
+            color: #88aaff;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
         .participant-car {
             color: #aaa;
             font-size: 13px;
@@ -531,6 +573,34 @@
         .save-btn:hover {
             background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .challenge-card {
+            background: rgba(40, 30, 30, 0.6);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 100, 100, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .challenge-card:hover {
+            background: rgba(45, 35, 35, 0.8);
+            border-color: rgba(255, 100, 100, 0.15);
+            transform: translateX(2px);
+        }
+
+        .time-badge {
+            background: rgba(100, 255, 150, 0.1);
+            color: #6fa;
+            font-size: 18px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-block;
+            font-variant-numeric: tabular-nums;
+            border: 1px solid rgba(100, 255, 150, 0.2);
         }
 
         ::-webkit-scrollbar {
@@ -587,9 +657,17 @@
                     <div class="icon">👤</div>
                     <div class="app-name">Profile</div>
                 </div>
+                <div class="app-icon" onclick="openApp('crews')">
+                    <div class="icon">👥</div>
+                    <div class="app-name">Crews</div>
+                </div>
+                <div class="app-icon" onclick="openApp('timetrials')">
+                    <div class="icon">⏱️</div>
+                    <div class="app-name">Time Trials</div>
+                </div>
                 <div class="app-icon" onclick="openApp('creator')">
                     <div class="icon">⚙️</div>
-                    <div class="app-name">Race Creator</div>
+                    <div class="app-name">Creator</div>
                 </div>
             </div>
 
@@ -724,7 +802,7 @@
                         </div>
                         <button class="action-btn" onclick="boostCar()">Boost Vehicle</button>
                         <button class="action-btn" onclick="trackCar()">Track Location</button>
-						<button class="action-btn" onclick="vinscratchCar()">Vin Scratch Vehicle</button>
+                        <button class="action-btn" onclick="vinscratchCar()">Vin Scratch Vehicle</button>
                     </div>
                 </div>
             </div>
@@ -762,10 +840,195 @@
                         <div class="section-title">Identity Settings</div>
                         <div class="profile-card">
                             <div class="input-group">
-                                <label class="stat-label">Alias (Undergreound)</label>
+                                <label class="stat-label">Alias (Underground)</label>
                                 <input type="text" class="input-field" id="userAlias" placeholder="Enter your alias" value="StreetRacer">
                             </div>
                             <button class="save-btn" onclick="saveAlias()">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREWS APP -->
+            <div id="crews" class="app-view">
+                <div class="app-header">
+                    <button class="back-btn" onclick="goHome()">←</button>
+                    <div class="app-title">Crews</div>
+                </div>
+                <div class="app-content">
+                    <div class="profile-section">
+                        <div class="section-title">Your Crew</div>
+                        <div class="profile-card" id="yourCrewSection">
+                            <div style="text-align: center; padding: 20px; color: #888;">
+                                <div style="font-size: 48px; margin-bottom: 10px;">👥</div>
+                                <div style="font-size: 14px; margin-bottom: 20px;">You're not in a crew yet</div>
+                                <button class="action-btn" onclick="toggleCrewCreation()">Create Crew</button>
+                                <button class="action-btn" onclick="showJoinCrew()">Join Crew</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section" id="crewCreationSection" style="display: none;">
+                        <div class="section-title">Create New Crew</div>
+                        <div class="profile-card">
+                            <div class="input-group">
+                                <label class="stat-label">Crew Name</label>
+                                <input type="text" class="input-field" id="crewName" placeholder="Enter crew name">
+                            </div>
+                            <div class="input-group">
+                                <label class="stat-label">Crew Tag (3-4 letters)</label>
+                                <input type="text" class="input-field" id="crewTag" placeholder="e.g., STRM" maxlength="4">
+                            </div>
+                            <div class="input-group">
+                                <label class="stat-label">Join Password (Optional)</label>
+                                <input type="password" class="input-field" id="crewPassword" placeholder="Leave blank for open crew">
+                            </div>
+                            <button class="save-btn" onclick="createCrew()">Create Crew</button>
+                            <button class="action-btn" onclick="toggleCrewCreation()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-section" id="crewManagementSection" style="display: none;">
+                        <div class="section-title">Crew Management</div>
+                        <div class="profile-card">
+                            <div class="stat-row">
+                                <span class="stat-label">Your Rank</span>
+                                <span class="stat-value" id="userRank">Owner</span>
+                            </div>
+                            <div class="input-group" style="margin-top: 20px;">
+                                <label class="stat-label">Crew Join Password</label>
+                                <input type="password" class="input-field" id="crewPasswordEdit" placeholder="Set password for joining">
+                                <button class="save-btn" onclick="updateCrewPassword()">Update Password</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section" id="crewMembersSection" style="display: none;">
+                        <div class="section-title">Crew Members</div>
+                        <div class="profile-card" id="crewMembersList">
+                            <!-- Members will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <div class="section-title">Top Crews</div>
+                        <div id="crewLeaderboard">
+                            <div class="leaderboard-item">
+                                <div class="rank top3">#1</div>
+                                <div class="player-name">
+                                    Street Kings
+                                    <span class="crew-badge">STRK</span>
+                                </div>
+                                <div class="player-wins">127 wins</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="rank top3">#2</div>
+                                <div class="player-name">
+                                    Night Riders
+                                    <span class="crew-badge">NGHT</span>
+                                </div>
+                                <div class="player-wins">98 wins</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="rank top3">#3</div>
+                                <div class="player-name">
+                                    Velocity Crew
+                                    <span class="crew-badge">VELO</span>
+                                </div>
+                                <div class="player-wins">84 wins</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="rank">#4</div>
+                                <div class="player-name">
+                                    Urban Legends
+                                    <span class="crew-badge">URBN</span>
+                                </div>
+                                <div class="player-wins">71 wins</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="rank">#5</div>
+                                <div class="player-name">
+                                    Speed Demons
+                                    <span class="crew-badge">SPDM</span>
+                                </div>
+                                <div class="player-wins">63 wins</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <div class="section-title">Crew Challenges</div>
+                        <div class="challenge-card">
+                            <div class="race-title">Street Kings vs Night Riders</div>
+                            <div class="race-details">
+                                <div>Track: Downtown Circuit</div>
+                                <div>Date: Tonight 9:00 PM</div>
+                                <div>Buy-in per crew: $50,000</div>
+                                <div>Prize: $100,000</div>
+                            </div>
+                            <button class="join-btn" style="background: rgba(255, 100, 100, 0.1); border-color: rgba(255, 100, 100, 0.2);">Challenge Pending</button>
+                        </div>
+                        <div class="challenge-card">
+                            <div class="race-title">Open Challenge</div>
+                            <div class="race-details">
+                                <div>Your crew can challenge any top 10 crew</div>
+                                <div>Minimum buy-in: $25,000</div>
+                            </div>
+                            <button class="join-btn" onclick="createChallenge()">Create Challenge</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIME TRIALS APP -->
+            <div id="timetrials" class="app-view">
+                <div class="app-header">
+                    <button class="back-btn" onclick="goHome()">←</button>
+                    <div class="app-title">Time Trials</div>
+                </div>
+                <div class="app-content">
+                    <div class="race-card">
+                        <div class="race-title">Track 1 Time Trial</div>
+                        <div class="race-details">
+                            <div>Track: Track 1</div>
+                            <div>Distance: TBD</div>
+                            <div>Target Time: <span class="time-badge">02:45.320</span></div>
+                            <div>Your Best: <span style="color: #6fa; font-weight: 600;">02:48.150</span></div>
+                            <div>Reward: $15,000</div>
+                        </div>
+                        <button class="join-btn" onclick="startTimeTrial('track1')">Start Time Trial</button>
+                    </div>
+
+                    <div class="race-card">
+                        <div class="race-title">Track 2 Time Trial</div>
+                        <div class="race-details">
+                            <div>Track: Track 2</div>
+                            <div>Distance: TBD</div>
+                            <div>Target Time: <span class="time-badge">04:12.890</span></div>
+                            <div>Your Best: <span style="color: #888;">Not attempted</span></div>
+                            <div>Reward: $25,000</div>
+                        </div>
+                        <button class="join-btn" onclick="startTimeTrial('track2')">Start Time Trial</button>
+                    </div>
+
+                    <div class="profile-section" style="margin-top: 20px;">
+                        <div class="section-title">Top Times - Track 1</div>
+                        <div id="timeTrialLeaderboard">
+                            <div class="leaderboard-item">
+                                <div class="rank top3">#1</div>
+                                <div class="player-name">Toast</div>
+                                <div class="player-wins">02:38.120</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="rank top3">#2</div>
+                                <div class="player-name">Keems</div>
+                                <div class="player-wins">02:40.450</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="rank top3">#3</div>
+                                <div class="player-name">Birb</div>
+                                <div class="player-wins">02:42.890</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -779,64 +1042,73 @@
                 </div>
                 <div class="app-content">
                     <div class="profile-section">
-                        <div class="section-title">Authentication Required</div>
+                        <div class="section-title">Create New Race</div>
                         <div class="profile-card">
                             <div class="input-group">
-                                <label class="stat-label">Password</label>
-                                <input type="password" class="input-field" id="creatorPassword" placeholder="Enter creator password">
+                                <label class="stat-label">Track Selection</label>
+                                <select class="select-field" id="raceTrack" onchange="updateRaceDetails()">
+                                    <option value="">Select a track...</option>
+                                    <option value="track1">Track 1</option>
+                                    <option value="track2">Track 2</option>
+                                </select>
                             </div>
-                            <button class="save-btn" onclick="unlockCreator()">Unlock Creator</button>
-                        </div>
-                    </div>
-
-                    <div id="creatorContent" style="display: none;">
-                        <div class="profile-section">
-                            <div class="section-title">Create New Race</div>
-                            <div class="profile-card">
-                                <div class="input-group">
-                                    <label class="stat-label">Race Name</label>
-                                    <input type="text" class="input-field" id="raceName" placeholder="Placeholder: Downtown Street Circuit">
-                                </div>
-                                <div class="input-group">
-                                    <label class="stat-label">Location</label>
-                                    <input type="text" class="input-field" id="raceLocation" placeholder="Placeholder: Downtown Los Santos">
-                                </div>
-                                <div class="input-group">
-                                    <label class="stat-label">Distance (miles)</label>
-                                    <input type="number" class="input-field" id="raceDistance" placeholder="Placeholder: 3.2">
-                                </div>
-                                <div class="input-group">
-                                    <label class="stat-label">Number of Laps</label>
-                                    <input type="number" class="input-field" id="raceLaps" placeholder="Placeholder: 3">
-                                </div>
-                                <div class="input-group">
-                                    <label class="stat-label">Buy-in Amount ($)</label>
-                                    <input type="number" class="input-field" id="raceBuyin" placeholder="Placeholder: 5000">
-                                </div>
-                                <div class="input-group">
-                                    <label class="stat-label">Max Participants</label>
-                                    <input type="number" class="input-field" id="raceMaxPlayers" placeholder="Placeholder: 8">
-                                </div>
-                                <button class="save-btn" onclick="startRaceCreation()" style="background: rgba(100, 255, 100, 0.1); border-color: rgba(100, 255, 100, 0.2);">Start Creation</button>
+                            <div class="input-group">
+                                <label class="stat-label">Race Name</label>
+                                <input type="text" class="input-field" id="raceName" placeholder="Select a track first" readonly>
                             </div>
+                            <div class="input-group">
+                                <label class="stat-label">Location</label>
+                                <input type="text" class="input-field" id="raceLocation" placeholder="Downtown Los Santos">
+                            </div>
+                            <div class="input-group">
+                                <label class="stat-label">Distance (miles)</label>
+                                <input type="text" class="input-field" id="raceDistance" placeholder="Select a track first" readonly>
+                            </div>
+                            <div class="input-group">
+                                <label class="stat-label">Number of Laps</label>
+                                <input type="number" class="input-field" id="raceLaps" placeholder="3">
+                            </div>
+                            <div class="input-group">
+                                <label class="stat-label">Buy-in Amount ($)</label>
+                                <input type="number" class="input-field" id="raceBuyin" placeholder="5000">
+                            </div>
+                            <div class="input-group">
+                                <label class="stat-label">Max Participants</label>
+                                <input type="number" class="input-field" id="raceMaxPlayers" placeholder="8">
+                            </div>
+                            <button class="save-btn" onclick="createRaceEvent()" style="background: rgba(100, 255, 100, 0.1); border-color: rgba(100, 255, 100, 0.2);">Create Race</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <script>
         let currentApp = 'home';
         let userAlias = 'StreetRacer';
         let isInRace = false;
         let baseBuyin = 1500;
         let basePrize = 3000;
+        let userCrew = null;
+        let userCrewRank = 'Owner';
+        let crewMembers = [];
         let participants = [
             { name: 'Toast', car: 'RH8', status: 'Waiting', isHost: true },
             { name: 'AK', car: '10F Widebody', status: 'READY', isHost: false },
             { name: 'Birb', car: 'Elegy Retro Custom', status: 'READY', isHost: false }
         ];
+
+        // Track data for race creator
+        const trackData = {
+            track1: {
+                name: 'Track 1 Sprint',
+                distance: 'TBD'
+            },
+            track2: {
+                name: 'Track 2 Circuit',
+                distance: 'TBD'
+            }
+        };
 
         function openApp(appName) {
             document.getElementById('home').style.display = 'none';
@@ -853,6 +1125,50 @@
             });
             document.getElementById('home').style.display = 'grid';
             currentApp = 'home';
+        }
+
+        function updateRaceDetails() {
+            const trackSelect = document.getElementById('raceTrack');
+            const selectedTrack = trackSelect.value;
+            
+            if (selectedTrack && trackData[selectedTrack]) {
+                document.getElementById('raceName').value = trackData[selectedTrack].name;
+                document.getElementById('raceDistance').value = trackData[selectedTrack].distance;
+                document.getElementById('raceName').readOnly = false;
+                document.getElementById('raceDistance').readOnly = false;
+            } else {
+                document.getElementById('raceName').value = '';
+                document.getElementById('raceDistance').value = '';
+                document.getElementById('raceName').readOnly = true;
+                document.getElementById('raceDistance').readOnly = true;
+            }
+        }
+
+        function createRaceEvent() {
+            const track = document.getElementById('raceTrack').value;
+            const name = document.getElementById('raceName').value;
+            const location = document.getElementById('raceLocation').value;
+            const distance = document.getElementById('raceDistance').value;
+            const laps = document.getElementById('raceLaps').value;
+            const buyin = document.getElementById('raceBuyin').value;
+            const maxPlayers = document.getElementById('raceMaxPlayers').value;
+
+            if (!track || !name || !location || !distance || !laps || !buyin || !maxPlayers) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            alert('Race created successfully!\n\nRace: ' + name + '\nTrack: ' + track + '\nThis race will now appear in the Racing app.');
+            // TriggerServerEvent('racing:createRace', track, name, location, distance, laps, buyin, maxPlayers);
+            
+            // Clear the form
+            document.getElementById('raceTrack').value = '';
+            document.getElementById('raceName').value = '';
+            document.getElementById('raceLocation').value = '';
+            document.getElementById('raceDistance').value = '';
+            document.getElementById('raceLaps').value = '';
+            document.getElementById('raceBuyin').value = '';
+            document.getElementById('raceMaxPlayers').value = '';
         }
 
         function updateRacePrizes() {
@@ -966,8 +1282,8 @@
         function trackCar() {
             alert('Track car functionality - connect this to the event thing');
         }
-		
-		function vinscratchCar() {
+
+        function vinscratchCar() {
             alert('Vin Scratch car functionality - connect this to the event thing');
         }
 
@@ -988,33 +1304,154 @@
             alert('Alias saved: ' + userAlias);
         }
 
-        function unlockCreator() {
-            const password = document.getElementById('creatorPassword').value;
-            if (password === 'admin123') {
-                document.getElementById('creatorContent').style.display = 'block';
-                alert('Creator unlocked!');
-            } else {
-                alert('Incorrect password');
-            }
+        function toggleCrewCreation() {
+            const section = document.getElementById('crewCreationSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
 
-        function startRaceCreation() {
-            const name = document.getElementById('raceName').value;
-            const location = document.getElementById('raceLocation').value;
-            const distance = document.getElementById('raceDistance').value;
-            const laps = document.getElementById('raceLaps').value;
-            const buyin = document.getElementById('raceBuyin').value;
-            const maxPlayers = document.getElementById('raceMaxPlayers').value;
+        function showJoinCrew() {
+            const password = prompt('Enter crew password (leave blank if crew has no password):');
+            alert('Join crew functionality - checking password: ' + (password || 'none'));
+            // TriggerServerEvent('crews:joinRequest', password);
+        }
 
-            if (!name || !location || !distance || !laps || !buyin || !maxPlayers) {
-                alert('Please fill in all fields');
+        function createCrew() {
+            const crewName = document.getElementById('crewName').value.trim();
+            const crewTag = document.getElementById('crewTag').value.trim().toUpperCase();
+            const crewPassword = document.getElementById('crewPassword').value.trim();
+
+            if (!crewName || !crewTag) {
+                alert('Please fill in crew name and tag');
                 return;
             }
 
-            alert('Starting race creation mode!\n\nTablet will close and checkpoint placement will begin.');
-            // i think this is correct? 
-			// This would close the tablet and start checkpoint placement mode
-            // TriggerServerEvent('racing:startCheckpointPlacement', name, location, distance, laps, buyin, maxPlayers);
+            if (crewTag.length < 3 || crewTag.length > 4) {
+                alert('Crew tag must be 3-4 letters');
+                return;
+            }
+
+            userCrew = { name: crewName, tag: crewTag, password: crewPassword };
+            userCrewRank = 'Owner';
+            crewMembers = [{ name: userAlias, rank: 'Owner' }];
+            
+            updateCrewDisplay();
+            toggleCrewCreation();
+            alert('Crew created: ' + crewName + ' [' + crewTag + ']' + (crewPassword ? '\nPassword protected' : '\nOpen crew'));
+            // TriggerServerEvent('crews:create', crewName, crewTag, crewPassword);
+        }
+
+        function updateCrewDisplay() {
+            const section = document.getElementById('yourCrewSection');
+            const managementSection = document.getElementById('crewManagementSection');
+            const membersSection = document.getElementById('crewMembersSection');
+            const permissionsSection = document.getElementById('rankPermissionsSection');
+            
+            if (userCrew) {
+                section.innerHTML = `
+                    <div class="stat-row">
+                        <span class="stat-label">Crew Name</span>
+                        <span class="stat-value">${userCrew.name} <span class="crew-badge">${userCrew.tag}</span></span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Your Rank</span>
+                        <span class="stat-value">${userCrewRank}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Members</span>
+                        <span class="stat-value">${crewMembers.length}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Wins</span>
+                        <span class="stat-value">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Rank</span>
+                        <span class="stat-value">Unranked</span>
+                    </div>
+                    <button class="action-btn" onclick="leaveCrew()" style="margin-top: 16px; background: rgba(255, 100, 100, 0.1); border-color: rgba(255, 100, 100, 0.2);">Leave Crew</button>
+                `;
+
+                // Show management section if Owner or Leader
+                if (userCrewRank === 'Owner' || userCrewRank === 'Leader') {
+                    managementSection.style.display = 'block';
+                    document.getElementById('userRank').textContent = userCrewRank;
+                }
+
+                // Show members list
+                membersSection.style.display = 'block';
+                updateCrewMembersList();
+
+                // Show rank permissions
+                permissionsSection.style.display = 'block';
+            }
+        }
+
+        function updateCrewMembersList() {
+            const membersList = document.getElementById('crewMembersList');
+            membersList.innerHTML = '';
+            
+            crewMembers.forEach(member => {
+                const row = document.createElement('div');
+                row.className = 'stat-row';
+                row.innerHTML = `
+                    <div>
+                        <span class="stat-label">${member.name}</span>
+                        <span style="display: block; font-size: 12px; color: #888; margin-top: 4px;">${member.rank}</span>
+                    </div>
+                    ${(userCrewRank === 'Owner' || userCrewRank === 'Leader') && member.name !== userAlias ? 
+                        `<button class="action-btn" onclick="manageCrewMember('${member.name}')" style="padding: 6px 12px; font-size: 12px;">Manage</button>` : 
+                        ''}
+                `;
+                membersList.appendChild(row);
+            });
+        }
+
+        function manageCrewMember(memberName) {
+            alert('Crew member management for: ' + memberName + '\n\nOptions:\n- Change rank\n- Kick member');
+            // TriggerServerEvent('crews:manageMember', memberName);
+        }
+
+        function updateCrewPassword() {
+            const newPassword = document.getElementById('crewPasswordEdit').value.trim();
+            
+            if (userCrewRank !== 'Owner') {
+                alert('Only the crew owner can change the password');
+                return;
+            }
+
+            userCrew.password = newPassword;
+            alert('Crew password updated!' + (newPassword ? '\nNew password: ' + newPassword : '\nPassword removed - crew is now open'));
+            document.getElementById('crewPasswordEdit').value = '';
+            // TriggerServerEvent('crews:updatePassword', newPassword);
+        }
+
+        function leaveCrew() {
+            if (confirm('Are you sure you want to leave ' + userCrew.name + '?')) {
+                if (userCrewRank === 'Owner') {
+                    if (!confirm('You are the Owner. Leaving will disband the crew. Continue?')) {
+                        return;
+                    }
+                }
+                userCrew = null;
+                userCrewRank = null;
+                crewMembers = [];
+                location.reload();
+                // TriggerServerEvent('crews:leave');
+            }
+        }
+
+        function createChallenge() {
+            if (!userCrew) {
+                alert('You need to be in a crew to create challenges');
+                return;
+            }
+            alert('Create crew challenge functionality - this would open a challenge creation form');
+            // TriggerServerEvent('crews:createChallenge');
+        }
+
+        function startTimeTrial(trialName) {
+            alert('Starting time trial: ' + trialName + '\n\nTablet will close and trial will begin.');
+            // TriggerServerEvent('timetrials:start', trialName);
             // closeTablet();
         }
 
@@ -1027,11 +1464,15 @@
             const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
             document.querySelector('.time').textContent = timeStr;
         }
+        
         updateTime();
         setInterval(updateTime, 60000);
 
-        document.getElementById('currentUserName').textContent = userAlias;
-        updateRacePrizes();
+        document.addEventListener('DOMContentLoaded', () => {
+			document.getElementById('currentUserName').textContent = userAlias;
+			updateTime();
+			setInterval(updateTime, 60000);
+		});
     </script>
 </body>
 </html>
