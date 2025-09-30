@@ -1382,7 +1382,9 @@
                 updateCrewMembersList();
 
                 // Show rank permissions
-                permissionsSection.style.display = 'block';
+                if (permissionsSection) {
+                    permissionsSection.style.display = 'block';
+                }
             }
         }
 
