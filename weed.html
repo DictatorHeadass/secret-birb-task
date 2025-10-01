@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Weed Harvest Minigame</title>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #d0f0c0; /* light green background */
+    font-family: Arial, sans-serif;
+    user-select: none;
+  }
+  #game-container {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    background: #f425; /* plant pot area */
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  #plant {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: url('https://i.ibb.co/nqZ3MBW3/weed.png') no-repeat center bottom;
+    background-size: contain;
+  }
+  .bud {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: url('https://i.ibb.co/HDWF3Cgj/bud.png') no-repeat center center;
+    background-size: contain;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .bud:active {
+    transform: scale(0.9);
+  }
+  #score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+  }
+  #message {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    color: yellow;
+    text-shadow: 1px 1px 2px black;
+  }
+</style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="plant"></div>
+    <div id="score">Harvested: 0</div>
+    <div id="message">Click all buds!</div>
+  </div>
+
+<script>
+const plant = document.getElementById('plant');
+const scoreDisplay = document.getElementById('score');
+const message = document.getElementById('message');
+
+let harvested = 0;
+const totalBuds = 6;
+
+// Define plant area (in pixels) relative to plant container
+const plantArea = {
+  top: 240,    // starting vertical position
+  left: 50,    // left boundary
+  width: 250,  // width of plant image
+  height: 300  // height of plant image
+};
+
+// Randomly place buds inside the plant area
+for (let i = 0; i < totalBuds; i++) {
+  const bud = document.createElement('div');
+  bud.classList.add('bud');
+  bud.style.top = `${plantArea.top + Math.random() * plantArea.height}px`;
+  bud.style.left = `${plantArea.left + Math.random() * plantArea.width}px`;
+
+  bud.addEventListener('click', () => {
+    bud.remove();
+    harvested++;
+    scoreDisplay.textContent = `Harvested: ${harvested}`;
+    if (harvested === totalBuds) {
+      message.textContent = "All buds harvested! 🍃";
+      if (typeof fetch === 'function') {
+        fetch(`https://${GetParentResourceName()}/harvestComplete`, {
+          method: 'POST',
+          body: JSON.stringify({ harvested })
+        });
+      }
+    }
+  });
+
+  plant.appendChild(bud);
+}
+</script>
+</body>
+</html>
