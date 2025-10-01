@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fishing Minigame</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #222; /* neutral background around the game */
+      overflow: hidden;
+      cursor: none; /* hide system cursor */
+    }
+    #game {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      background: linear-gradient(#1e90ff, #00bfff); /* water background */
+      overflow: hidden;
+    }
+    .fish {
+      position: absolute;
+      font-size: 2rem;
+      transition: transform 0.2s linear;
+    }
+    .hook {
+      position: absolute;
+      font-size: 2rem;
+      pointer-events: none;
+      transform: translate(-50%, -50%); /* center on cursor */
+    }
+    #progressContainer {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid #fff;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: limegreen;
+      transition: width 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div id="fish" class="fish">🐟</div>
+    <div id="hook" class="hook">🪝</div>
+    <div id="progressContainer">
+      <div id="progressBar"></div>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const fish = document.getElementById("fish");
+    const hook = document.getElementById("hook");
+    const progressBar = document.getElementById("progressBar");
+
+    const gameWidth = game.offsetWidth;
+    const gameHeight = game.offsetHeight;
+
+    // Fish properties
+    let fishX = Math.random() * (gameWidth - 40);
+    let fishY = Math.random() * (gameHeight - 40);
+    let fishAngle = Math.random() * Math.PI * 2; 
+    let fishSpeed = 2; 
+    let wiggle = 0;
+
+    function moveFish() {
+      // Wiggle swim
+      wiggle += 0.1;
+      fishX += Math.cos(fishAngle) * fishSpeed;
+      fishY += Math.sin(fishAngle) * fishSpeed + Math.sin(wiggle) * 0.5;
+
+      // Random turning
+      if (Math.random() < 0.02) {
+        fishAngle += (Math.random() - 0.5) * 0.6;
+      }
+
+      // Stay in bounds
+      if (fishX < 10 || fishX > gameWidth - 40) fishAngle = Math.PI - fishAngle;
+      if (fishY < 10 || fishY > gameHeight - 40) fishAngle = -fishAngle;
+
+      fish.style.left = fishX + "px";
+      fish.style.top = fishY + "px";
+
+      requestAnimationFrame(moveFish);
+    }
+    moveFish();
+
+    // Hook follows mouse
+    game.addEventListener("mousemove", (e) => {
+      const rect = game.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      hook.style.left = x + "px";
+      hook.style.top = y + "px";
+      checkCatch(x, y);
+    });
+
+    // Catch bar logic
+    let progress = 0;
+    let gameOver = false;
+
+    function checkCatch(hookX, hookY) {
+      if (gameOver) return;
+
+      const fishRect = fish.getBoundingClientRect();
+      const hookRect = hook.getBoundingClientRect();
+
+      if (
+        hookRect.left < fishRect.right &&
+        hookRect.right > fishRect.left &&
+        hookRect.top < fishRect.bottom &&
+        hookRect.bottom > fishRect.top
+      ) {
+        // Hook overlaps fish → increase progress
+        progress = Math.min(100, progress + 1.5);
+      } else {
+        // Hook not on fish → lose progress slowly
+        progress = Math.max(0, progress - 0.5);
+      }
+
+      progressBar.style.width = progress + "%";
+
+      if (progress >= 100) {
+        gameOver = true;
+        // alert("You caught the fish!");
+      }
+    }
+  </script>
+</body>
+</html>
