@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Door Kick Minigame</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .game-container {
+            background: rgba(26, 26, 40, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 1.6em;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #a0a0b0;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+        }
+
+        .door-container {
+            position: relative;
+            width: 120px;
+            height: 180px;
+            margin: 15px auto;
+            perspective: 1000px;
+        }
+
+        .door {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #8b6914 0%, #6b4e11 100%);
+            border-radius: 10px;
+            border: 4px solid #5a3d0f;
+            position: relative;
+            transform-origin: left center;
+            transition: transform 0.6s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .door.kick {
+            animation: kickDoor 0.5s ease;
+        }
+
+        .door.broken {
+            transform: rotateY(-120deg);
+            opacity: 0.5;
+        }
+
+        .door-knob {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            background: #c0c0c0;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes kickDoor {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(-10deg); }
+        }
+
+        .timing-container {
+            width: 220px;
+            height: 220px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        .circle-track {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .circle-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 30;
+        }
+
+        .circle-weak {
+            fill: none;
+            stroke: rgba(251, 191, 36, 0.5);
+            stroke-width: 30;
+            stroke-dasharray: 157 471;
+            stroke-dashoffset: -157;
+            transition: stroke-dashoffset 0.4s ease;
+        }
+
+        .circle-perfect {
+            fill: none;
+            stroke: rgba(74, 222, 128, 0.8);
+            stroke-width: 30;
+            stroke-dasharray: 47 581;
+            stroke-dashoffset: -204.5;
+            transition: stroke-dashoffset 0.4s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .center-labels {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .zone-label {
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+
+        .timing-indicator {
+            position: absolute;
+            width: 4px;
+            height: 45px;
+            background: linear-gradient(180deg, 
+                #fff 0%,
+                #667eea 50%,
+                transparent 100%
+            );
+            left: 50%;
+            top: 15px;
+            margin-left: -2px;
+            transform-origin: 50% 95px;
+            animation: rotateIndicator 2.5s linear infinite;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.6));
+        }
+
+        .timing-indicator::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #fff 0%, #667eea 70%);
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 1);
+        }
+
+        @keyframes rotateIndicator {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .timing-indicator.paused {
+            animation-play-state: paused;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #a0a0b0;
+            margin-top: 3px;
+        }
+
+        .message {
+            margin: 15px 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            min-height: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            color: #4ade80;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .message.fail {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .hint {
+            color: #a0a0b0;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Door Breach</h1>
+        <p class="subtitle">Kick at the perfect moment!</p>
+
+        <div class="door-container">
+            <div class="door" id="door">
+                <div class="door-knob"></div>
+            </div>
+        </div>
+
+        <div class="timing-container">
+            <div class="circle-track">
+                <svg class="circle-svg" viewBox="0 0 200 200">
+                    <circle class="circle-bg" cx="100" cy="100" r="75"/>
+                    <circle class="circle-weak" cx="100" cy="100" r="75"/>
+                    <circle class="circle-perfect" cx="100" cy="100" r="75"/>
+                </svg>
+                <div class="timing-indicator" id="indicator"></div>
+                <div class="center-labels">
+                    <div class="zone-label" style="color: #4ade80;">PERFECT</div>
+                    <div class="zone-label" style="color: #fbbf24; margin-top: 5px;">WEAK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <p class="hint">Press SPACE to kick</p>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="progress-text">0/5</div>
+                <div class="stat-label">Progress</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="misses">0/3</div>
+                <div class="stat-label">Misses</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let successfulKicks = 0;
+        let missedKicks = 0;
+        const maxKicks = 5;
+        const maxMisses = 3;
+        let isGameOver = false;
+        let currentSweetSpot = 0; // Random angle for the sweet spot
+
+        const door = document.getElementById('door');
+        const indicator = document.getElementById('indicator');
+        const message = document.getElementById('message');
+        const progress = document.getElementById('progress');
+        const progressText = document.getElementById('progress-text');
+        const missesEl = document.getElementById('misses');
+        const circleWeak = document.querySelector('.circle-weak');
+        const circlePerfect = document.querySelector('.circle-perfect');
+
+        function randomizeSweetSpot() {
+            // Generate random angle between 0-360
+            currentSweetSpot = Math.floor(Math.random() * 360);
+            
+            // Random zone sizes with min/max constraints
+            const perfectSize = Math.floor(Math.random() * 16) + 20; // 20° to 35°
+            const weakSize = Math.floor(Math.random() * 31) + 50; // 50° to 80°
+            
+            // Store sizes globally for detection
+            window.currentPerfectSize = perfectSize;
+            window.currentWeakSize = weakSize;
+            
+            // Calculate stroke-dashoffset and dasharray based on angle and size
+            const circumference = 471;
+            
+            // Convert degrees to arc length
+            const perfectArcLength = (perfectSize / 360) * circumference;
+            const weakArcLength = (weakSize / 360) * circumference;
+            
+            // Update dasharray (visible, invisible)
+            circleWeak.style.strokeDasharray = `${weakArcLength} ${circumference}`;
+            circlePerfect.style.strokeDasharray = `${perfectArcLength} ${circumference}`;
+            
+            // Convert angle to offset (rotate the zones)
+            // Center the weak zone on the sweet spot
+            const weakOffset = -(currentSweetSpot / 360) * circumference + (weakArcLength / 2);
+            // Center the perfect zone on the sweet spot (on top of weak zone)
+            const perfectOffset = -(currentSweetSpot / 360) * circumference + (perfectArcLength / 2);
+            
+            circleWeak.style.strokeDashoffset = weakOffset;
+            circlePerfect.style.strokeDashoffset = perfectOffset;
+        }
+
+        // Initialize with random position
+        randomizeSweetSpot();
+
+        function getKickResult() {
+            const computedStyle = window.getComputedStyle(indicator);
+            const transform = computedStyle.transform;
+            
+            if (transform === 'none') return 'miss';
+            
+            const values = transform.split('(')[1].split(')')[0].split(',');
+            const a = parseFloat(values[0]);
+            const b = parseFloat(values[1]);
+            let angle = Math.atan2(b, a) * (180 / Math.PI);
+            
+            // Normalize angle to 0-360
+            if (angle < 0) angle += 360;
+            
+            // Calculate the difference from the sweet spot
+            let diff = Math.abs(angle - currentSweetSpot);
+            if (diff > 180) diff = 360 - diff; // Handle wraparound
+            
+            // Use dynamic zone sizes
+            const perfectSize = window.currentPerfectSize || 20;
+            const weakSize = window.currentWeakSize || 50;
+            
+            // Perfect zone: within dynamic size of sweet spot
+            if (diff <= perfectSize / 2) {
+                return 'perfect';
+            }
+            // Weak zone: within dynamic size of sweet spot
+            else if (diff <= weakSize / 2) {
+                return 'weak';
+            }
+            // Miss
+            return 'miss';
+        }
+
+        function kick() {
+            if (isGameOver) return;
+
+            door.classList.add('kick');
+            setTimeout(() => door.classList.remove('kick'), 500);
+
+            const result = getKickResult();
+
+            if (result === 'perfect') {
+                successfulKicks += 2;
+                if (successfulKicks > maxKicks) successfulKicks = maxKicks;
+                progressText.textContent = `${successfulKicks}/${maxKicks}`;
+                message.textContent = 'PERFECT KICK! +2';
+                message.className = 'message success';
+                
+                const progressPercent = (successfulKicks / maxKicks) * 100;
+                progress.style.width = progressPercent + '%';
+
+                if (successfulKicks >= maxKicks) {
+                    setTimeout(() => {
+                        door.classList.add('broken');
+                        message.textContent = 'DOOR BREACHED!';
+                        message.className = 'message success';
+                        indicator.classList.add('paused');
+                        isGameOver = true;
+
+                        if (window.postMessage) {
+                            window.postMessage({
+                                type: 'doorBreachComplete',
+                                success: true
+                            });
+                        }
+                    }, 300);
+                }
+            } else if (result === 'weak') {
+                successfulKicks += 1;
+                if (successfulKicks > maxKicks) successfulKicks = maxKicks;
+                progressText.textContent = `${successfulKicks}/${maxKicks}`;
+                message.textContent = 'Weak kick... +1';
+                message.className = 'message';
+                message.style.color = '#fbbf24';
+                
+                const progressPercent = (successfulKicks / maxKicks) * 100;
+                progress.style.width = progressPercent + '%';
+
+                if (successfulKicks >= maxKicks) {
+                    setTimeout(() => {
+                        door.classList.add('broken');
+                        message.textContent = 'DOOR BREACHED!';
+                        message.className = 'message success';
+                        indicator.classList.add('paused');
+                        isGameOver = true;
+
+                        if (window.postMessage) {
+                            window.postMessage({
+                                type: 'doorBreachComplete',
+                                success: true
+                            });
+                        }
+                    }, 300);
+                }
+            } else {
+                missedKicks++;
+                missesEl.textContent = `${missedKicks}/${maxMisses}`;
+                message.textContent = `MISSED!`;
+                message.className = 'message fail';
+
+                if (missedKicks >= maxMisses) {
+                    setTimeout(() => {
+                        message.textContent = 'LEG INJURED! FAILED!';
+                        message.className = 'message fail';
+                        indicator.classList.add('paused');
+                        isGameOver = true;
+
+                        if (window.postMessage) {
+                            window.postMessage({
+                                type: 'doorBreachComplete',
+                                success: false,
+                                reason: 'injured'
+                            });
+                        }
+                    }, 300);
+                }
+            }
+
+            setTimeout(() => {
+                if (!isGameOver) {
+                    message.textContent = '';
+                    message.className = 'message';
+                    // Randomize sweet spot for next kick
+                    randomizeSweetSpot();
+                }
+            }, 1500);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isGameOver) {
+                e.preventDefault();
+                kick();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Escape') {
+                if (window.postMessage) {
+                    window.postMessage({
+                        type: 'doorBreachComplete',
+                        success: false,
+                        attempts: attempts
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
