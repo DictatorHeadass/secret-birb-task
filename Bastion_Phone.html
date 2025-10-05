@@ -1108,8 +1108,7 @@
                             </div>
                         </div>
                         <div class="tab-content" id="bank-bills" style="padding: 20px;">
-                            <!-- Bills content will be rendered here by JS -->
-                        </div>
+                            </div>
                     </div>
                 </div>
 
@@ -1186,6 +1185,22 @@
                         </div>
                         <h3 style="color: var(--text-secondary); margin: 20px 20px 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Tweets</h3>
                         <div id="view-profile-tweet-list" style="padding: 0 0 20px 0;"></div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="twitter-thread-view">
+                    <div class="app-header">
+                        <div style="position: absolute; left: 20px;">
+                            <button class="btn btn-secondary" id="twitter-thread-back" style="width: auto; padding: 8px 16px; margin: 0;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                        <div class="app-title">Thread</div>
+                    </div>
+                    <div class="app-content" style="padding: 0; overflow-y: auto;">
+                        <div id="main-tweet-container" style="padding: 20px; border-bottom: 5px solid var(--bg-tertiary);"></div>
+                        <h3 style="color: var(--text-secondary); margin: 20px 20px 0px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Replies</h3>
+                        <div id="thread-replies-list" style="padding: 0 20px 20px 20px;"></div>
                     </div>
                 </div>
 
@@ -1331,8 +1346,7 @@
                         <div class="app-title">Rankings</div>
                     </div>
                     <div class="app-content" id="food-leaderboard-content">
-                        <!-- Leaderboard will be rendered here -->
-                    </div>
+                        </div>
                 </div>
 
                 <div class="app-view" id="requestee-app">
@@ -1597,6 +1611,8 @@
                 callDuration: 0,
                 callInterval: null,
                 currentConversation: null,
+                twitterNavStack: [],
+                twitterRootView: null,
                 myCard: {
                     name: 'John Doe',
                     number: '555-1234',
@@ -1807,8 +1823,34 @@
                     }
                 }
             };
+            
+            const goBackTwitterThread = () => {
+                if (state.twitterNavStack.length === 0) return;
+                state.twitterNavStack.pop();
+
+                if (state.twitterNavStack.length === 0) {
+                    document.getElementById('twitter-thread-view').classList.remove('active');
+                    const rootView = document.getElementById(state.twitterRootView);
+                    if (rootView) {
+                        rootView.classList.add('active');
+                        state.currentApp = state.twitterRootView;
+                    } else { // Fallback
+                        document.getElementById('twitter-app').classList.add('active');
+                        state.currentApp = 'twitter';
+                    }
+                    state.twitterRootView = null;
+                } else {
+                    const parentTweetId = state.twitterNavStack[state.twitterNavStack.length - 1];
+                    renderThreadView(parentTweetId);
+                }
+            };
 
             const closeApp = () => {
+                if (state.currentApp === 'twitter-thread-view') {
+                    goBackTwitterThread();
+                    return;
+                }
+
                 const userProfileView = document.getElementById('twitter-user-profile-view');
                 if (userProfileView.classList.contains('active')) {
                     userProfileView.classList.remove('active');
@@ -1825,9 +1867,8 @@
                     return;
                 }
                 
-
                 if (state.currentApp) {
-                    const currentView = document.getElementById(`${state.currentApp}-app`);
+                    const currentView = document.getElementById(`${state.currentApp}-app`) || document.getElementById(state.currentApp);
                     if (currentView) currentView.classList.remove('active');
                 }
 
@@ -2024,6 +2065,7 @@
             const tweetText = document.getElementById('tweet-text');
             const tweetCount = document.getElementById('tweet-count');
             const twitterUserProfileView = document.getElementById('twitter-user-profile-view');
+            const twitterThreadView = document.getElementById('twitter-thread-view');
 
             const findTweetById = (id, tweets = state.tweets) => {
                 for (const tweet of tweets) {
@@ -2068,7 +2110,6 @@
                             ${!tweet.retweetOf ? `<span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>` : ''}
                             <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
                         </div>
-                        <div class="tweet-replies-container" style="display: none; width: 100%; margin-top: 10px; padding-left: 20px; border-left: 2px solid var(--bg-tertiary);"></div>
                     </div>`;
             }
 
@@ -2083,6 +2124,45 @@
                 document.getElementById('twitter-profile-stats').textContent = `${state.allTwitterUsers[state.twitterProfile.handle].followers} Followers • ${state.twitterProfile.following.length} Following`;
                 const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || (t.retweetOf && t.handle === state.twitterProfile.handle));
                 renderTweets(myTweetListContainer, myTweets);
+            };
+
+            const renderThreadView = (tweetId) => {
+                const tweet = findTweetById(parseInt(tweetId));
+                if (!tweet) return;
+
+                const mainTweetContainer = document.getElementById('main-tweet-container');
+                mainTweetContainer.innerHTML = createTweetHTML(tweet);
+
+                const repliesList = document.getElementById('thread-replies-list');
+                const repliesHeader = repliesList.previousElementSibling;
+                if (tweet.replies && tweet.replies.length > 0) {
+                    renderTweets(repliesList, tweet.replies);
+                    repliesHeader.style.display = 'block';
+                } else {
+                    repliesList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding-top: 20px;">No replies yet.</p>';
+                    repliesHeader.style.display = 'none';
+                }
+            };
+
+            const openTweetThread = (tweetId) => {
+                if (state.twitterNavStack.length === 0) {
+                    const twitterApp = document.getElementById('twitter-app');
+                    const profileView = document.getElementById('twitter-user-profile-view');
+                    if (twitterApp.classList.contains('active')) {
+                        state.twitterRootView = 'twitter-app';
+                        twitterApp.classList.remove('active');
+                    } else if (profileView.classList.contains('active')) {
+                        state.twitterRootView = 'twitter-user-profile-view';
+                        profileView.classList.remove('active');
+                    }
+                }
+                
+                state.twitterNavStack.push(tweetId);
+                
+                document.getElementById('twitter-thread-view').classList.add('active');
+                state.currentApp = 'twitter-thread-view';
+                
+                renderThreadView(tweetId);
             };
 
             const openTwitterProfile = (handle) => {
@@ -2103,7 +2183,7 @@
                 renderTweets(document.getElementById('view-profile-tweet-list'), userTweets);
                 document.getElementById('twitter-app').classList.remove('active');
                 twitterUserProfileView.classList.add('active');
-                state.currentApp = 'twitter-user-profile';
+                state.currentApp = 'twitter-user-profile-view';
             };
             
             document.getElementById('follow-btn').addEventListener('click', (e) => {
@@ -2128,11 +2208,12 @@
             });
             
             const tweetClickHandler = e => {
-                // Action: Reply
                 const replyBtn = e.target.closest('.tweet-reply-btn');
                 if (replyBtn) {
                     e.stopPropagation();
-                    if (state.currentApp !== 'twitter') closeApp();
+                    if (!document.getElementById('twitter-app').classList.contains('active')) {
+                        closeApp(); 
+                    }
                     document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
                     tweetComposeContainer.style.display = 'block';
                     tweetText.value = `${replyBtn.dataset.handle} `;
@@ -2140,7 +2221,6 @@
                     return;
                 }
 
-                // Action: Like
                 const likeBtn = e.target.closest('.tweet-like-btn');
                 if (likeBtn) {
                     e.stopPropagation();
@@ -2155,7 +2235,6 @@
                     return;
                 }
 
-                // Action: Retweet
                 const retweetBtn = e.target.closest('.tweet-retweet-btn');
                 if (retweetBtn) {
                     e.stopPropagation();
@@ -2175,14 +2254,12 @@
                         sendNUI('retweet', { originalTweetId: tweetId });
                         notify('Retweeted!');
                         retweetBtn.innerHTML = `<i class="fas fa-retweet"></i> ${originalTweet.retweets}`;
-                        // Re-render main views to show the new retweet
                         renderTwitterFeed();
                         renderMyTwitterProfile();
                     }
                     return;
                 }
 
-                // Action: View Profile
                 const handleLink = e.target.closest('.tweet-handle');
                 if (handleLink) {
                     e.stopPropagation();
@@ -2190,42 +2267,18 @@
                     return;
                 }
 
-                // Default Action: Expand/Collapse Replies
                 const tweetItem = e.target.closest('.tweet-item');
                 if (tweetItem) {
-                    const repliesContainer = tweetItem.querySelector('.tweet-replies-container');
-                    if (!repliesContainer) return;
-
-                    const isVisible = repliesContainer.style.display === 'block';
-
-                    const siblings = [...tweetItem.parentElement.children];
-                    siblings.forEach(sibling => {
-                        if (sibling !== tweetItem && sibling.classList.contains('tweet-item')) {
-                            const siblingReplies = sibling.querySelector('.tweet-replies-container');
-                            if (siblingReplies) {
-                                siblingReplies.style.display = 'none';
-                                siblingReplies.innerHTML = '';
-                            }
-                        }
-                    });
-
-                    if (!isVisible) {
-                        const tweetId = parseInt(tweetItem.dataset.tweetId);
-                        const tweet = findTweetById(tweetId);
-                        if (tweet && tweet.replies && tweet.replies.length > 0) {
-                            renderTweets(repliesContainer, tweet.replies);
-                            repliesContainer.style.display = 'block';
-                        }
-                    } else {
-                        repliesContainer.style.display = 'none';
-                        repliesContainer.innerHTML = '';
-                    }
+                    const tweetId = tweetItem.dataset.tweetId;
+                    openTweetThread(tweetId);
                 }
             };
 
             const twitterAppContainer = document.getElementById('twitter-app');
             twitterAppContainer.addEventListener('click', tweetClickHandler);
             twitterUserProfileView.addEventListener('click', tweetClickHandler);
+            twitterThreadView.addEventListener('click', tweetClickHandler);
+            document.getElementById('twitter-thread-back').addEventListener('click', goBackTwitterThread);
             
             tweetText.addEventListener('input', () => tweetCount.textContent = `${tweetText.value.length}/280`);
             newTweetBtn.addEventListener('click', () => {
@@ -2512,4 +2565,3 @@
     </script>
 </body>
 </html>
-
