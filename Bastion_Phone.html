@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FiveM Premium Phone</title>
+    <title>NEW Bastion Phone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -303,6 +303,8 @@
             display: none;
             flex-direction: column;
             z-index: 80;
+            padding-top: 50px;
+            box-sizing: border-box;
         }
 
         .app-view.active {
@@ -326,6 +328,14 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             z-index: 10;
             flex-shrink: 0;
+            margin-top: -50px;
+            position: relative;
+        }
+        
+        .app-header .btn {
+            height: auto;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .app-title {
@@ -349,6 +359,7 @@
             gap: 8px;
             padding: 15px 20px 0 20px;
             background: var(--bg-primary);
+            position: relative;
         }
 
         .tab-btn {
@@ -456,7 +467,6 @@
             border-radius: 12px;
             margin-bottom: 10px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -484,6 +494,24 @@
             font-size: 16px;
             font-weight: 700;
             color: var(--accent);
+        }
+		
+		/* Avatar Style for Messages and Contacts */
+        .list-item-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Dialpad */
@@ -605,21 +633,9 @@
             margin-bottom: 20px;
         }
 
-        .food-header i {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .food-header h2 {
-            font-size: 24px;
-            margin: 0;
-        }
-
-        .food-header p {
-            font-size: 14px;
-            opacity: 0.9;
-            margin: 5px 0 0 0;
-        }
+        .food-header i { font-size: 48px; margin-bottom: 10px; }
+        .food-header h2 { font-size: 24px; margin: 0; }
+        .food-header p { font-size: 14px; opacity: 0.9; margin: 5px 0 0 0; }
 
         .food-stats {
             display: flex;
@@ -630,21 +646,9 @@
             border-radius: 12px;
         }
 
-        .food-stat {
-            text-align: center;
-        }
-
-        .food-stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--warning);
-        }
-
-        .food-stat-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
+        .food-stat { text-align: center; }
+        .food-stat-value { font-size: 20px; font-weight: 700; color: var(--warning); }
+        .food-stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
 
         /* Modal */
         .modal-overlay {
@@ -663,11 +667,7 @@
             transition: opacity 0.2s ease;
         }
 
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
+        .modal-overlay.active { display: flex; opacity: 1; }
         .modal {
             background: var(--bg-secondary);
             border-radius: 20px;
@@ -676,26 +676,9 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        .modal-message {
-            font-size: 15px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
+        .modal-title { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+        .modal-message { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 12px; }
         .modal-actions .btn { margin: 0; }
 
         /* App-specific colors */
@@ -709,19 +692,129 @@
         .app-food .app-icon { background: linear-gradient(135deg, #ff9a56, #ff6a88); }
         .app-requestee .app-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
         .app-settings .app-icon { background: linear-gradient(135deg, #6c757d, #5a6268); }
+        
+        /* Twitter Floating Action Button */
+        #twitter-app #new-tweet-btn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            border-radius: 50%;
+            padding: 0;
+            margin: 0;
+            font-size: 22px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(29, 161, 242, 0.4);
+        }
+
+        /* Contact Action Buttons */
+        .contact-action-btn {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            font-size: 15px !important;
+            flex-shrink: 0;
+            flex-grow: 1;
+        }
+        
+        /* Expandable Contact List Styles */
+        .contact-item {
+            flex-wrap: wrap;
+            padding: 12px 16px;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+        .contact-actions {
+            max-height: 0;
+            overflow: hidden;
+            width: 100%;
+            display: flex;
+            gap: 8px;
+            justify-content: space-around;
+            transition: max-height 0.3s ease-out, margin-top 0.3s ease-out, padding-top 0.3s ease-out;
+        }
+        .contact-item.expanded .contact-actions {
+            max-height: 100px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        /* Active Job Widget Style */
+        .job-widget {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .job-widget.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-dim);
+        }
+
+        /* Twitter Profile Styles */
+        .twitter-profile-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        .twitter-profile-handle {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .twitter-profile-stats {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .tweet-actions {
+            display: flex;
+            gap: 25px;
+            margin-top: 12px;
+            color: var(--text-secondary);
+        }
+        .tweet-action-btn {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .tweet-action-btn:hover {
+            color: var(--accent);
+        }
+        .tweet-action-btn .fa-heart.liked {
+            color: var(--danger);
+        }
 
         /* Gesture Bar */
         #gesture {
             position: absolute;
-            bottom: 8px;
+            bottom: 6px;
             left: 50%;
             transform: translateX(-50%);
+			filter: drop-shadow(1px 1px 4px #0A0A0A);
             width: 120px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
+            height: 15px;
+            line-height: 3px;
+            text-align: center;
+            font-size: 38px;
+            color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
             z-index: 100;
+        }
+
+        #gesture::before {
+            content: '⬢'; /* Hexagon character */
         }
     </style>
 </head>
@@ -739,7 +832,6 @@
                 </div>
             </div>
 
-            <!-- Dynamic Island -->
             <div id="dynamic-island">
                 <div class="island-icon">
                     <i class="fas fa-phone-alt"></i>
@@ -754,7 +846,6 @@
             </div>
 
             <div id="screen-container">
-                <!-- Home Screen -->
                 <div id="home-screen">
                     <div id="wallpaper"></div>
                     <div id="home-content">
@@ -821,7 +912,6 @@
                     </div>
                 </div>
 
-                <!-- Phone App -->
                 <div class="app-view" id="phone-app">
                     <div class="app-header">
                         <div class="app-title">Phone</div>
@@ -832,7 +922,6 @@
                         <button class="tab-btn" data-tab="recents">Recents</button>
                     </div>
                     <div class="app-content">
-                        <!-- Dialpad Tab -->
                         <div class="tab-content active" id="dialpad">
                             <div class="form-group">
                                 <input type="text" class="form-input" id="phone-input" placeholder="Enter phone number" readonly>
@@ -861,78 +950,18 @@
                             </div>
                         </div>
 
-                        <!-- Contacts Tab -->
                         <div class="tab-content" id="contacts">
-                            <div class="form-group">
-                                <input type="text" class="form-input" id="contact-search" placeholder="Search contacts...">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                                <input type="text" class="form-input" id="contact-search" placeholder="Search contacts..." style="margin-bottom: 0;">
+                                <button class="btn btn-primary" id="new-contact-btn" style="width: auto; padding: 0 18px; margin: 0; flex-shrink: 0;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                             </div>
+                            <div id="my-contact-card-container"></div>
                             <div id="contacts-list">
-                                <div class="list-item contact-item" data-number="555-0101" data-name="Adam Smith">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Adam Smith</div>
-                                        <div class="list-item-subtitle">555-0101</div>
-                                    </div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-secondary contact-call" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-phone"></i>
-                                        </button>
-                                        <button class="btn btn-secondary contact-message" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-comment"></i>
-                                        </button>
-                                        <button class="btn btn-danger contact-delete" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
                                 </div>
-                                <div class="list-item contact-item" data-number="555-0202" data-name="Jane Doe">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Jane Doe</div>
-                                        <div class="list-item-subtitle">555-0202</div>
-                                    </div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-secondary contact-call" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-phone"></i>
-                                        </button>
-                                        <button class="btn btn-secondary contact-message" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-comment"></i>
-                                        </button>
-                                        <button class="btn btn-danger contact-delete" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="list-item contact-item" data-number="555-0303" data-name="Mechanic Mike">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Mechanic Mike</div>
-                                        <div class="list-item-subtitle">555-0303</div>
-                                    </div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-secondary contact-call" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-phone"></i>
-                                        </button>
-                                        <button class="btn btn-secondary contact-message" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-comment"></i>
-                                        </button>
-                                        <button class="btn btn-danger contact-delete" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="list-item contact-item" data-number="911" data-name="Emergency Services">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Emergency Services</div>
-                                        <div class="list-item-subtitle">911</div>
-                                    </div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-danger contact-call" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                            <i class="fas fa-phone"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
-                        <!-- Recents Tab -->
                         <div class="tab-content" id="recents">
                             <div id="recents-list">
                                 <div class="list-item recent-call" data-number="555-0202">
@@ -976,7 +1005,6 @@
                     </div>
                 </div>
 
-                <!-- Messages App -->
                 <div class="app-view" id="messages-app">
                     <div class="app-header">
                         <div class="app-title">Messages</div>
@@ -985,55 +1013,34 @@
                         <div class="form-group">
                             <input type="text" class="form-input" id="message-search" placeholder="Search messages...">
                         </div>
-
-                        <div class="list-item message-thread" data-contact="Jane Doe" data-number="555-0202">
-                            <div class="list-item-main">
-                                <div class="list-item-title">Jane Doe</div>
-                                <div class="list-item-subtitle">Just got the car back, thanks!</div>
-                            </div>
-                            <div style="color: var(--text-secondary); font-size: 12px;">2m</div>
                         </div>
 
-                        <div class="list-item message-thread" data-contact="Mechanic Mike" data-number="555-0303">
-                            <div class="list-item-main">
-                                <div class="list-item-title">Mechanic Mike</div>
-                                <div class="list-item-subtitle">Sure, I'm free now</div>
+                    <div class="app-content" id="conversation-view" style="display: none; padding: 0; flex-direction: column;">
+                        <div style="margin-bottom: 15px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <button class="btn btn-secondary" id="back-to-messages" style="width: auto; padding: 8px 16px; margin: 0 15px 0 0;">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <div id="conversation-avatar" class="list-item-avatar" style="margin-right: 15px;">J</div>
+                                <div>
+                                    <h3 id="conversation-contact" style="color: var(--text-primary); margin: 0;">Jane Doe</h3>
+                                    <p id="conversation-number" style="color: var(--text-secondary); font-size: 13px; margin: 5px 0 0 0;">555-0202</p>
+                                </div>
                             </div>
-                            <div style="color: var(--text-secondary); font-size: 12px;">15m</div>
+                            <div>
+                                <button class="btn btn-primary" id="call-from-message" style="width: 45px; height: 45px; padding: 0; margin: 0; border-radius: 50%;">
+                                    <i class="fas fa-phone-alt"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="list-item message-thread" data-contact="Casino Royale" data-number="555-9999">
-                            <div class="list-item-main">
-                                <div class="list-item-title">Casino Royale</div>
-                                <div class="list-item-subtitle">You won $1,000,000!</div>
-                            </div>
-                            <div style="color: var(--text-secondary); font-size: 12px;">1h</div>
+                        <div class="messages-container" id="messages-container" style="flex: 1; overflow-y: auto; padding: 0 20px;">
                         </div>
 
-                        <div class="list-item message-thread" data-contact="Adam Smith" data-number="555-0101">
-                            <div class="list-item-main">
-                                <div class="list-item-title">Adam Smith</div>
-                                <div class="list-item-subtitle">See you at the meeting</div>
-                            </div>
-                            <div style="color: var(--text-secondary); font-size: 12px;">3h</div>
-                        </div>
-                    </div>
-
-                    <!-- Conversation View -->
-                    <div class="app-content" id="conversation-view" style="display: none; padding: 20px; flex-direction: column;">
-                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <button class="btn btn-secondary" id="back-to-messages" style="width: auto; padding: 8px 16px; margin: 0 0 10px 0;">
-                                <i class="fas fa-arrow-left"></i> Back
+                        <div class="message-input-container" style="padding: 15px 20px;">
+                            <button class="btn btn-secondary" id="attach-image" style="width: auto; padding: 0 20px; margin: 0;">
+                                <i class="fas fa-paperclip"></i>
                             </button>
-                            <h3 id="conversation-contact" style="color: var(--text-primary); margin: 0;">Jane Doe</h3>
-                            <p id="conversation-number" style="color: var(--text-secondary); font-size: 13px; margin: 5px 0 0 0;">555-0202</p>
-                        </div>
-
-                        <div class="messages-container" id="messages-container" style="flex: 1; overflow-y: auto;">
-                            <!-- Messages populated dynamically -->
-                        </div>
-
-                        <div class="message-input-container">
                             <input type="text" class="form-input" id="message-input" placeholder="Type a message..." style="flex: 1; margin: 0;">
                             <button class="btn btn-primary" id="send-message" style="width: auto; padding: 0 20px; margin: 0;">
                                 <i class="fas fa-paper-plane"></i>
@@ -1042,15 +1049,23 @@
                     </div>
                 </div>
 
-                <!-- Bank App -->
                 <div class="app-view" id="bank-app">
                     <div class="app-header">
                         <div class="app-title">Banking</div>
                     </div>
                     <div class="app-content">
+                        <div class="form-group">
+                            <label class="form-label">Account</label>
+                            <select class="form-select" id="bank-account-select">
+                                <option value="personal">Personal Account</option>
+                                <option value="business">Business Account</option>
+                                <option value="escrow">Escrow Account</option>
+                            </select>
+                        </div>
+
                         <div class="widget" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
                             <div class="widget-header" style="color: rgba(255,255,255,0.8);">Total Balance</div>
-                            <div class="widget-balance">$16,250</div>
+                            <div class="widget-balance">$0</div>
                         </div>
 
                         <div class="form-group">
@@ -1060,7 +1075,7 @@
 
                         <div class="form-group">
                             <label class="form-label">Amount</label>
-                            <input type="number" class="form-input" id="transfer-amount" placeholder="$0.00">
+                            <input type="number" class="form-input" id="transfer-amount" placeholder="$0">
                         </div>
 
                         <button class="btn btn-primary" id="transfer-btn">
@@ -1087,7 +1102,6 @@
                     </div>
                 </div>
 
-                <!-- Camera App -->
                 <div class="app-view" id="camera-app">
                     <div class="app-header">
                         <div class="app-title">Camera</div>
@@ -1101,7 +1115,7 @@
                             <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
                                 <i class="fas fa-images"></i>
                             </button>
-                            <button class="btn btn-primary" style="width: 70px; height: 70px; padding: 0; border-radius: 50%;">
+                            <button class="btn btn-primary" style="width: 70px; height: 75px; padding: 0; border-radius: 50%;">
                                 <i class="fas fa-circle" style="font-size: 24px;"></i>
                             </button>
                             <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
@@ -1111,41 +1125,59 @@
                     </div>
                 </div>
 
-                <!-- Twitter App -->
                 <div class="app-view" id="twitter-app">
                     <div class="app-header">
                         <div class="app-title">Tweeter</div>
                     </div>
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-tab="twitter-feed">Feed</button>
+                        <button class="tab-btn" data-tab="twitter-profile">Profile</button>
+                    </div>
+                    <div class="app-content" style="padding: 0; display: flex; flex-direction: column;">
+                        <div id="tweet-compose-container" style="display: none; padding: 20px; border-bottom: 1px solid var(--bg-tertiary);">
+                            <div class="form-group">
+                                <textarea class="form-textarea" id="tweet-text" placeholder="What's happening in Los Santos?" maxlength="280"></textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                    <span id="tweet-count" style="font-size: 12px; color: var(--text-secondary);">0/280</span>
+                                    <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex-grow: 1; overflow-y: auto;">
+                            <div class="tab-content active" id="twitter-feed" style="padding: 20px;">
+                                <div id="tweet-list"></div>
+                            </div>
+                            <div class="tab-content" id="twitter-profile" style="padding: 0;">
+                                <div class="twitter-profile-header">
+                                    <div id="twitter-profile-handle" class="twitter-profile-handle"></div>
+                                    <div id="twitter-profile-stats" class="twitter-profile-stats"></div>
+                                </div>
+                                 <h3 style="color: var(--text-secondary); margin: 20px 20px 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">My Tweets</h3>
+                                <div id="my-tweet-list" style="padding: 0 20px 20px 20px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="new-tweet-btn">
+                        <i class="fas fa-feather-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="app-view" id="twitter-user-profile-view">
+                    <div class="app-header">
+                        <div class="app-title">Profile</div>
+                    </div>
                     <div class="app-content">
-                        <div class="form-group">
-                            <textarea class="form-textarea" id="tweet-text" placeholder="What's happening in Los Santos?" maxlength="280"></textarea>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                                <span id="tweet-count" style="font-size: 12px; color: var(--text-secondary);">0/280</span>
-                                <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
-                            </div>
+                        <div class="twitter-profile-header">
+                            <div id="view-profile-avatar" class="list-item-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px;"></div>
+                            <div id="view-profile-handle" class="twitter-profile-handle"></div>
+                            <div id="view-profile-stats" class="twitter-profile-stats"></div>
+                            <button id="follow-btn" class="btn btn-primary" style="width: auto; padding: 10px 30px; margin-top: 15px;">Follow</button>
                         </div>
-
-                        <h3 style="color: var(--text-secondary); margin: 20px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Feed</h3>
-
-                        <div class="list-item" style="flex-direction: column; align-items: flex-start;">
-                            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                                <span style="color: var(--accent); font-weight: 600;">@FastDriver42</span>
-                                <span style="color: var(--text-secondary); font-size: 12px;">5m ago</span>
-                            </div>
-                            <p style="color: var(--text-primary); margin: 0;">The highways are totally clear tonight! Perfect for a cruise. #LSStreets</p>
-                        </div>
-
-                        <div class="list-item" style="flex-direction: column; align-items: flex-start;">
-                            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                                <span style="color: var(--accent); font-weight: 600;">@LSPDBoss</span>
-                                <span style="color: var(--text-secondary); font-size: 12px;">1h ago</span>
-                            </div>
-                            <p style="color: var(--text-primary); margin: 0;">Reminder: Do not call 911 for pizza deliveries. We will find you.</p>
-                        </div>
+                        <h3 style="color: var(--text-secondary); margin: 20px 20px 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Tweets</h3>
+                        <div id="view-profile-tweet-list" style="padding: 0 0 20px 0;"></div>
                     </div>
                 </div>
 
-                <!-- Ping App -->
                 <div class="app-view" id="ping-app">
                     <div class="app-header">
                         <div class="app-title">Pingr</div>
@@ -1186,34 +1218,19 @@
                     </div>
                 </div>
 
-                <!-- Job App -->
                 <div class="app-view" id="job-app">
                     <div class="app-header">
                         <div class="app-title">Job Center</div>
                     </div>
                     <div class="app-content">
-                        <!-- Primary Job -->
-                        <div class="widget" style="background: linear-gradient(135deg, #30cfd0, #330867);">
+                        <div class="widget job-widget" id="primary-job-widget">
                             <div class="widget-header" style="color: rgba(255,255,255,0.8);">Primary Job</div>
-                            <div class="widget-balance" style="font-size: 28px;">Taxi Driver</div>
-                            <div style="margin-top: 10px;">
-                                <select class="form-select" id="job-status-primary" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.2);">
-                                    <option value="on">On Duty</option>
-                                    <option value="off">Off Duty</option>
-                                </select>
-                            </div>
+                            <div class="widget-balance" style="font-size: 28px;" id="primary-job-display">Unemployed</div>
                         </div>
 
-                        <!-- Secondary Job -->
-                        <div class="widget" style="background: linear-gradient(135deg, #667eea, #764ba2); margin-top: 15px;">
+                        <div class="widget job-widget" id="secondary-job-widget">
                             <div class="widget-header" style="color: rgba(255,255,255,0.8);">Secondary Job</div>
-                            <div class="widget-balance" style="font-size: 28px;">Mechanic</div>
-                            <div style="margin-top: 10px;">
-                                <select class="form-select" id="job-status-secondary" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.2);">
-                                    <option value="on">On Duty</option>
-                                    <option value="off">Off Duty</option>
-                                </select>
-                            </div>
+                            <div class="widget-balance" style="font-size: 28px;" id="secondary-job-display">Unemployed</div>
                         </div>
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Job Actions</h3>
@@ -1227,109 +1244,36 @@
                                 <option value="fire">Fire Employee</option>
                                 <option value="promote">Promote Employee</option>
                                 <option value="demote">Demote Employee</option>
-                                <option value="paycheck">View Paycheck</option>
                             </select>
                         </div>
 
-                        <div id="job-action-form" style="display: none;">
-                            <!-- Bill Customer -->
-                            <div class="job-action-content" id="action-bill" style="display: none;">
-                                <div class="form-group">
-                                    <label class="form-label">Customer ID</label>
-                                    <input type="number" class="form-input" id="bill-customer-id" placeholder="Enter customer ID">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Amount</label>
-                                    <input type="number" class="form-input" id="bill-amount" placeholder="$0.00">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Reason</label>
-                                    <input type="text" class="form-input" id="bill-reason" placeholder="Service description">
-                                </div>
-                                <button class="btn btn-primary" id="submit-bill">
-                                    <i class="fas fa-receipt"></i> Send Bill
-                                </button>
+                        <div id="job-action-form" style="display: none; background: var(--bg-secondary); padding: 20px; border-radius: 15px;">
+                            <div class="form-group" id="job-action-target-group" style="display: none;">
+                                <label class="form-label">Target Player</label>
+                                <select class="form-select" id="job-action-target-select"></select>
                             </div>
-
-                            <!-- Hire Employee -->
-                            <div class="job-action-content" id="action-hire" style="display: none;">
-                                <div class="form-group">
-                                    <label class="form-label">Player ID</label>
-                                    <input type="number" class="form-input" id="hire-player-id" placeholder="Enter player ID">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Position</label>
-                                    <input type="text" class="form-input" id="hire-position" placeholder="e.g., Junior Mechanic">
-                                </div>
-                                <button class="btn btn-primary" id="submit-hire">
-                                    <i class="fas fa-user-plus"></i> Hire Employee
-                                </button>
+                            <div class="form-group" id="job-action-amount-group" style="display: none;">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" id="job-action-amount-input" placeholder="$0">
                             </div>
-
-                            <!-- Fire Employee -->
-                            <div class="job-action-content" id="action-fire" style="display: none;">
-                                <div class="form-group">
-                                    <label class="form-label">Employee ID</label>
-                                    <input type="number" class="form-input" id="fire-employee-id" placeholder="Enter employee ID">
-                                </div>
-                                <button class="btn btn-danger" id="submit-fire">
-                                    <i class="fas fa-user-minus"></i> Fire Employee
-                                </button>
+                            <div class="form-group" id="job-action-reason-group" style="display: none;">
+                                <label class="form-label" id="job-action-reason-label">Reason</label>
+                                <input type="text" class="form-input" id="job-action-reason-input" placeholder="Service description...">
                             </div>
-
-                            <!-- Promote Employee -->
-                            <div class="job-action-content" id="action-promote" style="display: none;">
-                                <div class="form-group">
-                                    <label class="form-label">Employee ID</label>
-                                    <input type="number" class="form-input" id="promote-employee-id" placeholder="Enter employee ID">
-                                </div>
-                                <button class="btn btn-primary" id="submit-promote">
-                                    <i class="fas fa-arrow-up"></i> Promote Employee
-                                </button>
-                            </div>
-
-                            <!-- Demote Employee -->
-                            <div class="job-action-content" id="action-demote" style="display: none;">
-                                <div class="form-group">
-                                    <label class="form-label">Employee ID</label>
-                                    <input type="number" class="form-input" id="demote-employee-id" placeholder="Enter employee ID">
-                                </div>
-                                <button class="btn btn-secondary" id="submit-demote">
-                                    <i class="fas fa-arrow-down"></i> Demote Employee
-                                </button>
-                            </div>
-
-                            <!-- Paycheck -->
-                            <div class="job-action-content" id="action-paycheck" style="display: none;">
-                                <div class="list-item" style="cursor: default;">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Last Paycheck</div>
-                                        <div class="list-item-subtitle">Received 3 hours ago</div>
-                                    </div>
-                                    <div class="list-item-value" style="color: var(--success);">+$1,250</div>
-                                </div>
-                                <div class="list-item" style="cursor: default;">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Next Paycheck</div>
-                                        <div class="list-item-subtitle">In 21 hours</div>
-                                    </div>
-                                    <div class="list-item-value">~$1,400</div>
-                                </div>
-                            </div>
+                            <button class="btn btn-primary" id="job-action-execute-btn">Execute</button>
                         </div>
 
-                        <div style="display: flex; gap: 12px; margin-top: 30px;">
-                            <button class="btn btn-danger" id="quit-job-primary" style="flex: 1;">
+                        <div style="margin-top: 30px; display: flex; gap: 12px;">
+                             <button class="btn btn-danger" id="quit-job-primary" style="flex: 1;">
                                 <i class="fas fa-sign-out-alt"></i> Quit Primary
                             </button>
-                            <button class="btn btn-danger" id="quit-job-secondary" style="flex: 1;">
+                             <button class="btn btn-danger" id="quit-job-secondary" style="flex: 1;">
                                 <i class="fas fa-sign-out-alt"></i> Quit Secondary
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Food Ferry App -->
                 <div class="app-view" id="food-app">
                     <div class="app-header">
                         <div class="app-title">Food Ferry</div>
@@ -1366,7 +1310,6 @@
                     </div>
                 </div>
 
-                <!-- Requestee App -->
                 <div class="app-view" id="requestee-app">
                     <div class="app-header">
                         <div class="app-title">Requestee</div>
@@ -1404,13 +1347,11 @@
                     </div>
                 </div>
 
-                <!-- Settings App -->
                 <div class="app-view" id="settings-app">
                     <div class="app-header">
                         <div class="app-title">Settings</div>
                     </div>
                     <div class="app-content">
-                        <!-- Phone Number -->
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Your Phone Number</div>
@@ -1420,7 +1361,6 @@
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Appearance</h3>
 
-                        <!-- Theme Toggle -->
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Theme</div>
@@ -1432,7 +1372,6 @@
                             </select>
                         </div>
 
-                        <!-- Wallpaper -->
                         <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
                             <label class="form-label">Custom Wallpaper</label>
                             <input type="text" class="form-input" id="wallpaper-url" placeholder="Enter ImgBB image URL" style="margin: 0 0 10px 0;">
@@ -1448,7 +1387,6 @@
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Notifications</h3>
 
-                        <!-- Notification Settings -->
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Show Notifications</div>
@@ -1475,7 +1413,6 @@
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">System</h3>
 
-                        <!-- Volume Control -->
                         <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
                             <label class="form-label">Ringtone Volume</label>
                             <input type="range" id="volume-slider" min="0" max="100" value="70" style="width: 100%; margin: 0;">
@@ -1486,7 +1423,6 @@
                             </div>
                         </div>
 
-                        <!-- Airplane Mode -->
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Airplane Mode</div>
@@ -1504,7 +1440,7 @@
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Version</div>
-                                <div class="list-item-subtitle">Phone OS v2.5.0</div>
+                                <div class="list-item-subtitle">Phone OS v2.5.1</div>
                             </div>
                         </div>
 
@@ -1513,11 +1449,38 @@
                         </button>
                     </div>
                 </div>
+                
+                <div class="app-view" id="contact-editor-app">
+                    <div class="app-header">
+                        <div class="app-title" id="contact-editor-title">New Contact</div>
+                    </div>
+                    <div class="app-content">
+                        <input type="hidden" id="contact-editor-id">
+                        <div class="form-group" style="text-align: center;">
+                            <div id="contact-editor-avatar" class="list-item-avatar" style="width: 100px; height: 100px; font-size: 40px; margin: 0 auto 20px;">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="contact-editor-name" placeholder="Contact Name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" class="form-input" id="contact-editor-number" placeholder="555-0123">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Photo URL</label>
+                            <input type="text" class="form-input" id="contact-editor-photo" placeholder="e.g., https://i.imgur.com/image.png">
+                        </div>
+                        <button class="btn btn-primary" id="save-contact-btn">Save Contact</button>
+                        <button class="btn btn-secondary" style="margin-top: 10px;" id="cancel-contact-btn">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <div id="gesture"></div>
 
-            <!-- Modal -->
             <div class="modal-overlay" id="modal">
                 <div class="modal">
                     <div class="modal-title" id="modal-title">Confirm Action</div>
@@ -1528,50 +1491,207 @@
                     </div>
                 </div>
             </div>
+			
+			<div class="modal-overlay" id="input-modal">
+                <div class="modal">
+                    <div class="modal-title" id="input-modal-title">Enter Details</div>
+                    <div class="form-group" style="margin: 20px 0;">
+                        <textarea class="form-textarea" id="input-modal-textarea" placeholder="Describe your request..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="input-modal-cancel">Cancel</button>
+                        <button class="btn btn-primary" id="input-modal-confirm">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="incoming-call-view" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-primary); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 80px 20px;">
+                <div style="text-align: center;">
+                    <div id="caller-avatar" class="list-item-avatar" style="width: 100px; height: 100px; background: var(--bg-tertiary); margin: 0 auto 20px; font-size: 40px;">J</div>
+                    <div id="caller-name" style="font-size: 28px; font-weight: 600; color: var(--text-primary);">Jane Doe</div>
+                    <div id="caller-number" style="font-size: 18px; color: var(--text-secondary); margin-top: 8px;">555-0202</div>
+                </div>
+                <div style="display: flex; justify-content: space-around; width: 100%;">
+                    <button id="call-reject-btn" class="btn" style="background: var(--danger); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                    <button id="call-accept-btn" class="btn" style="background: var(--success); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                        <i class="fas fa-phone"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const state = {
-            balance: { bank: 16250, cash: 450 },
-            currentApp: null,
-            phoneNumber: '555-1234',
-            modalCallback: null,
-            callActive: false,
-            callNumber: '',
-            callDuration: 0,
-            callInterval: null,
-            currentConversation: null,
-            settings: {
-                theme: 'dark',
-                wallpaper: null,
-                notifications: true,
-                notificationSound: true,
-                volume: 70,
-                airplaneMode: false
-            },
-            conversations: {
-                '555-0202': [
-                    { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM' },
-                    { type: 'sent', text: 'Sure, what time?', time: '10:26 AM' },
-                    { type: 'received', text: 'Just got the car back, thanks!', time: '11:42 AM' }
-                ],
-                '555-0303': [
-                    { type: 'received', text: 'Need any repairs?', time: '9:15 AM' },
-                    { type: 'sent', text: 'Can you fix my engine?', time: '9:16 AM' },
-                    { type: 'received', text: 'Sure, I\'m free now', time: '9:17 AM' }
-                ],
-                '555-9999': [
-                    { type: 'received', text: 'You won $1,000,000!', time: 'Yesterday' }
-                ],
-                '555-0101': [
-                    { type: 'sent', text: 'Are we still meeting today?', time: '2:30 PM' },
-                    { type: 'received', text: 'See you at the meeting', time: '2:45 PM' }
-                ]
-            }
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
+            const state = {
+                balance: {
+                    personal: 16250,
+                    business: 85000,
+                    escrow: 1200,
+                    cash: 450
+                },
+                primaryJob: 'Taxi Driver',
+                secondaryJob: 'Food Ferry',
+                activeJob: 'primary',
+                twitterProfile: {
+                    handle: '@JohnDoe',
+                    followers: 125,
+                    following: ['@LSPDBoss']
+                },
+                tweets: [
+                    { id: 1, handle: '@LSPDBoss', text: 'Reminder: Do not call 911 for pizza deliveries. We will find you.', time: '1h ago', likes: 15, retweets: 3, liked: true },
+                    { id: 2, handle: '@FastDriver42', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false },
+                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive!', time: '2h ago', likes: 5, retweets: 1, liked: false }
+                ],
+                allTwitterUsers: {
+                    '@JohnDoe': { followers: 125, photoUrl: 'https://i.imgur.com/1q3n4U7.png' },
+                    '@LSPDBoss': { followers: 2500, photoUrl: '' },
+                    '@FastDriver42': { followers: 312, photoUrl: 'https://i.imgur.com/83w0f9d.png' }
+                },
+                currentApp: null,
+                modalCallback: null,
+                callActive: false,
+                callNumber: '',
+                callDuration: 0,
+                callInterval: null,
+                currentConversation: null,
+                myCard: {
+                    name: 'John Doe',
+                    number: '555-1234',
+                    photoUrl: 'https://i.imgur.com/1q3n4U7.png'
+                },
+                contacts: [
+                    { id: 1, name: 'Adam Smith', number: '555-0101', photoUrl: 'https://i.imgur.com/83w0f9d.png' },
+                    { id: 2, name: 'Jane Doe', number: '555-0202', photoUrl: 'https://i.imgur.com/b1EPD1g.png' },
+                    { id: 3, name: 'Mechanic Mike', number: '555-0303', photoUrl: '' },
+                    { id: 4, name: 'Emergency Services', number: '911', photoUrl: '' }
+                ],
+                conversations: {
+                    '555-0101': [ { type: 'sent', text: 'Are we still meeting today?', time: '2:30 PM' }, { type: 'received', text: 'See you at the meeting', time: '2:45 PM' } ],
+                    '555-0202': [ { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM' }, { type: 'sent', text: 'Sure, what time?', time: '10:26 AM' }, { type: 'received', text: 'Just got the car back, thanks!', time: '11:42 AM' } ],
+                    '555-0303': [ { type: 'received', text: 'Need any repairs?', time: '9:15 AM' }, { type: 'sent', text: 'Can you fix my engine?', time: '9:16 AM' }, { type: 'received', text: 'Sure, I\'m free now', time: '9:17 AM' } ],
+                    '555-9999': [ { type: 'received', text: 'You won $1,000,000!', time: 'Yesterday' } ]
+                },
+                nearbyPlayers: [
+                    { id: 1, name: 'Adam Smith' },
+                    { id: 2, name: 'Jane Doe' },
+                    { id: 8, name: 'Some Guy' }
+                ],
+                settings: {
+                    theme: 'dark',
+                    wallpaper: null,
+                    notifications: true,
+                    notificationSound: true,
+                    volume: 70,
+                    airplaneMode: false
+                }
+            };
+            
+            const sendNUI = (eventName, data = {}) => console.log(`MOCK NUI: [${eventName}]`, data);
+            const getContactByNumber = (number) => state.contacts.find(c => c.number === number);
+            const notify = (message) => console.log('Notification:', message);
+
+            const setAvatar = (element, contact, handle) => {
+                let photoUrl = contact ? contact.photoUrl : null;
+                let name = contact ? contact.name : (handle || '#');
+
+                if (!photoUrl && handle && state.allTwitterUsers[handle]) {
+                    photoUrl = state.allTwitterUsers[handle].photoUrl;
+                }
+
+                if (photoUrl) {
+                    element.style.backgroundImage = `url(${photoUrl})`;
+                    element.textContent = '';
+                } else {
+                    element.style.backgroundImage = '';
+                    element.textContent = name.charAt(0) === '@' ? name.charAt(1).toUpperCase() : name.charAt(0).toUpperCase();
+                }
+            };
+
+            const renderMyContactCard = () => {
+                const container = document.getElementById('my-contact-card-container');
+                const card = state.myCard;
+                container.innerHTML = `
+                    <h3 style="color: var(--text-secondary); margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">My Card</h3>
+                    <div class="list-item" data-number="${card.number}" style="background: var(--bg-tertiary);">
+                        <div class="contact-info">
+                            <div class="list-item-avatar"></div>
+                            <div class="list-item-main" style="margin-left: 15px;">
+                                <div class="list-item-title">${card.name} (You)</div>
+                                <div class="list-item-subtitle">${card.number}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button id="edit-my-card-btn" class="btn btn-secondary contact-action-btn" style="width: auto !important; padding: 0 12px !important;" title="Edit My Card"><i class="fas fa-pencil-alt"></i></button>
+                        </div>
+                    </div>
+                     <h3 style="color: var(--text-secondary); margin: 20px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Contacts</h3>
+                `;
+                 setAvatar(container.querySelector('.list-item-avatar'), card);
+            };
+
+            const renderContacts = () => {
+                renderMyContactCard();
+                const list = document.getElementById('contacts-list');
+                list.innerHTML = '';
+                state.contacts
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .forEach(contact => {
+                        const isEmergency = contact.number === '911';
+                        const item = document.createElement('div');
+                        item.className = 'list-item contact-item';
+                        item.setAttribute('data-number', contact.number);
+                        item.innerHTML = `
+                            <div class="contact-info">
+                                <div class="list-item-avatar"></div>
+                                <div class="list-item-main" style="margin-left: 15px;">
+                                    <div class="list-item-title">${contact.name}</div>
+                                    <div class="list-item-subtitle">${contact.number}</div>
+                                </div>
+                            </div>
+                            <div class="contact-actions">
+                                ${!isEmergency ? `<button class="btn btn-secondary contact-share contact-action-btn" title="Share"><i class="fas fa-share-square"></i></button>` : ''}
+                                ${!isEmergency ? `<button class="btn btn-secondary contact-edit contact-action-btn" title="Edit"><i class="fas fa-pencil-alt"></i></button>` : ''}
+                                <button class="btn ${isEmergency ? 'btn-danger' : 'btn-primary'} contact-call contact-action-btn" title="Call"><i class="fas fa-phone"></i></button>
+                                ${!isEmergency ? `<button class="btn btn-secondary contact-message contact-action-btn" title="Message"><i class="fas fa-comment"></i></button>` : ''}
+                                ${!isEmergency ? `<button class="btn btn-danger contact-delete contact-action-btn" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
+                            </div>
+                        `;
+                        setAvatar(item.querySelector('.list-item-avatar'), contact);
+                        list.appendChild(item);
+                    });
+                attachContactListeners();
+            };
+            
+            const renderMessageThreads = () => {
+                const container = document.getElementById('messages-list-view');
+                container.querySelectorAll('.message-thread').forEach(el => el.remove());
+                Object.keys(state.conversations).forEach(number => {
+                    const thread = state.conversations[number];
+                    if (thread.length === 0) return;
+                    const lastMessage = thread[thread.length - 1];
+                    const contact = getContactByNumber(number);
+                    const name = contact ? contact.name : number;
+                    const item = document.createElement('div');
+                    item.className = 'list-item message-thread';
+                    item.setAttribute('data-contact', name);
+                    item.setAttribute('data-number', number);
+                    item.innerHTML = `
+                        <div class="list-item-avatar"></div>
+                        <div class="list-item-main" style="margin-left: 15px;">
+                            <div class="list-item-title">${name}</div>
+                            <div class="list-item-subtitle">${lastMessage.text}</div>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 12px;">${lastMessage.time.split(' ')[0]}</div>
+                    `;
+                    setAvatar(item.querySelector('.list-item-avatar'), contact);
+                    container.appendChild(item);
+                });
+                attachMessageThreadListeners();
+            };
+
             const phoneWrapper = document.getElementById('phone-wrapper');
             const homeScreen = document.getElementById('home-screen');
             const apps = document.querySelectorAll('.app, .dock-app');
@@ -1580,40 +1700,33 @@
             const dynamicIsland = document.getElementById('dynamic-island');
             const islandEndCall = document.getElementById('island-end-call');
 
-            // Time Update
             const updateTime = () => {
                 const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                document.getElementById('time').textContent = `${hours}:${minutes}`;
+                document.getElementById('time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             };
             updateTime();
             setInterval(updateTime, 60000);
 
-            // Tab Navigation
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tabName = btn.getAttribute('data-tab');
                     const parent = btn.closest('.app-view');
-                    
+                    if (!parent) return;
                     parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
                     btn.classList.add('active');
-                    parent.querySelector(`#${tabName}`).classList.add('active');
+                    const activeContent = parent.querySelector(`#${tabName}`);
+                    if (activeContent) activeContent.classList.add('active');
                 });
             });
 
-            // Dynamic Island Functions
             const showDynamicIsland = (number) => {
                 state.callActive = true;
                 state.callNumber = number;
                 state.callDuration = 0;
-                
                 document.getElementById('island-title').textContent = 'Calling...';
                 document.getElementById('island-subtitle').textContent = number;
                 dynamicIsland.classList.add('active');
-
                 state.callInterval = setInterval(() => {
                     state.callDuration++;
                     const minutes = Math.floor(state.callDuration / 60);
@@ -1625,14 +1738,9 @@
 
             const hideDynamicIsland = () => {
                 state.callActive = false;
-                state.callNumber = '';
-                state.callDuration = 0;
                 dynamicIsland.classList.remove('active');
-                
-                if (state.callInterval) {
-                    clearInterval(state.callInterval);
-                    state.callInterval = null;
-                }
+                if (state.callInterval) clearInterval(state.callInterval);
+                state.callInterval = null;
             };
 
             islandEndCall.addEventListener('click', () => {
@@ -1641,535 +1749,492 @@
                 notify('Call ended');
             });
 
-            // Navigation Functions
-            const openApp = (appName) => {
+            const openApp = (appName, data = {}) => {
+                if (state.currentApp) {
+                    const currentView = document.getElementById(`${state.currentApp}-app`);
+                    if (currentView) currentView.classList.remove('active');
+                }
                 homeScreen.classList.add('hidden');
                 const targetView = document.getElementById(`${appName}-app`);
                 if (targetView) {
                     targetView.classList.add('active');
                     state.currentApp = appName;
+                    if(appName === 'twitter') {
+                         renderTwitterFeed();
+                         renderMyTwitterProfile();
+                    }
                 }
             };
 
             const closeApp = () => {
+                const userProfileView = document.getElementById('twitter-user-profile-view');
+                if (userProfileView.classList.contains('active')) {
+                    userProfileView.classList.remove('active');
+                    document.getElementById('twitter-app').classList.add('active');
+                    state.currentApp = 'twitter';
+                    return;
+                }
+
                 if (state.currentApp) {
                     const currentView = document.getElementById(`${state.currentApp}-app`);
-                    if (currentView) {
-                        currentView.classList.remove('active');
-                    }
-                    state.currentApp = null;
+                    if (currentView) currentView.classList.remove('active');
                 }
-                
-                // Close conversation view if open
+
+                state.currentApp = null;
                 document.getElementById('messages-list-view').style.display = 'block';
                 document.getElementById('conversation-view').style.display = 'none';
-                
                 homeScreen.classList.remove('hidden');
             };
-
+            
             const closePhone = () => {
                 phoneWrapper.style.display = 'none';
                 document.body.style.display = 'none';
                 sendNUI('phoneClosed');
             };
 
-            // Event Listeners
-            apps.forEach(app => {
-                app.addEventListener('click', () => {
-                    const appName = app.getAttribute('data-app');
-                    if (appName) openApp(appName);
-                });
-            });
+            apps.forEach(app => app.addEventListener('click', () => openApp(app.dataset.app)));
+            gesture.addEventListener('click', () => state.currentApp ? closeApp() : closePhone());
 
-            gesture.addEventListener('click', () => {
-                if (state.currentApp) closeApp();
-                else closePhone();
-            });
-
-            // Phone App - Dialpad
             const phoneInput = document.getElementById('phone-input');
-            const dialBtns = document.querySelectorAll('.dial-btn[data-num]');
-            const clearBtn = document.getElementById('clear-btn');
-            const callBtn = document.getElementById('call-btn');
-
-            dialBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const num = btn.getAttribute('data-num');
-                    state.phoneNumber += num;
-                    phoneInput.value = state.phoneNumber;
-                });
+            document.querySelectorAll('.dial-btn[data-num]').forEach(btn => {
+                btn.addEventListener('click', () => phoneInput.value += btn.dataset.num);
             });
-
-            clearBtn.addEventListener('click', () => {
-                state.phoneNumber = state.phoneNumber.slice(0, -1);
-                phoneInput.value = state.phoneNumber;
-            });
-
-            callBtn.addEventListener('click', () => {
-                if (state.phoneNumber) {
-                    showModal('Make Call', `Call ${state.phoneNumber}?`, () => {
-                        sendNUI('makeCall', { number: state.phoneNumber });
-                        showDynamicIsland(state.phoneNumber);
-                        hideModal();
-                        state.phoneNumber = '';
+            document.getElementById('clear-btn').addEventListener('click', () => phoneInput.value = phoneInput.value.slice(0, -1));
+            document.getElementById('call-btn').addEventListener('click', () => {
+                if (phoneInput.value) {
+                    showModal('Make Call', `Call ${phoneInput.value}?`, () => {
+                        sendNUI('makeCall', { number: phoneInput.value });
+                        showDynamicIsland(phoneInput.value);
                         phoneInput.value = '';
+                        hideModal();
                     });
                 }
             });
 
-            // Settings App
-            document.getElementById('settings-phone-number').textContent = state.phoneNumber;
+            const editorTitle = document.getElementById('contact-editor-title');
+            const editorId = document.getElementById('contact-editor-id');
+            const editorAvatar = document.getElementById('contact-editor-avatar');
+            const editorName = document.getElementById('contact-editor-name');
+            const editorNumber = document.getElementById('contact-editor-number');
+            const editorPhoto = document.getElementById('contact-editor-photo');
 
-            // Theme Toggle
-            const themeSelect = document.getElementById('theme-select');
-            themeSelect.value = state.settings.theme;
-            themeSelect.addEventListener('change', (e) => {
-                state.settings.theme = e.target.value;
-                if (e.target.value === 'light') {
-                    document.documentElement.style.setProperty('--bg-primary', '#f5f5f5');
-                    document.documentElement.style.setProperty('--bg-secondary', '#ffffff');
-                    document.documentElement.style.setProperty('--bg-tertiary', '#e0e0e0');
-                    document.documentElement.style.setProperty('--text-primary', '#000000');
-                    document.documentElement.style.setProperty('--text-secondary', '#666666');
+            const openContactEditor = (contactIdentifier = null) => {
+                let contact, isMyCard = false;
+                editorNumber.readOnly = false;
+                editorNumber.style.cssText = 'opacity: 1; cursor: text;';
+                if (contactIdentifier === 'my-card') {
+                    contact = state.myCard;
+                    isMyCard = true;
                 } else {
-                    document.documentElement.style.setProperty('--bg-primary', '#0a0a0a');
-                    document.documentElement.style.setProperty('--bg-secondary', '#1a1a1a');
-                    document.documentElement.style.setProperty('--bg-tertiary', '#2a2a2a');
-                    document.documentElement.style.setProperty('--text-primary', '#ffffff');
-                    document.documentElement.style.setProperty('--text-secondary', '#a0a0a0');
+                    contact = contactIdentifier ? getContactByNumber(contactIdentifier) : null;
                 }
-                sendNUI('updateSettings', { theme: e.target.value });
-            });
-
-            // Wallpaper
-            const applyWallpaper = document.getElementById('apply-wallpaper');
-            const resetWallpaper = document.getElementById('reset-wallpaper');
-            const wallpaperUrl = document.getElementById('wallpaper-url');
-
-            applyWallpaper.addEventListener('click', () => {
-                const url = wallpaperUrl.value.trim();
-                if (url) {
-                    const wallpaper = document.getElementById('wallpaper');
-                    wallpaper.style.backgroundImage = `url(${url})`;
-                    wallpaper.style.backgroundSize = 'cover';
-                    wallpaper.style.backgroundPosition = 'center';
-                    wallpaper.style.opacity = '0.3';
-                    state.settings.wallpaper = url;
-                    sendNUI('updateSettings', { wallpaper: url });
-                    notify('Wallpaper applied successfully');
-                }
-            });
-
-            resetWallpaper.addEventListener('click', () => {
-                const wallpaper = document.getElementById('wallpaper');
-                wallpaper.style.backgroundImage = '';
-                wallpaper.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                wallpaperUrl.value = '';
-                state.settings.wallpaper = null;
-                sendNUI('updateSettings', { wallpaper: null });
-                notify('Wallpaper reset to default');
-            });
-
-            // Notifications Toggle
-            const notificationsToggle = document.getElementById('notifications-toggle');
-            notificationsToggle.checked = state.settings.notifications;
-            notificationsToggle.addEventListener('change', (e) => {
-                state.settings.notifications = e.target.checked;
-                updateToggleStyle(notificationsToggle);
-                sendNUI('updateSettings', { notifications: e.target.checked });
-                notify(e.target.checked ? 'Notifications enabled' : 'Notifications disabled');
-            });
-
-            // Notification Sound Toggle
-            const notificationSoundToggle = document.getElementById('notification-sound-toggle');
-            notificationSoundToggle.checked = state.settings.notificationSound;
-            notificationSoundToggle.addEventListener('change', (e) => {
-                state.settings.notificationSound = e.target.checked;
-                updateToggleStyle(notificationSoundToggle);
-                sendNUI('updateSettings', { notificationSound: e.target.checked });
-            });
-
-            // Volume Slider
-            const volumeSlider = document.getElementById('volume-slider');
-            const volumeDisplay = document.getElementById('volume-display');
-            volumeSlider.value = state.settings.volume;
-            volumeSlider.addEventListener('input', (e) => {
-                state.settings.volume = e.target.value;
-                volumeDisplay.textContent = `${e.target.value}%`;
-                sendNUI('updateSettings', { volume: e.target.value });
-            });
-
-            // Airplane Mode Toggle
-            const airplaneToggle = document.getElementById('airplane-toggle');
-            airplaneToggle.checked = state.settings.airplaneMode;
-            airplaneToggle.addEventListener('change', (e) => {
-                state.settings.airplaneMode = e.target.checked;
-                updateToggleStyle(airplaneToggle);
-                sendNUI('updateSettings', { airplaneMode: e.target.checked });
-                notify(e.target.checked ? 'Airplane mode enabled' : 'Airplane mode disabled');
-            });
-
-            // Toggle Switch Styling Helper
-            function updateToggleStyle(toggle) {
-                const slider = toggle.nextElementSibling;
-                const knob = slider.nextElementSibling;
-                if (toggle.checked) {
-                    slider.style.backgroundColor = 'var(--accent)';
-                    knob.style.transform = 'translateX(22px)';
+                if (contact) {
+                    editorTitle.textContent = isMyCard ? 'Edit My Card' : 'Edit Contact';
+                    editorId.value = isMyCard ? 'my-card' : contact.number;
+                    editorName.value = contact.name;
+                    editorNumber.value = contact.number;
+                    editorPhoto.value = contact.photoUrl || '';
+                    setAvatar(editorAvatar, contact);
+                    if (isMyCard) {
+                        editorNumber.readOnly = true;
+                        editorNumber.style.cssText = 'opacity: 0.6; cursor: not-allowed;';
+                    }
                 } else {
-                    slider.style.backgroundColor = 'var(--bg-tertiary)';
-                    knob.style.transform = 'translateX(0)';
+                    editorTitle.textContent = 'New Contact';
+                    ['id', 'name', 'number', 'photo'].forEach(f => document.getElementById(`contact-editor-${f}`).value = '');
+                    editorAvatar.style.backgroundImage = '';
+                    editorAvatar.innerHTML = '<i class="fas fa-camera"></i>';
                 }
-            }
+                openApp('contact-editor');
+            };
 
-            // Initialize toggle styles
-            [notificationsToggle, notificationSoundToggle, airplaneToggle].forEach(toggle => {
-                updateToggleStyle(toggle);
+            document.getElementById('new-contact-btn').addEventListener('click', () => openContactEditor());
+
+            document.getElementById('save-contact-btn').addEventListener('click', () => {
+                const name = editorName.value.trim(), number = editorNumber.value.trim(), photoUrl = editorPhoto.value.trim(), originalId = editorId.value;
+                if (!name || !number) return notify('Name and Number are required.');
+                if (originalId === 'my-card') {
+                    state.myCard.name = name;
+                    state.myCard.photoUrl = photoUrl;
+                    sendNUI('updateMyCard', { ...state.myCard });
+                    notify('Your card has been updated!');
+                } else if (originalId) {
+                    const contact = getContactByNumber(originalId);
+                    if (contact) {
+                        contact.name = name;
+                        contact.number = number;
+                        contact.photoUrl = photoUrl;
+                        if (originalId !== number && state.conversations[originalId]) {
+                            state.conversations[number] = state.conversations[originalId];
+                            delete state.conversations[originalId];
+                        }
+                    }
+                    sendNUI('updateContact', { name, number, photoUrl, originalNumber: originalId });
+                    notify('Contact saved!');
+                } else {
+                    state.contacts.push({ name, number, photoUrl });
+                    sendNUI('createContact', { name, number, photoUrl });
+                    notify('Contact created!');
+                }
+                renderContacts();
+                renderMessageThreads();
+                if (state.currentApp === 'messages' && state.currentConversation) {
+                    const cNum = document.getElementById('conversation-number').textContent;
+                    if (cNum === originalId || cNum === number) {
+                        const updatedContact = getContactByNumber(number);
+                        if (updatedContact) openConversation(updatedContact.name, updatedContact.number);
+                    }
+                }
+                closeApp();
+                openApp('phone');
+                document.querySelector('#phone-app .tab-btn[data-tab="contacts"]').click();
             });
 
-            // Phone App - Contacts
-            const contactSearch = document.getElementById('contact-search');
-            contactSearch.addEventListener('input', (e) => {
+            document.getElementById('cancel-contact-btn').addEventListener('click', () => {
+                closeApp();
+                openApp('phone');
+                document.querySelector('#phone-app .tab-btn[data-tab="contacts"]').click();
+            });
+
+            const attachContactListeners = () => {
+                document.getElementById('edit-my-card-btn').addEventListener('click', e => { e.stopPropagation(); openContactEditor('my-card'); });
+                document.querySelectorAll('.contact-item .contact-info').forEach(card => card.addEventListener('click', () => card.closest('.contact-item').classList.toggle('expanded')));
+                document.querySelectorAll('.contact-action-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.stopPropagation();
+                        const number = e.target.closest('.list-item').dataset.number;
+                        const contact = getContactByNumber(number);
+                        if (btn.classList.contains('contact-share')) { sendNUI('shareContact', contact); notify(`Shared ${contact.name}'s card.`); }
+                        if (btn.classList.contains('contact-call')) { sendNUI('makeCall', { number, name: contact ? contact.name : number }); showDynamicIsland(number); }
+                        if (btn.classList.contains('contact-message')) { openApp('messages'); openConversation(contact.name, number); }
+                        if (btn.classList.contains('contact-edit')) openContactEditor(number);
+                        if (btn.classList.contains('contact-delete')) {
+                            showModal('Delete Contact', `Delete ${contact.name}?`, () => {
+                                state.contacts = state.contacts.filter(c => c.number !== number);
+                                renderContacts();
+                                sendNUI('deleteContact', { number });
+                                notify(`${contact.name} deleted`);
+                                hideModal();
+                            });
+                        }
+                    });
+                });
+            };
+            
+            document.getElementById('contact-search').addEventListener('input', e => {
                 const search = e.target.value.toLowerCase();
-                document.querySelectorAll('.contact-item').forEach(item => {
-                    const name = item.getAttribute('data-name').toLowerCase();
-                    item.style.display = name.includes(search) ? 'flex' : 'none';
+                document.querySelectorAll('#contacts-list .contact-item').forEach(item => {
+                    item.style.display = item.querySelector('.list-item-title').textContent.toLowerCase().includes(search) ? 'flex' : 'none';
                 });
             });
 
-            document.querySelectorAll('.contact-call').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const item = e.target.closest('.contact-item');
-                    const number = item.getAttribute('data-number');
-                    const name = item.getAttribute('data-name');
-                    sendNUI('makeCall', { number, name });
-                    showDynamicIsland(number);
-                    notify(`Calling ${name}...`);
-                });
-            });
-
-            document.querySelectorAll('.contact-message').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const item = e.target.closest('.contact-item');
-                    const name = item.getAttribute('data-name');
-                    const number = item.getAttribute('data-number');
-                    openConversation(name, number);
-                });
-            });
-
-            // Contact Delete
-            document.querySelectorAll('.contact-delete').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const item = e.target.closest('.contact-item');
-                    const name = item.getAttribute('data-name');
-                    const number = item.getAttribute('data-number');
-                    
-                    showModal('Delete Contact', `Delete ${name} from your contacts?`, () => {
-                        item.remove();
-                        sendNUI('deleteContact', { number, name });
-                        notify(`${name} deleted from contacts`);
-                    });
-                });
-            });
-
-            // Phone App - Recents
-            document.querySelectorAll('.recent-call button').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const number = e.target.closest('.recent-call').getAttribute('data-number');
-                    sendNUI('makeCall', { number });
-                    showDynamicIsland(number);
-                    notify(`Calling ${number}...`);
-                });
-            });
-
-            // Messages App
-            const openConversation = (contact, number) => {
+            const openConversation = (contactName, number) => {
                 state.currentConversation = number;
+                const contact = getContactByNumber(number);
                 document.getElementById('messages-list-view').style.display = 'none';
                 document.getElementById('conversation-view').style.display = 'flex';
-                document.getElementById('conversation-contact').textContent = contact;
+                document.getElementById('conversation-contact').textContent = contactName;
                 document.getElementById('conversation-number').textContent = number;
-                
-                // Load messages
+                setAvatar(document.getElementById('conversation-avatar'), contact);
                 const messagesContainer = document.getElementById('messages-container');
                 messagesContainer.innerHTML = '';
-                
-                const messages = state.conversations[number] || [];
-                messages.forEach(msg => {
+                (state.conversations[number] || []).forEach(msg => {
                     const bubble = document.createElement('div');
                     bubble.className = `message-bubble message-${msg.type}`;
-                    bubble.innerHTML = `
-                        <div>${msg.text}</div>
-                        <div class="message-time">${msg.time}</div>
-                    `;
+                    bubble.innerHTML = `<div>${msg.text}</div><div class="message-time">${msg.time}</div>`;
                     messagesContainer.appendChild(bubble);
                 });
-                
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             };
 
-            document.querySelectorAll('.message-thread').forEach(thread => {
-                thread.addEventListener('click', () => {
-                    const contact = thread.getAttribute('data-contact');
-                    const number = thread.getAttribute('data-number');
-                    openConversation(contact, number);
-                });
-            });
-
-            document.getElementById('back-to-messages').addEventListener('click', () => {
-                document.getElementById('messages-list-view').style.display = 'block';
-                document.getElementById('conversation-view').style.display = 'none';
-                state.currentConversation = null;
-            });
-
+            const attachMessageThreadListeners = () => document.querySelectorAll('.message-thread').forEach(thread => thread.addEventListener('click', () => openConversation(thread.dataset.contact, thread.dataset.number)));
+            document.getElementById('back-to-messages').addEventListener('click', () => { document.getElementById('messages-list-view').style.display = 'block'; document.getElementById('conversation-view').style.display = 'none'; state.currentConversation = null; });
+            const messageInput = document.getElementById('message-input');
             document.getElementById('send-message').addEventListener('click', () => {
-                const input = document.getElementById('message-input');
-                const text = input.value.trim();
-                
+                const text = messageInput.value.trim();
                 if (text && state.currentConversation) {
-                    const messagesContainer = document.getElementById('messages-container');
-                    const bubble = document.createElement('div');
-                    bubble.className = 'message-bubble message-sent';
-                    bubble.innerHTML = `
-                        <div>${text}</div>
-                        <div class="message-time">Just now</div>
-                    `;
-                    messagesContainer.appendChild(bubble);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    
                     sendNUI('sendMessage', { number: state.currentConversation, message: text });
-                    input.value = '';
+                    messageInput.value = '';
                 }
             });
-
-            document.getElementById('message-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('send-message').click();
-                }
-            });
-
-            // Message Search
-            const messageSearch = document.getElementById('message-search');
-            messageSearch.addEventListener('input', (e) => {
+            messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('send-message').click(); });
+            document.getElementById('message-search').addEventListener('input', e => {
                 const search = e.target.value.toLowerCase();
-                document.querySelectorAll('.message-thread').forEach(thread => {
-                    const contact = thread.getAttribute('data-contact').toLowerCase();
-                    thread.style.display = contact.includes(search) ? 'flex' : 'none';
-                });
+                document.querySelectorAll('.message-thread').forEach(thread => thread.style.display = thread.dataset.contact.toLowerCase().includes(search) ? 'flex' : 'none');
             });
-
-            // Bank App
-            const transferBtn = document.getElementById('transfer-btn');
-            transferBtn.addEventListener('click', () => {
-                const id = document.getElementById('transfer-id').value;
-                const amount = parseInt(document.getElementById('transfer-amount').value);
-
-                if (!id || !amount || amount <= 0) {
-                    notify('Please enter valid recipient and amount');
-                    return;
-                }
-
-                if (amount > state.balance.bank) {
-                    notify('Insufficient funds!');
-                    return;
-                }
-
-                showModal('Transfer Money', `Send ${amount} to ${id}?`, () => {
-                    sendNUI('transferMoney', { recipient: id, amount });
-                    notify(`${amount} transferred successfully`);
-                    document.getElementById('transfer-id').value = '';
-                    document.getElementById('transfer-amount').value = '';
-                });
-            });
-
-            // Twitter App
+            document.getElementById('call-from-message').addEventListener('click', () => { if (state.currentConversation) { sendNUI('makeCall', { number: state.currentConversation }); showDynamicIsland(state.currentConversation); } });
+            document.querySelectorAll('.recent-call button').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); const number = e.target.closest('.recent-call').dataset.number; sendNUI('makeCall', { number }); showDynamicIsland(number); }));
+            
+            const tweetListContainer = document.getElementById('tweet-list');
+            const myTweetListContainer = document.getElementById('my-tweet-list');
+            const newTweetBtn = document.getElementById('new-tweet-btn');
+            const tweetComposeContainer = document.getElementById('tweet-compose-container');
+            const postTweetBtn = document.getElementById('post-tweet');
             const tweetText = document.getElementById('tweet-text');
             const tweetCount = document.getElementById('tweet-count');
-            const postTweet = document.getElementById('post-tweet');
+            const twitterUserProfileView = document.getElementById('twitter-user-profile-view');
 
-            tweetText.addEventListener('input', () => {
-                const length = tweetText.value.length;
-                tweetCount.textContent = `${length}/280`;
-                tweetCount.style.color = length > 280 ? 'var(--danger)' : 'var(--text-secondary)';
-            });
-
-            postTweet.addEventListener('click', () => {
-                const content = tweetText.value.trim();
-                if (content && content.length <= 280) {
-                    sendNUI('postTweet', { content });
-                    notify('Tweet posted!');
-                    tweetText.value = '';
-                    tweetCount.textContent = '0/280';
-                } else if (content.length > 280) {
-                    notify('Tweet is too long!');
-                }
-            });
-
-            // Ping App
-            const sendPingBtn = document.getElementById('send-ping');
-            sendPingBtn.addEventListener('click', () => {
-                const targetId = document.getElementById('ping-target').value;
-                if (targetId) {
-                    showModal('Send Location', `Send your location to Player ${targetId}?`, () => {
-                        sendNUI('sendPing', { playerId: targetId });
-                        notify(`Location sent to Player ${targetId}`);
-                        document.getElementById('ping-target').value = '';
-                    });
-                }
-            });
-
-           // Job App
-			const jobStatusPrimary = document.getElementById('job-status-primary');
-			const jobStatusSecondary = document.getElementById('job-status-secondary');
-			const quitJobPrimary = document.getElementById('quit-job-primary');
-			const quitJobSecondary = document.getElementById('quit-job-secondary');
-
-			if (jobStatusPrimary) {
-				jobStatusPrimary.addEventListener('change', (e) => {
-				const status = e.target.value;
-				sendNUI('setJobStatus', { job: 'primary', status });
-				notify(status === 'on' ? 'Primary job: On duty' : 'Primary job: Off duty');
-			});
-		}
-
-			if (jobStatusSecondary) {
-				jobStatusSecondary.addEventListener('change', (e) => {
-				const status = e.target.value;
-				sendNUI('setJobStatus', { job: 'secondary', status });
-				notify(status === 'on' ? 'Secondary job: On duty' : 'Secondary job: Off duty');
-			});
-		}
-
-			if (quitJobPrimary) {
-				quitJobPrimary.addEventListener('click', () => {
-				showModal('Quit Primary Job', 'Are you sure you want to quit your primary job?', () => {
-				sendNUI('quitJob', { job: 'primary' });
-				notify('Primary job quit successfully');
-			});
-		});
-	}
-
-			if (quitJobSecondary) {
-			quitJobSecondary.addEventListener('click', () => {
-			showModal('Quit Secondary Job', 'Are you sure you want to quit your secondary job?', () => {
-				sendNUI('quitJob', { job: 'secondary' });
-				notify('Secondary job quit successfully');
-			});
-		});
-	}
-
-            // Requestee App
-            const requestButtons = {
-                'request-mechanic': { service: 'mechanic', name: 'Mechanic' },
-                'request-realtor': { service: 'realtor', name: 'Realtor' },
-                'request-pdm': { service: 'pdm', name: 'PDM Sales' },
-                'request-doctor': { service: 'doctor', name: 'Doctor' },
-                'request-lawyer': { service: 'lawyer', name: 'Lawyer' },
-                'request-general': { service: 'general', name: 'General Service' }
+            const renderTweets = (container, tweets) => {
+                container.innerHTML = '';
+                [...tweets].reverse().forEach(tweet => {
+                    let tweetHTML = '';
+                    if (tweet.retweetOf) {
+                        tweetHTML = `
+                            <div class="list-item" style="flex-direction: column; align-items: flex-start; cursor: default;" data-tweet-id="${tweet.id}">
+                                <div style="width: 100%; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">
+                                    <i class="fas fa-retweet"></i> <span class="tweet-handle" data-handle="${tweet.handle}" style="cursor: pointer;">${tweet.handle}</span> retweeted
+                                </div>
+                                <div style="width: 100%; border: 1px solid var(--bg-tertiary); border-radius: 10px; padding: 10px;">
+                                    <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                                        <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle}</span>
+                                    </div>
+                                    <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.retweetOf.text}</p>
+                                </div>
+                                <div class="tweet-actions">
+                                    <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.retweetOf.handle}"><i class="fas fa-reply"></i></span>
+                                    <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
+                                </div>
+                            </div>`;
+                    } else {
+                        tweetHTML = `
+                            <div class="list-item" style="flex-direction: column; align-items: flex-start; cursor: default;" data-tweet-id="${tweet.id}">
+                                <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                                    <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: pointer;">${tweet.handle}</span>
+                                    <span style="color: var(--text-secondary); font-size: 12px;">${tweet.time}</span>
+                                </div>
+                                <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.text}</p>
+                                <div class="tweet-actions">
+                                    <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.handle}"><i class="fas fa-reply"></i></span>
+                                    <span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>
+                                    <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
+                                </div>
+                            </div>`;
+                    }
+                    container.innerHTML += tweetHTML;
+                });
+                attachTweetActionListeners();
             };
 
-            Object.keys(requestButtons).forEach(btnId => {
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    const { service, name } = requestButtons[btnId];
+            const attachTweetActionListeners = () => {
+                document.querySelectorAll('.tweet-handle').forEach(btn => btn.addEventListener('click', () => openTwitterProfile(btn.dataset.handle)));
+                
+                document.querySelectorAll('.tweet-reply-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        showModal(`Request ${name}`, `Send a request for a ${name} to assist you?`, () => {
-                            sendNUI('requestService', { service });
-                            notify(`${name} request sent!`);
-                        });
+                        tweetComposeContainer.style.display = 'block';
+                        tweetText.value = `${btn.dataset.handle} `;
+                        tweetText.focus();
                     });
+                });
+
+                document.querySelectorAll('.tweet-like-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tweetId = parseInt(btn.closest('[data-tweet-id]').dataset.tweetId);
+                        const tweet = state.tweets.find(t => t.id === tweetId);
+                        if(tweet) {
+                            tweet.liked = !tweet.liked;
+                            tweet.likes += tweet.liked ? 1 : -1;
+                            sendNUI('likeTweet', { tweetId: tweetId, liked: tweet.liked });
+                            renderTwitterFeed();
+                            renderMyTwitterProfile();
+                            if (twitterUserProfileView.classList.contains('active')) {
+                                const handle = document.getElementById('view-profile-handle').textContent;
+                                openTwitterProfile(handle);
+                            }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.tweet-retweet-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tweetId = parseInt(btn.closest('[data-tweet-id]').dataset.tweetId);
+                        const originalTweet = state.tweets.find(t => t.id === tweetId);
+                        
+                        if (originalTweet && !originalTweet.retweetOf) {
+                            originalTweet.retweets++;
+
+                            const newRetweet = {
+                                id: Date.now(),
+                                handle: state.twitterProfile.handle,
+                                time: 'Just now',
+                                likes: 0,
+                                liked: false,
+                                retweetOf: {
+                                    handle: originalTweet.handle,
+                                    text: originalTweet.text
+                                }
+                            };
+
+                            state.tweets.push(newRetweet);
+                            sendNUI('retweet', { originalTweetId: tweetId });
+                            notify('Retweeted!');
+
+                            renderTwitterFeed();
+                            renderMyTwitterProfile();
+                        }
+                    });
+                });
+            };
+
+            const renderTwitterFeed = () => renderTweets(tweetListContainer, state.tweets);
+            const renderMyTwitterProfile = () => {
+                document.getElementById('twitter-profile-handle').textContent = state.twitterProfile.handle;
+                document.getElementById('twitter-profile-stats').textContent = `${state.allTwitterUsers[state.twitterProfile.handle].followers} Followers • ${state.twitterProfile.following.length} Following`;
+                const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || t.retweetOf);
+                renderTweets(myTweetListContainer, myTweets);
+            };
+
+            const openTwitterProfile = (handle) => {
+                if(handle === state.twitterProfile.handle) {
+                    document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+                    return;
                 }
+                const user = state.allTwitterUsers[handle];
+                if (!user) return notify("User not found");
+                document.getElementById('view-profile-handle').textContent = handle;
+                document.getElementById('view-profile-stats').textContent = `${user.followers} Followers`;
+                setAvatar(document.getElementById('view-profile-avatar'), null, handle);
+                const followBtn = document.getElementById('follow-btn');
+                const isFollowing = state.twitterProfile.following.includes(handle);
+                followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
+                followBtn.dataset.handle = handle;
+                const userTweets = state.tweets.filter(t => t.handle === handle || (t.retweetOf && t.retweetOf.handle === handle));
+                renderTweets(document.getElementById('view-profile-tweet-list'), userTweets);
+                document.getElementById('twitter-app').classList.remove('active');
+                twitterUserProfileView.classList.add('active');
+                state.currentApp = 'twitter-user-profile';
+            };
+            
+            document.getElementById('follow-btn').addEventListener('click', (e) => {
+                const handle = e.target.dataset.handle;
+                const user = state.allTwitterUsers[handle];
+                if (!user) return;
+
+                const followingIndex = state.twitterProfile.following.indexOf(handle);
+                if (followingIndex > -1) {
+                    state.twitterProfile.following.splice(followingIndex, 1);
+                    user.followers--;
+                    e.target.textContent = 'Follow';
+                } else {
+                    state.twitterProfile.following.push(handle);
+                    user.followers++;
+                    e.target.textContent = 'Unfollow';
+                }
+
+                document.getElementById('view-profile-stats').textContent = `${user.followers} Followers`;
+                sendNUI('toggleFollow', { handle });
+                renderMyTwitterProfile();
+            });
+            
+            tweetText.addEventListener('input', () => tweetCount.textContent = `${tweetText.value.length}/280`);
+            newTweetBtn.addEventListener('click', () => {
+                const isVisible = tweetComposeContainer.style.display === 'block';
+                tweetComposeContainer.style.display = isVisible ? 'none' : 'block';
+                if (!isVisible) tweetText.focus();
             });
 
-            // Modal Functions
+            postTweetBtn.addEventListener('click', () => {
+                const text = tweetText.value.trim();
+                if (!text) return;
+                const newTweet = { id: Date.now(), handle: state.twitterProfile.handle, text, time: 'Just now', likes: 0, retweets: 0, liked: false };
+                state.tweets.push(newTweet);
+                sendNUI('postTweet', { text });
+                renderTwitterFeed();
+                renderMyTwitterProfile();
+                tweetText.value = '';
+                tweetCount.textContent = '0/280';
+                tweetComposeContainer.style.display = 'none';
+                notify('Tweet sent!');
+            });
+            
+            const primaryJobWidget = document.getElementById('primary-job-widget');
+            const secondaryJobWidget = document.getElementById('secondary-job-widget');
+
+            const renderJobs = () => {
+                primaryJobWidget.classList.toggle('active', state.activeJob === 'primary' && state.primaryJob);
+                secondaryJobWidget.classList.toggle('active', state.activeJob === 'secondary' && state.secondaryJob);
+                primaryJobWidget.querySelector('#primary-job-display').textContent = state.primaryJob || 'Unemployed';
+                secondaryJobWidget.querySelector('#secondary-job-display').textContent = state.secondaryJob || 'Unemployed';
+                document.getElementById('quit-job-primary').style.display = state.primaryJob ? 'block' : 'none';
+                document.getElementById('quit-job-secondary').style.display = state.secondaryJob ? 'block' : 'none';
+            };
+
+            primaryJobWidget.addEventListener('click', () => { if(state.primaryJob) { state.activeJob = 'primary'; renderJobs(); notify('Primary job is now active.'); }});
+            secondaryJobWidget.addEventListener('click', () => { if(state.secondaryJob) { state.activeJob = 'secondary'; renderJobs(); notify('Secondary job is now active.'); }});
+
+            const jobActionSelect = document.getElementById('job-action-select');
+            const jobActionForm = document.getElementById('job-action-form');
+            const jobActionTargetGroup = document.getElementById('job-action-target-group');
+            const jobActionTargetSelect = document.getElementById('job-action-target-select');
+            const jobActionAmountGroup = document.getElementById('job-action-amount-group');
+            const jobActionAmountInput = document.getElementById('job-action-amount-input');
+            const jobActionReasonGroup = document.getElementById('job-action-reason-group');
+            const jobActionReasonLabel = document.getElementById('job-action-reason-label');
+            const jobActionReasonInput = document.getElementById('job-action-reason-input');
+
+            const populateNearbyPlayers = () => {
+                jobActionTargetSelect.innerHTML = '<option value="">Select nearby player...</option>';
+                state.nearbyPlayers.forEach(p => jobActionTargetSelect.innerHTML += `<option value="${p.id}">${p.name} (ID: ${p.id})</option>`);
+            };
+
+            jobActionSelect.addEventListener('change', () => {
+                const action = jobActionSelect.value;
+                jobActionForm.style.display = action ? 'block' : 'none';
+                if (!action) return;
+                populateNearbyPlayers();
+                jobActionTargetGroup.style.display = ['bill', 'hire', 'fire', 'promote', 'demote'].includes(action) ? 'block' : 'none';
+                jobActionAmountGroup.style.display = action === 'bill' ? 'block' : 'none';
+                jobActionReasonGroup.style.display = action !== '' ? 'block' : 'none';
+                jobActionReasonLabel.textContent = action === 'bill' ? 'Service Description' : 'Reason (Optional)';
+            });
+            
+            document.getElementById('job-action-execute-btn').addEventListener('click', () => {
+                const action = jobActionSelect.value, targetId = jobActionTargetSelect.value, amount = jobActionAmountInput.value;
+                if (!action) return;
+                if (jobActionTargetGroup.style.display === 'block' && !targetId) return notify('Please select a target player.');
+                if (action === 'bill' && (!amount || amount <= 0)) return notify('Please enter a valid amount.');
+                sendNUI('jobAction', { action, targetId, amount, reason: jobActionReasonInput.value, activeJobType: state.activeJob });
+                notify(`Job action '${action}' sent.`);
+                jobActionSelect.value = '';
+                jobActionForm.style.display = 'none';
+            });
+            
+            document.getElementById('quit-job-primary').addEventListener('click', () => showModal('Quit Job', 'Quit primary job?', () => { sendNUI('quitJob', { jobType: 'primary' }); state.primaryJob = null; renderJobs(); hideModal(); }));
+            document.getElementById('quit-job-secondary').addEventListener('click', () => showModal('Quit Job', 'Quit secondary job?', () => { sendNUI('quitJob', { jobType: 'secondary' }); state.secondaryJob = null; renderJobs(); hideModal(); }));
+
+            const bankAccountSelect = document.getElementById('bank-account-select');
+            const updateBankBalance = () => document.querySelector('#bank-app .widget-balance').textContent = (state.balance[bankAccountSelect.value] || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            bankAccountSelect.addEventListener('change', updateBankBalance);
+            document.getElementById('transfer-btn').addEventListener('click', () => {
+                const id = document.getElementById('transfer-id').value, amount = parseInt(document.getElementById('transfer-amount').value);
+                if (id && amount > 0) showModal('Transfer Money', `Send $${amount} to ID ${id}?`, () => { sendNUI('transferMoney', { recipient: id, amount }); hideModal(); });
+                else notify('Please enter a valid ID and amount.');
+            });
+
             const showModal = (title, message, callback) => {
                 document.getElementById('modal-title').textContent = title;
                 document.getElementById('modal-message').textContent = message;
                 modal.classList.add('active');
                 state.modalCallback = callback;
             };
-
-            const hideModal = () => {
-                modal.classList.remove('active');
-                state.modalCallback = null;
-            };
-
+            const hideModal = () => { modal.classList.remove('active'); state.modalCallback = null; };
             document.getElementById('modal-cancel').addEventListener('click', hideModal);
-            document.getElementById('modal-confirm').addEventListener('click', () => {
-                if (state.modalCallback) state.modalCallback();
-                hideModal();
-            });
+            document.getElementById('modal-confirm').addEventListener('click', () => { if (state.modalCallback) state.modalCallback(); });
 
-            // Utility Functions
-            const sendNUI = (action, data = {}) => {
-                fetch(`https://YOUR_RESOURCE_NAME/${action}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                }).catch(err => console.error(`NUI Error (${action}):`, err));
-            };
+            window.addEventListener('message', e => { if (e.data.type === 'phone:show') { phoneWrapper.style.display = 'block'; document.body.style.display = 'flex'; } });
+            const callerView = document.getElementById('incoming-call-view');
+            document.getElementById('call-reject-btn').addEventListener('click', () => { callerView.style.display = 'none'; sendNUI('rejectCall'); });
+            document.getElementById('call-accept-btn').addEventListener('click', () => { const num = callerView.querySelector('#caller-number').textContent; callerView.style.display = 'none'; showDynamicIsland(num); sendNUI('acceptCall'); });
+            document.addEventListener('keyup', e => { if (e.key === 'Escape') { if (modal.classList.contains('active')) hideModal(); else if (state.currentApp) closeApp(); else closePhone(); }});
+            
+            renderContacts();
+            renderMessageThreads();
+            renderJobs();
+            updateBankBalance();
 
-            const notify = (message) => {
-                console.log('Notification:', message);
-            };
-
-            // NUI Message Handler
-            window.addEventListener('message', (event) => {
-                const { type, data } = event.data;
-
-                switch(type) {
-                    case 'phone:show':
-                        phoneWrapper.style.display = 'block';
-                        document.body.style.display = 'flex';
-                        break;
-                    case 'phone:hide':
-                        closePhone();
-                        break;
-                    case 'phone:toggle':
-                        if (phoneWrapper.style.display === 'block') {
-                            closePhone();
-                        } else {
-                            phoneWrapper.style.display = 'block';
-                            document.body.style.display = 'flex';
-                        }
-                        break;
-                    case 'updateBalance':
-                        if (data.bank !== undefined) state.balance.bank = data.bank;
-                        if (data.cash !== undefined) state.balance.cash = data.cash;
-                        break;
-                    case 'newMessage':
-                        notify(`New message from ${data.from}`);
-                        break;
-                    case 'callStarted':
-                        if (data.number) showDynamicIsland(data.number);
-                        break;
-                    case 'callEnded':
-                        hideDynamicIsland();
-                        break;
-                }
-            });
-
-            // Keyboard Handler
-            document.addEventListener('keyup', (e) => {
-                if (e.key === 'Escape') {
-                    if (modal.classList.contains('active')) {
-                        hideModal();
-                    } else if (state.currentApp) {
-                        closeApp();
-                    } else {
-                        closePhone();
-                    }
-                }
-            });
-
-            // FOR TESTING - Remove in production
             phoneWrapper.style.display = 'block';
             document.body.style.display = 'flex';
-        });
+		});
     </script>
 </body>
 </html>
+
