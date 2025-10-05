@@ -953,7 +953,7 @@
                         <div class="tab-content" id="contacts">
                             <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
                                 <input type="text" class="form-input" id="contact-search" placeholder="Search contacts..." style="margin-bottom: 0;">
-                                <button class="btn btn-primary" id="new-contact-btn" style="width: auto; padding: 0 18px; margin: 0; flex-shrink: 0;height: 50px;">
+                                <button class="btn btn-primary" id="new-contact-btn" style="width: auto; padding: 0 18px; margin: 0; flex-shrink: 0;">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -2201,6 +2201,100 @@
             document.getElementById('quit-job-primary').addEventListener('click', () => showModal('Quit Job', 'Quit primary job?', () => { sendNUI('quitJob', { jobType: 'primary' }); state.primaryJob = null; renderJobs(); hideModal(); }));
             document.getElementById('quit-job-secondary').addEventListener('click', () => showModal('Quit Job', 'Quit secondary job?', () => { sendNUI('quitJob', { jobType: 'secondary' }); state.secondaryJob = null; renderJobs(); hideModal(); }));
 
+            // Settings App that i fuckin deleted lmao
+            const themeSelect = document.getElementById('theme-select');
+            const notificationsToggle = document.getElementById('notifications-toggle');
+            const notificationSoundToggle = document.getElementById('notification-sound-toggle');
+            const airplaneToggle = document.getElementById('airplane-toggle');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeDisplay = document.getElementById('volume-display');
+            const wallpaperUrl = document.getElementById('wallpaper-url');
+            const wallpaperElement = document.getElementById('wallpaper');
+
+            const applyTheme = (theme) => {
+                if (theme === 'light') {
+                    document.documentElement.style.setProperty('--bg-primary', '#ffffff');
+                    document.documentElement.style.setProperty('--bg-secondary', '#f5f5f5');
+                    document.documentElement.style.setProperty('--bg-tertiary', '#e0e0e0');
+                    document.documentElement.style.setProperty('--text-primary', '#000000');
+                    document.documentElement.style.setProperty('--text-secondary', '#666666');
+                } else {
+                    document.documentElement.style.setProperty('--bg-primary', '#0a0a0a');
+                    document.documentElement.style.setProperty('--bg-secondary', '#1a1a1a');
+                    document.documentElement.style.setProperty('--bg-tertiary', '#2a2a2a');
+                    document.documentElement.style.setProperty('--text-primary', '#ffffff');
+                    document.documentElement.style.setProperty('--text-secondary', '#a0a0a0');
+                }
+            };
+
+            themeSelect.addEventListener('change', () => {
+                state.settings.theme = themeSelect.value;
+                applyTheme(state.settings.theme);
+                sendNUI('updateSettings', { theme: state.settings.theme });
+                notify(`${state.settings.theme === 'light' ? 'Light' : 'Dark'} mode enabled`);
+            });
+
+            const updateToggleUI = (toggle) => {
+                const slider = toggle.nextElementSibling;
+                const knob = slider.nextElementSibling;
+                if (toggle.checked) {
+                    slider.style.backgroundColor = 'var(--accent)';
+                    knob.style.transform = 'translateX(22px)';
+                } else {
+                    slider.style.backgroundColor = 'var(--bg-tertiary)';
+                    knob.style.transform = 'translateX(0)';
+                }
+            };
+
+            notificationsToggle.addEventListener('change', () => {
+                state.settings.notifications = notificationsToggle.checked;
+                updateToggleUI(notificationsToggle);
+                sendNUI('updateSettings', { notifications: state.settings.notifications });
+            });
+
+            notificationSoundToggle.addEventListener('change', () => {
+                state.settings.notificationSound = notificationSoundToggle.checked;
+                updateToggleUI(notificationSoundToggle);
+                sendNUI('updateSettings', { notificationSound: state.settings.notificationSound });
+            });
+
+            airplaneToggle.addEventListener('change', () => {
+                state.settings.airplaneMode = airplaneToggle.checked;
+                updateToggleUI(airplaneToggle);
+                sendNUI('updateSettings', { airplaneMode: state.settings.airplaneMode });
+                if (state.settings.airplaneMode) notify('Airplane mode enabled');
+            });
+
+            volumeSlider.addEventListener('input', () => {
+                state.settings.volume = parseInt(volumeSlider.value);
+                volumeDisplay.textContent = `${state.settings.volume}%`;
+                sendNUI('updateSettings', { volume: state.settings.volume });
+            });
+
+            document.getElementById('apply-wallpaper').addEventListener('click', () => {
+                const url = wallpaperUrl.value.trim();
+                if (url) {
+                    state.settings.wallpaper = url;
+                    wallpaperElement.style.backgroundImage = `url(${url})`;
+                    wallpaperElement.style.backgroundSize = 'cover';
+                    wallpaperElement.style.backgroundPosition = 'center';
+                    sendNUI('updateSettings', { wallpaper: url });
+                    notify('Wallpaper applied!');
+                }
+            });
+
+            document.getElementById('reset-wallpaper').addEventListener('click', () => {
+                state.settings.wallpaper = null;
+                wallpaperElement.style.backgroundImage = '';
+                wallpaperUrl.value = '';
+                sendNUI('updateSettings', { wallpaper: null });
+                notify('Wallpaper reset!');
+            });
+
+            updateToggleUI(notificationsToggle);
+            updateToggleUI(notificationSoundToggle);
+            updateToggleUI(airplaneToggle);
+			
             const bankAccountSelect = document.getElementById('bank-account-select');
             const updateBankBalance = () => document.querySelector('#bank-app .widget-balance').textContent = (state.balance[bankAccountSelect.value] || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
             bankAccountSelect.addEventListener('change', updateBankBalance);
@@ -2237,4 +2331,3 @@
     </script>
 </body>
 </html>
-
