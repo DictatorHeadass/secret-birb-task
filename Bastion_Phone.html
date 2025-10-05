@@ -776,6 +776,14 @@
             font-size: 14px;
             color: var(--text-secondary);
         }
+        .tweet-item {
+            flex-direction: column; 
+            align-items: flex-start;
+            cursor: pointer;
+        }
+        .tweet-item:active {
+            transform: scale(1);
+        }
         .tweet-actions {
             display: flex;
             gap: 25px;
@@ -1053,51 +1061,55 @@
                     <div class="app-header">
                         <div class="app-title">Banking</div>
                     </div>
-                    <div class="app-content">
-                        <div class="form-group">
-                            <label class="form-label">Account</label>
-                            <select class="form-select" id="bank-account-select">
-                                <option value="personal">Personal Account</option>
-                                <option value="business">Business Account</option>
-                                <option value="escrow">Escrow Account</option>
-                            </select>
-                        </div>
-
-                        <div class="widget" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                            <div class="widget-header" style="color: rgba(255,255,255,0.8);">Total Balance</div>
-                            <div class="widget-balance">$0</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Recipient ID</label>
-                            <input type="text" class="form-input" id="transfer-id" placeholder="Enter player or account ID">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Amount</label>
-                            <input type="number" class="form-input" id="transfer-amount" placeholder="$0">
-                        </div>
-
-                        <button class="btn btn-primary" id="transfer-btn">
-                            <i class="fas fa-paper-plane"></i> Send Money
-                        </button>
-
-                        <h3 style="color: var(--text-secondary); margin: 30px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Transactions</h3>
-
-                        <div class="list-item">
-                            <div class="list-item-main">
-                                <div class="list-item-title">Jane Doe</div>
-                                <div class="list-item-subtitle">Yesterday, 3:42 PM</div>
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-tab="bank-transfer">Transfer</button>
+                        <button class="tab-btn" data-tab="bank-bills">Bills</button>
+                    </div>
+                    <div class="app-content" style="padding: 0;">
+                        <div class="tab-content active" id="bank-transfer" style="padding: 20px;">
+                            <div class="form-group">
+                                <label class="form-label">Account</label>
+                                <select class="form-select" id="bank-account-select">
+                                    <option value="personal">Personal Account</option>
+                                    <option value="business">Business Account</option>
+                                    <option value="escrow">Escrow Account</option>
+                                </select>
                             </div>
-                            <div class="list-item-value" style="color: var(--danger);">-$500</div>
-                        </div>
-
-                        <div class="list-item">
-                            <div class="list-item-main">
-                                <div class="list-item-title">Taxi Payment</div>
-                                <div class="list-item-subtitle">Today, 10:15 AM</div>
+                            <div class="widget" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <div class="widget-header" style="color: rgba(255,255,255,0.8);">Account Balance</div>
+                                <div class="widget-balance">$0</div>
                             </div>
-                            <div class="list-item-value" style="color: var(--success);">+$150</div>
+                            <div class="form-group">
+                                <label class="form-label">Recipient ID</label>
+                                <input type="text" class="form-input" id="transfer-id" placeholder="Enter player or account ID">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" id="transfer-amount" placeholder="$0">
+                            </div>
+                            <button class="btn btn-primary" id="transfer-btn">
+                                <i class="fas fa-paper-plane"></i> Send Money
+                            </button>
+                            <h3 style="color: var(--text-secondary); margin: 30px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Transactions</h3>
+                            <div id="transactions-list">
+                                <div class="list-item">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">Jane Doe</div>
+                                        <div class="list-item-subtitle">Yesterday, 3:42 PM</div>
+                                    </div>
+                                    <div class="list-item-value" style="color: var(--danger);">-$500</div>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">Taxi Payment</div>
+                                        <div class="list-item-subtitle">Today, 10:15 AM</div>
+                                    </div>
+                                    <div class="list-item-value" style="color: var(--success);">+$150</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="bank-bills" style="padding: 20px;">
+                            <!-- Bills content will be rendered here by JS -->
                         </div>
                     </div>
                 </div>
@@ -1111,7 +1123,7 @@
                             <i class="fas fa-camera" style="font-size: 64px; color: #555;"></i>
                             <p style="color: #555; font-size: 14px;">Camera feed would appear here</p>
                         </div>
-                        <div style="height: 130px; background: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; padding: 20px;padding-bottom: 55px;">
+                        <div style="height: 120px; background: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; padding: 20px;">
                             <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
                                 <i class="fas fa-images"></i>
                             </button>
@@ -1162,6 +1174,15 @@
                     </button>
                 </div>
                 
+                <div class="app-view" id="tweet-detail-view">
+                    <div class="app-header">
+                        <div class="app-title">Tweet</div>
+                    </div>
+                    <div class="app-content" id="tweet-detail-content">
+                        <!-- Tweet and replies will be rendered here by JS -->
+                    </div>
+                </div>
+
                 <div class="app-view" id="twitter-user-profile-view">
                     <div class="app-header">
                         <div class="app-title">Profile</div>
@@ -1285,15 +1306,15 @@
                             <p>Feeding You Faster</p>
                         </div>
 
-                        <button class="btn" style="background: var(--orange); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
+                        <button class="btn" id="food-toggle-orders" style="background: var(--orange); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
                             <i class="fas fa-list"></i> TOGGLE ORDERS
                         </button>
 
-                        <button class="btn btn-danger" style="margin-bottom: 15px;">
+                        <button class="btn btn-danger" id="food-view-rankings" style="margin-bottom: 15px;">
                             <i class="fas fa-crown"></i> VIEW RANKINGS
                         </button>
 
-                        <button class="btn btn-secondary" style="margin-bottom: 20px;">
+                        <button class="btn btn-secondary" id="food-about-btn" style="margin-bottom: 20px;">
                             <i class="fas fa-info-circle"></i> ABOUT
                         </button>
 
@@ -1307,6 +1328,20 @@
                                 <div class="food-stat-label">Orders Completed</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="app-view" id="food-leaderboard-view">
+                    <div class="app-header">
+                        <div style="position: absolute; left: 20px;">
+                            <button class="btn btn-secondary" id="food-leaderboard-back" style="width: auto; padding: 8px 16px; margin: 0;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                        <div class="app-title">Rankings</div>
+                    </div>
+                    <div class="app-content" id="food-leaderboard-content">
+                        <!-- Leaderboard will be rendered here -->
                     </div>
                 </div>
 
@@ -1532,6 +1567,11 @@
                     escrow: 1200,
                     cash: 450
                 },
+                bills: [
+                    { id: 1, name: 'Los Santos Power & Water', amount: 150, due: '2 days' },
+                    { id: 2, name: 'Badger Phone Service', amount: 85, due: '5 days' },
+                    { id: 3, name: 'Dynasty8 Real Estate (Rent)', amount: 2500, due: '12 days' },
+                ],
                 primaryJob: 'Taxi Driver',
                 secondaryJob: 'Food Ferry',
                 activeJob: 'primary',
@@ -1541,15 +1581,25 @@
                     following: ['@LSPDBoss']
                 },
                 tweets: [
-                    { id: 1, handle: '@LSPDBoss', text: 'Reminder: Do not call 911 for pizza deliveries. We will find you.', time: '1h ago', likes: 15, retweets: 3, liked: true },
-                    { id: 2, handle: '@FastDriver42', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false },
-                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive!', time: '2h ago', likes: 5, retweets: 1, liked: false }
+                    { id: 1, handle: '@LSPDBoss', text: 'Reminder: Do not call 911 for pizza deliveries. We will find you.', time: '1h ago', likes: 15, retweets: 3, liked: true, replies: [
+                        { id: 101, handle: '@JohnDoe', text: 'What if it\'s an emergency pizza?', time: '55m ago', likes: 5, retweets: 0, liked: false, replies: [
+                             { id: 102, handle: '@LSPDBoss', text: 'Still no.', time: '50m ago', likes: 25, retweets: 2, liked: true, replies: [] }
+                        ]}
+                    ]},
+                    { id: 2, handle: '@FastDriver42', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false, replies: [] },
+                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive!', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] }
                 ],
                 allTwitterUsers: {
                     '@JohnDoe': { followers: 125, photoUrl: 'https://i.imgur.com/1q3n4U7.png' },
                     '@LSPDBoss': { followers: 2500, photoUrl: '' },
                     '@FastDriver42': { followers: 312, photoUrl: 'https://i.imgur.com/83w0f9d.png' }
                 },
+                foodFerryLeaderboard: [
+                    { rank: 1, name: 'Speedy Gonzales', orders: 152 },
+                    { rank: 2, name: 'Adam Smith', orders: 131 },
+                    { rank: 3, name: 'Jane Doe', orders: 98 },
+                    { rank: 4, name: 'John Doe', orders: 34 }
+                ],
                 currentApp: null,
                 modalCallback: null,
                 callActive: false,
@@ -1762,6 +1812,8 @@
                     if(appName === 'twitter') {
                          renderTwitterFeed();
                          renderMyTwitterProfile();
+                    } else if(appName === 'bank') {
+                        renderBills();
                     }
                 }
             };
@@ -1774,6 +1826,23 @@
                     state.currentApp = 'twitter';
                     return;
                 }
+                
+                const tweetDetailView = document.getElementById('tweet-detail-view');
+                if (tweetDetailView.classList.contains('active')) {
+                    tweetDetailView.classList.remove('active');
+                    document.getElementById('twitter-app').classList.add('active');
+                    state.currentApp = 'twitter';
+                    return;
+                }
+
+                const foodLeaderboardView = document.getElementById('food-leaderboard-view');
+                if (foodLeaderboardView.classList.contains('active')) {
+                    foodLeaderboardView.classList.remove('active');
+                    document.getElementById('food-app').classList.add('active');
+                    state.currentApp = 'food';
+                    return;
+                }
+                
 
                 if (state.currentApp) {
                     const currentView = document.getElementById(`${state.currentApp}-app`);
@@ -1973,53 +2042,105 @@
             const tweetText = document.getElementById('tweet-text');
             const tweetCount = document.getElementById('tweet-count');
             const twitterUserProfileView = document.getElementById('twitter-user-profile-view');
+            const tweetDetailView = document.getElementById('tweet-detail-view');
+
+            const findTweetById = (id, tweets = state.tweets) => {
+                for (const tweet of tweets) {
+                    if (tweet.id === id) return tweet;
+                    if (tweet.replies && tweet.replies.length > 0) {
+                        const foundInReply = findTweetById(id, tweet.replies);
+                        if (foundInReply) return foundInReply;
+                    }
+                }
+                return null;
+            };
+
+            const createTweetHTML = (tweet) => {
+                let tweetContentHTML;
+                if (tweet.retweetOf) {
+                     tweetContentHTML = `
+                        <div style="width: 100%; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">
+                            <i class="fas fa-retweet"></i> <span class="tweet-handle" data-handle="${tweet.handle}" style="cursor: pointer;">${tweet.handle}</span> retweeted
+                        </div>
+                        <div style="width: 100%; border: 1px solid var(--bg-tertiary); border-radius: 10px; padding: 10px;">
+                            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                                <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle}</span>
+                            </div>
+                            <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.retweetOf.text}</p>
+                        </div>
+                    `;
+                } else {
+                     tweetContentHTML = `
+                        <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                            <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: pointer;">${tweet.handle}</span>
+                            <span style="color: var(--text-secondary); font-size: 12px;">${tweet.time}</span>
+                        </div>
+                        <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.text}</p>
+                    `;
+                }
+
+                return `
+                    <div class="list-item tweet-item" data-tweet-id="${tweet.id}">
+                        ${tweetContentHTML}
+                        <div class="tweet-actions">
+                            <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.retweetOf ? tweet.retweetOf.handle : tweet.handle}"><i class="fas fa-reply"></i></span>
+                            ${!tweet.retweetOf ? `<span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>` : ''}
+                            <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
+                        </div>
+                    </div>`;
+            }
 
             const renderTweets = (container, tweets) => {
                 container.innerHTML = '';
                 [...tweets].reverse().forEach(tweet => {
-                    let tweetHTML = '';
-                    if (tweet.retweetOf) {
-                        tweetHTML = `
-                            <div class="list-item" style="flex-direction: column; align-items: flex-start; cursor: default;" data-tweet-id="${tweet.id}">
-                                <div style="width: 100%; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">
-                                    <i class="fas fa-retweet"></i> <span class="tweet-handle" data-handle="${tweet.handle}" style="cursor: pointer;">${tweet.handle}</span> retweeted
-                                </div>
-                                <div style="width: 100%; border: 1px solid var(--bg-tertiary); border-radius: 10px; padding: 10px;">
-                                    <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                                        <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle}</span>
-                                    </div>
-                                    <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.retweetOf.text}</p>
-                                </div>
-                                <div class="tweet-actions">
-                                    <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.retweetOf.handle}"><i class="fas fa-reply"></i></span>
-                                    <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
-                                </div>
-                            </div>`;
-                    } else {
-                        tweetHTML = `
-                            <div class="list-item" style="flex-direction: column; align-items: flex-start; cursor: default;" data-tweet-id="${tweet.id}">
-                                <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                                    <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: pointer;">${tweet.handle}</span>
-                                    <span style="color: var(--text-secondary); font-size: 12px;">${tweet.time}</span>
-                                </div>
-                                <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.text}</p>
-                                <div class="tweet-actions">
-                                    <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.handle}"><i class="fas fa-reply"></i></span>
-                                    <span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>
-                                    <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
-                                </div>
-                            </div>`;
-                    }
-                    container.innerHTML += tweetHTML;
+                    container.innerHTML += createTweetHTML(tweet);
                 });
                 attachTweetActionListeners();
             };
+            
+            const openTweetDetail = (tweetId) => {
+                const tweet = findTweetById(tweetId);
+                if (!tweet) return;
+
+                const content = document.getElementById('tweet-detail-content');
+                content.innerHTML = `
+                    <button class="btn btn-secondary" id="tweet-detail-back" style="width: auto; padding: 8px 16px; margin-bottom: 15px;">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <div id="main-tweet-container"></div>
+                    <h3 style="color: var(--text-secondary); margin: 20px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Replies</h3>
+                    <div id="tweet-replies-container"></div>
+                `;
+
+                document.getElementById('main-tweet-container').innerHTML = createTweetHTML(tweet);
+                renderTweets(document.getElementById('tweet-replies-container'), tweet.replies || []);
+
+                document.getElementById('twitter-app').classList.remove('active');
+                tweetDetailView.classList.add('active');
+                state.currentApp = 'tweet-detail';
+                
+                document.getElementById('tweet-detail-back').addEventListener('click', () => closeApp());
+            };
+
 
             const attachTweetActionListeners = () => {
-                document.querySelectorAll('.tweet-handle').forEach(btn => btn.addEventListener('click', () => openTwitterProfile(btn.dataset.handle)));
+                document.querySelectorAll('.tweet-item').forEach(item => item.addEventListener('click', (e) => {
+                    if (e.target.closest('.tweet-action-btn') || e.target.closest('.tweet-handle')) return;
+                    openTweetDetail(parseInt(item.dataset.tweetId));
+                }));
+
+                document.querySelectorAll('.tweet-handle').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openTwitterProfile(btn.dataset.handle);
+                }));
                 
                 document.querySelectorAll('.tweet-reply-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (state.currentApp !== 'twitter') {
+                            closeApp(); // Go back to main twitter view
+                        }
+                        document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
                         tweetComposeContainer.style.display = 'block';
                         tweetText.value = `${btn.dataset.handle} `;
                         tweetText.focus();
@@ -2027,41 +2148,42 @@
                 });
 
                 document.querySelectorAll('.tweet-like-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
                         const tweetId = parseInt(btn.closest('[data-tweet-id]').dataset.tweetId);
-                        const tweet = state.tweets.find(t => t.id === tweetId);
+                        const tweet = findTweetById(tweetId);
                         if(tweet) {
                             tweet.liked = !tweet.liked;
                             tweet.likes += tweet.liked ? 1 : -1;
                             sendNUI('likeTweet', { tweetId: tweetId, liked: tweet.liked });
+                            
+                            // Re-render all views that might show this tweet
                             renderTwitterFeed();
                             renderMyTwitterProfile();
                             if (twitterUserProfileView.classList.contains('active')) {
                                 const handle = document.getElementById('view-profile-handle').textContent;
                                 openTwitterProfile(handle);
                             }
+                            if (tweetDetailView.classList.contains('active')) {
+                                const mainTweetId = parseInt(document.querySelector('#main-tweet-container .tweet-item').dataset.tweetId);
+                                openTweetDetail(mainTweetId);
+                            }
                         }
                     });
                 });
 
                 document.querySelectorAll('.tweet-retweet-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
                         const tweetId = parseInt(btn.closest('[data-tweet-id]').dataset.tweetId);
-                        const originalTweet = state.tweets.find(t => t.id === tweetId);
+                        const originalTweet = findTweetById(tweetId);
                         
                         if (originalTweet && !originalTweet.retweetOf) {
                             originalTweet.retweets++;
 
                             const newRetweet = {
-                                id: Date.now(),
-                                handle: state.twitterProfile.handle,
-                                time: 'Just now',
-                                likes: 0,
-                                liked: false,
-                                retweetOf: {
-                                    handle: originalTweet.handle,
-                                    text: originalTweet.text
-                                }
+                                id: Date.now(), handle: state.twitterProfile.handle, time: 'Just now', likes: 0, liked: false,
+                                retweetOf: { handle: originalTweet.handle, text: originalTweet.text }
                             };
 
                             state.tweets.push(newRetweet);
@@ -2079,7 +2201,7 @@
             const renderMyTwitterProfile = () => {
                 document.getElementById('twitter-profile-handle').textContent = state.twitterProfile.handle;
                 document.getElementById('twitter-profile-stats').textContent = `${state.allTwitterUsers[state.twitterProfile.handle].followers} Followers • ${state.twitterProfile.following.length} Following`;
-                const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || t.retweetOf);
+                const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || t.retweetOf?.handle === state.twitterProfile.handle);
                 renderTweets(myTweetListContainer, myTweets);
             };
 
@@ -2097,7 +2219,7 @@
                 const isFollowing = state.twitterProfile.following.includes(handle);
                 followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
                 followBtn.dataset.handle = handle;
-                const userTweets = state.tweets.filter(t => t.handle === handle || (t.retweetOf && t.retweetOf.handle === handle));
+                const userTweets = state.tweets.filter(t => t.handle === handle || (t.retweetOf && t.handle === handle));
                 renderTweets(document.getElementById('view-profile-tweet-list'), userTweets);
                 document.getElementById('twitter-app').classList.remove('active');
                 twitterUserProfileView.classList.add('active');
@@ -2135,7 +2257,7 @@
             postTweetBtn.addEventListener('click', () => {
                 const text = tweetText.value.trim();
                 if (!text) return;
-                const newTweet = { id: Date.now(), handle: state.twitterProfile.handle, text, time: 'Just now', likes: 0, retweets: 0, liked: false };
+                const newTweet = { id: Date.now(), handle: state.twitterProfile.handle, text, time: 'Just now', likes: 0, retweets: 0, liked: false, replies: [] };
                 state.tweets.push(newTweet);
                 sendNUI('postTweet', { text });
                 renderTwitterFeed();
@@ -2201,7 +2323,6 @@
             document.getElementById('quit-job-primary').addEventListener('click', () => showModal('Quit Job', 'Quit primary job?', () => { sendNUI('quitJob', { jobType: 'primary' }); state.primaryJob = null; renderJobs(); hideModal(); }));
             document.getElementById('quit-job-secondary').addEventListener('click', () => showModal('Quit Job', 'Quit secondary job?', () => { sendNUI('quitJob', { jobType: 'secondary' }); state.secondaryJob = null; renderJobs(); hideModal(); }));
 
-            // Settings App that i fuckin deleted lmao
             const themeSelect = document.getElementById('theme-select');
             const notificationsToggle = document.getElementById('notifications-toggle');
             const notificationSoundToggle = document.getElementById('notification-sound-toggle');
@@ -2300,9 +2421,89 @@
             bankAccountSelect.addEventListener('change', updateBankBalance);
             document.getElementById('transfer-btn').addEventListener('click', () => {
                 const id = document.getElementById('transfer-id').value, amount = parseInt(document.getElementById('transfer-amount').value);
-                if (id && amount > 0) showModal('Transfer Money', `Send $${amount} to ID ${id}?`, () => { sendNUI('transferMoney', { recipient: id, amount }); hideModal(); });
+                if (id && amount > 0) showModal('Transfer Money', `Send $${amount} to ID ${id}?`, () => { sendNUI('transferMoney', { recipient: id, amount, fromAccount: bankAccountSelect.value }); hideModal(); });
                 else notify('Please enter a valid ID and amount.');
             });
+
+            const renderBills = () => {
+                const container = document.getElementById('bank-bills');
+                if (state.bills.length === 0) {
+                     container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">You have no outstanding bills.</p>';
+                     return;
+                }
+                container.innerHTML = state.bills.map(bill => `
+                    <div class="list-item" style="flex-direction: column; align-items: stretch;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <div class="list-item-title">${bill.name}</div>
+                                <div class="list-item-subtitle">Due in ${bill.due}</div>
+                            </div>
+                            <div class="list-item-value" style="color: var(--warning);">$${bill.amount.toLocaleString()}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid var(--bg-tertiary); padding-top: 15px;">
+                            <select class="form-select bill-pay-account" style="flex: 2; margin: 0; padding: 10px;">
+                                ${Object.keys(state.balance).filter(k=>k!=='cash').map(acc => `<option value="${acc}">${acc.charAt(0).toUpperCase() + acc.slice(1)} ($${state.balance[acc].toLocaleString()})</option>`).join('')}
+                            </select>
+                            <button class="btn btn-primary pay-bill-btn" data-bill-id="${bill.id}" style="flex: 1; margin: 0; padding: 10px; font-size: 14px;">Pay Bill</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.querySelectorAll('.pay-bill-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const billId = parseInt(btn.dataset.billId);
+                        const bill = state.bills.find(b => b.id === billId);
+                        const selectedAccount = btn.closest('.list-item').querySelector('.bill-pay-account').value;
+                        
+                        if (bill && selectedAccount && state.balance[selectedAccount] >= bill.amount) {
+                             showModal('Pay Bill', `Pay $${bill.amount} for ${bill.name} from your ${selectedAccount} account?`, () => {
+                                state.balance[selectedAccount] -= bill.amount;
+                                state.bills = state.bills.filter(b => b.id !== billId);
+                                sendNUI('payBill', { billId, fromAccount: selectedAccount });
+                                notify('Bill paid successfully!');
+                                updateBankBalance();
+                                renderBills();
+                                hideModal();
+                            });
+                        } else {
+                            notify('Insufficient funds in selected account.');
+                        }
+                    });
+                });
+            };
+
+            const renderLeaderboard = () => {
+                const container = document.getElementById('food-leaderboard-content');
+                container.innerHTML = state.foodFerryLeaderboard
+                    .map(entry => `
+                        <div class="list-item">
+                             <div class="list-item-avatar" style="background: var(--bg-tertiary);">${entry.rank}</div>
+                             <div class="list-item-main" style="margin-left: 15px;">
+                                <div class="list-item-title">${entry.name}</div>
+                            </div>
+                            <div class="list-item-value" style="color: var(--warning);">${entry.orders} Orders</div>
+                        </div>
+                    `).join('');
+            };
+
+            document.getElementById('food-view-rankings').addEventListener('click', () => {
+                homeScreen.classList.add('hidden');
+                document.getElementById('food-app').classList.remove('active');
+                document.getElementById('food-leaderboard-view').classList.add('active');
+                state.currentApp = 'food-leaderboard';
+                renderLeaderboard();
+            });
+
+            document.getElementById('food-leaderboard-back').addEventListener('click', closeApp);
+            
+            document.getElementById('food-about-btn').addEventListener('click', () => {
+                showModal('About Food Ferry', 'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', () => hideModal());
+                document.getElementById('modal-confirm').textContent = 'Close';
+            });
+            document.getElementById('modal-cancel').addEventListener('click', () => {
+                 document.getElementById('modal-confirm').textContent = 'Confirm';
+            });
+
 
             const showModal = (title, message, callback) => {
                 document.getElementById('modal-title').textContent = title;
