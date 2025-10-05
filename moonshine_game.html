@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moonshine Distilling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f08 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #f4e4c1;
+        }
+
+        .game-container {
+            background: rgba(40, 25, 15, 0.9);
+            border: 3px solid #8b4513;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 900px;
+            width: 95%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .still-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            margin: 30px 0;
+            background: rgba(20, 15, 10, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        /* Chamber (right side) */
+        .chamber {
+            position: absolute;
+            right: 12%;
+            top: 22%;
+            width: 110px;
+            height: 170px;
+            background: linear-gradient(135deg, rgba(200, 200, 200, 0.3) 0%, rgba(150, 150, 150, 0.2) 100%);
+            border: 3px solid #666;
+            border-radius: 5px;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .chamber-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #d4af37;
+            white-space: nowrap;
+        }
+
+        .chamber-liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0%;
+            background: linear-gradient(180deg, rgba(139, 69, 19, 0.7) 0%, rgba(101, 67, 33, 0.8) 100%);
+            border-radius: 0 0 2px 2px;
+            transition: height 0.5s ease;
+        }
+
+        /* Barrel (center) */
+        .barrel {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 180px;
+            background: linear-gradient(90deg, #8b4513 0%, #a0522d 20%, #8b4513 50%, #654321 80%, #8b4513 100%);
+            border-radius: 10px;
+            border: 3px solid #5c3317;
+        }
+
+        .barrel-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #d4af37;
+            white-space: nowrap;
+        }
+
+        .barrel-band {
+            position: absolute;
+            width: 100%;
+            height: 8px;
+            background: #2c1810;
+            border: 1px solid #000;
+        }
+
+        .band1 { top: 20%; }
+        .band2 { top: 45%; }
+        .band3 { top: 70%; }
+
+        .barrel-liquid {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            right: 5px;
+            height: 0%;
+            background: linear-gradient(180deg, #d4a574 0%, #8b6914 100%);
+            border-radius: 0 0 7px 7px;
+            transition: height 0.5s ease;
+        }
+
+        /* Output jar (left side) */
+        .output-jar {
+            position: absolute;
+            left: 12%;
+            bottom: 20%;
+            width: 70px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(200, 220, 255, 0.3) 0%, rgba(150, 180, 200, 0.2) 100%);
+            border: 3px solid #888;
+            border-radius: 0 0 5px 5px;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .jar-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #d4af37;
+            white-space: nowrap;
+			z-index: 100; 
+        }
+
+        .jar-liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(220, 235, 255, 0.9) 100%);
+            border-radius: 0 0 3px 3px;
+            transition: height 0.5s ease;
+        }
+
+        /* Pipes */
+        .pipe {
+            position: absolute;
+            background: linear-gradient(135deg, #555 0%, #333 100%);
+            border: 2px solid #222;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+        }
+
+        /* From chamber to barrel - horizontal at top of barrel */
+        .pipe1 {
+            top: 55%;
+            right: 24%;
+            width: 220px;
+            height: 10px;
+        }
+
+        /* From barrel bottom - vertical down */
+        .pipe2 {
+            left: 34%;
+            top: 5%;
+			transform: rotate(90deg);
+			transform-origin: center; 
+            width: 10px;
+            height: 276px;
+        }
+
+        /* From barrel to jar - horizontal */
+        .pipe3 {
+            left: 44%;
+            bottom: 53%;
+            width: 100px;
+            height: 10px;
+			transform: rotate(90deg);
+			transform-origin: center;
+        }
+
+        /* Into jar - vertical down */
+        .pipe4 {
+            left: 18%;
+            bottom: 44%;
+            width: 10px;
+            height: 95px;
+        }
+
+        /* Pipe joints */
+        .pipe-joint {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle, #555 0%, #333 100%);
+            border: 2px solid #222;
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .joint1 {
+            top: 33.5%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .joint2 {
+            left: 50%;
+            transform: translateX(-50%);
+            top: 54%;
+        }
+
+        .joint3 {
+            left: 17.5%;
+            bottom: 41.5%;
+        }
+
+        .joint4 {
+            left: 17.5%;
+            bottom: 38%;
+        }
+
+        .fire {
+            position: absolute;
+            left: 50%;
+            bottom: 10%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 70px;
+            animation: flicker 0.3s infinite alternate;
+        }
+
+        .flame {
+            position: absolute;
+            bottom: 0;
+            width: 32px;
+            height: 45px;
+            background: linear-gradient(180deg, #ff4500 0%, #ffa500 50%, #ffff00 100%);
+            border-radius: 50% 50% 20% 20%;
+            animation: flameMove 0.5s infinite alternate;
+            filter: drop-shadow(0 0 10px #ff6600);
+        }
+
+        .flame1 { left: 5px; }
+        .flame2 { left: 29px; animation-delay: 0.2s; }
+        .flame3 { left: 53px; animation-delay: 0.1s; }
+
+        @keyframes flicker {
+            0% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+        }
+
+        @keyframes flameMove {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-10px); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            color: #f4e4c1;
+            border: 2px solid #5c3317;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #a0522d 0%, #cd853f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(60, 40, 25, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #8b4513;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #d4af37;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f4e4c1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: rgba(30, 20, 10, 0.8);
+            border: 2px solid #8b4513;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d4af37 0%, #ffd700 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c1810;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 18px;
+            color: #d4af37;
+            min-height: 30px;
+            font-weight: bold;
+        }
+
+        .steam {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            animation: steam-rise 2s infinite;
+            opacity: 0;
+        }
+
+        @keyframes steam-rise {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120px) scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        .bubble {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
+            border-radius: 50%;
+            animation: bubble-rise 3s infinite;
+            opacity: 0;
+        }
+
+        @keyframes bubble-rise {
+            0% {
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-60px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Keem's Moonshine Distillery </h1>
+        
+        <div class="still-container">
+            <!-- Chamber (Right) -->
+            <div class="chamber">
+                <div class="chamber-label">Mash Chamber</div>
+                <div class="chamber-liquid" id="chamberLiquid"></div>
+            </div>
+
+            <!-- Barrel (Center) -->
+            <div class="barrel">
+                <div class="barrel-label">Distillation Barrel</div>
+                <div class="barrel-band band1"></div>
+                <div class="barrel-band band2"></div>
+                <div class="barrel-band band3"></div>
+                <div class="barrel-liquid" id="barrelLiquid"></div>
+            </div>
+
+            <!-- Output Jar (Left) -->
+            <div class="output-jar">
+                <div class="jar-label">Collection Jar</div>
+                <div class="jar-liquid" id="jarLiquid"></div>
+            </div>
+
+            <!-- Pipes -->
+            <div class="pipe pipe1"></div>
+            <div class="pipe-joint joint1"></div>
+            
+            <div class="pipe pipe2"></div>
+            <div class="pipe-joint joint2"></div>
+            
+            <div class="pipe pipe3"></div>
+            <div class="pipe-joint joint3"></div>
+            
+            <div class="pipe pipe4"></div>
+
+            <!-- Fire -->
+            <div class="fire" id="fire" style="display: none;">
+                <div class="flame flame1"></div>
+                <div class="flame flame2"></div>
+                <div class="flame flame3"></div>
+            </div>
+
+            <div id="steamContainer"></div>
+            <div id="bubbleContainer"></div>
+        </div>
+
+        <div class="controls">
+            <button id="fillBtn">Fill Chamber</button>
+            <button id="transferBtn" disabled>Transfer to Barrel</button>
+            <button id="heatBtn" disabled>Start Fire</button>
+            <button id="distillBtn" disabled>Begin Distilling</button>
+            <button id="collectBtn" disabled>Collect Moonshine</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Temperature</div>
+                <div class="stat-value" id="tempValue">0°F</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Purity</div>
+                <div class="stat-value" id="purityValue">0%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Moonshine</div>
+                <div class="stat-value" id="moonshineValue">0 L</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill">0%</div>
+        </div>
+
+        <div class="message" id="message">Fill the chamber to start!</div>
+    </div>
+
+    <script>
+        const state = {
+            chamberFilled: false,
+            barrelFilled: false,
+            fireStarted: false,
+            distilling: false,
+            temperature: 0,
+            purity: 0,
+            moonshine: 0,
+            progress: 0,
+            distillInterval: null,
+            tempInterval: null,
+            transferInterval: null
+        };
+
+        const elements = {
+            chamberLiquid: document.getElementById('chamberLiquid'),
+            barrelLiquid: document.getElementById('barrelLiquid'),
+            jarLiquid: document.getElementById('jarLiquid'),
+            fire: document.getElementById('fire'),
+            fillBtn: document.getElementById('fillBtn'),
+            transferBtn: document.getElementById('transferBtn'),
+            heatBtn: document.getElementById('heatBtn'),
+            distillBtn: document.getElementById('distillBtn'),
+            collectBtn: document.getElementById('collectBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            tempValue: document.getElementById('tempValue'),
+            purityValue: document.getElementById('purityValue'),
+            moonshineValue: document.getElementById('moonshineValue'),
+            progressFill: document.getElementById('progressFill'),
+            message: document.getElementById('message'),
+            steamContainer: document.getElementById('steamContainer'),
+            bubbleContainer: document.getElementById('bubbleContainer')
+        };
+
+        function updateUI() {
+            elements.tempValue.textContent = Math.round(state.temperature) + '°F';
+            elements.purityValue.textContent = Math.round(state.purity) + '%';
+            elements.moonshineValue.textContent = state.moonshine.toFixed(1) + ' L';
+            elements.progressFill.style.width = state.progress + '%';
+            elements.progressFill.textContent = Math.round(state.progress) + '%';
+        }
+
+        function createSteam() {
+            if (!state.distilling) return;
+            
+            const steam = document.createElement('div');
+            steam.className = 'steam';
+            steam.style.left = (Math.random() * 20 + 45) + '%';
+            steam.style.top = '25%';
+            steam.style.animationDelay = Math.random() * 0.5 + 's';
+            elements.steamContainer.appendChild(steam);
+
+            setTimeout(() => steam.remove(), 2000);
+        }
+
+        function createBubble() {
+            if (!state.fireStarted) return;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.left = (Math.random() * 80 + 42) + '%';
+            bubble.style.top = '60%';
+            bubble.style.animationDelay = Math.random() * 1 + 's';
+            bubble.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            elements.bubbleContainer.appendChild(bubble);
+
+            setTimeout(() => bubble.remove(), 3000);
+        }
+
+         // Fill chamber
+        elements.fillBtn.addEventListener('click', () => {
+            elements.fillBtn.disabled = true;
+            elements.message.textContent = 'Filling chamber with mash...';
+            
+            let fillProgress = 0;
+            const fillDuration = 60000; // 60 seconds
+            const fillInterval = 100; // Update every 100ms
+            const fillIncrement = (85 / fillDuration) * fillInterval;
+            
+            const fillTimer = setInterval(() => {
+                if (fillProgress < 85) {
+                    fillProgress += fillIncrement;
+                    elements.chamberLiquid.style.height = Math.min(fillProgress, 85) + '%';
+                    
+                    const secondsRemaining = Math.ceil(((85 - fillProgress) / fillIncrement) * fillInterval / 1000);
+                    elements.message.textContent = `Filling chamber with mash... ${secondsRemaining}s remaining`;
+                } else {
+                    clearInterval(fillTimer);
+                    state.chamberFilled = true;
+                    elements.transferBtn.disabled = false;
+                    elements.message.textContent = 'Chamber filled! Transfer to barrel.';
+                }
+            }, fillInterval);
+        });
+
+        // Transfer from chamber to barrel
+        elements.transferBtn.addEventListener('click', () => {
+            elements.transferBtn.disabled = true;
+            elements.message.textContent = 'Transferring mash to barrel...';
+            
+            let transferProgress = 0;
+            state.transferInterval = setInterval(() => {
+                if (transferProgress < 100) {
+                    transferProgress += 2;
+                    
+                    // Empty chamber
+                    const chamberLevel = 85 - (transferProgress * 0.85);
+                    elements.chamberLiquid.style.height = chamberLevel + '%';
+                    
+                    // Fill barrel
+                    const barrelLevel = transferProgress * 0.85;
+                    elements.barrelLiquid.style.height = barrelLevel + '%';
+                } else {
+                    clearInterval(state.transferInterval);
+                    state.barrelFilled = true;
+                    elements.heatBtn.disabled = false;
+                    elements.message.textContent = 'Transfer complete! Start the fire.';
+                }
+            }, 50);
+        });
+
+        // Start fire
+        elements.heatBtn.addEventListener('click', () => {
+            state.fireStarted = true;
+            elements.fire.style.display = 'block';
+            elements.heatBtn.disabled = true;
+            elements.distillBtn.disabled = false;
+            elements.message.textContent = 'Fire started! Temperature rising...';
+
+            state.tempInterval = setInterval(() => {
+                if (state.temperature < 200) {
+                    state.temperature += 2;
+                    updateUI();
+                }
+                
+                if (Math.random() > 0.6) {
+                    createBubble();
+                }
+            }, 100);
+        });
+
+        // Begin distilling
+        elements.distillBtn.addEventListener('click', () => {
+            state.distilling = true;
+            elements.distillBtn.disabled = true;
+            elements.message.textContent = 'Distilling in progress...';
+
+            state.distillInterval = setInterval(() => {
+                if (state.progress < 100) {
+                    state.progress += 0.4;
+                    
+                    // Drain barrel
+                    const barrelLevel = 85 - (state.progress * 0.7);
+                    elements.barrelLiquid.style.height = Math.max(barrelLevel, 10) + '%';
+                    
+                    // Fill jar
+                    const jarLevel = (state.progress * 0.8);
+                    elements.jarLiquid.style.height = Math.min(jarLevel, 80) + '%';
+
+                    state.purity = 50 + (state.progress * 0.45);
+                    state.moonshine = (state.progress / 100) * 5.5;
+
+                    if (Math.random() > 0.6) {
+                        createSteam();
+                    }
+                    if (Math.random() > 0.7) {
+                        createBubble();
+                    }
+
+                    updateUI();
+                } else {
+                    clearInterval(state.distillInterval);
+                    elements.collectBtn.disabled = false;
+                    elements.message.textContent = '✅ Distillation complete! Collect your moonshine.';
+                }
+            }, 100);
+        });
+
+        // Collect moonshine
+        elements.collectBtn.addEventListener('click', () => {
+            const quality = state.purity > 90 ? 'Premium' : state.purity > 75 ? 'Good' : 'Average';
+            elements.message.textContent = `🎉 Collected ${state.moonshine.toFixed(1)}L of ${quality} moonshine!`;
+            elements.collectBtn.disabled = true;
+            
+            setTimeout(() => {
+                elements.message.textContent = 'Press Reset to make another batch!';
+            }, 3000);
+        });
+
+        // Reset
+        elements.resetBtn.addEventListener('click', () => {
+            clearInterval(state.distillInterval);
+            clearInterval(state.tempInterval);
+            clearInterval(state.transferInterval);
+            
+            state.chamberFilled = false;
+            state.barrelFilled = false;
+            state.fireStarted = false;
+            state.distilling = false;
+            state.temperature = 0;
+            state.purity = 0;
+            state.moonshine = 0;
+            state.progress = 0;
+
+            elements.chamberLiquid.style.height = '0%';
+            elements.barrelLiquid.style.height = '0%';
+            elements.jarLiquid.style.height = '0%';
+            elements.fire.style.display = 'none';
+            
+            elements.fillBtn.disabled = false;
+            elements.transferBtn.disabled = true;
+            elements.heatBtn.disabled = true;
+            elements.distillBtn.disabled = true;
+            elements.collectBtn.disabled = true;
+            
+            elements.message.textContent = 'Fill the chamber to start!';
+            elements.steamContainer.innerHTML = '';
+            elements.bubbleContainer.innerHTML = '';
+            
+            updateUI();
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>
