@@ -328,14 +328,15 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             z-index: 10;
             flex-shrink: 0;
-            margin-top: -50px;
+            margin-top: -20px;
             position: relative;
         }
         
         .app-header .btn {
-            height: auto;
+            height: 50px;
             font-size: 14px;
             font-weight: 600;
+			z-index: 101;
         }
 
         .app-title {
@@ -1108,7 +1109,8 @@
                             </div>
                         </div>
                         <div class="tab-content" id="bank-bills" style="padding: 20px;">
-                            </div>
+                            <!-- Bills content will be rendered here by JS -->
+                        </div>
                     </div>
                 </div>
 
@@ -1190,14 +1192,14 @@
 
                 <div class="app-view" id="twitter-thread-view">
                     <div class="app-header">
-                        <div style="position: absolute; left: 20px;">
-                            <button class="btn btn-secondary" id="twitter-thread-back" style="width: auto; padding: 8px 16px; margin: 0;">
+                        <div style="position: absolute; left: 20px;top: 8%;">
+                            <button class="btn btn-secondary" id="twitter-thread-back" style="width: auto; padding: 10px 16px; margin: 0; top: 1%;">
                                 <i class="fas fa-arrow-left"></i>
                             </button>
                         </div>
                         <div class="app-title">Thread</div>
                     </div>
-                    <div class="app-content" style="padding: 0; overflow-y: auto;">
+                    <div class="app-content" style="padding: 0; overflow-y: auto; ">
                         <div id="main-tweet-container" style="padding: 20px; border-bottom: 5px solid var(--bg-tertiary);"></div>
                         <h3 style="color: var(--text-secondary); margin: 20px 20px 0px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Replies</h3>
                         <div id="thread-replies-list" style="padding: 0 20px 20px 20px;"></div>
@@ -1346,7 +1348,8 @@
                         <div class="app-title">Rankings</div>
                     </div>
                     <div class="app-content" id="food-leaderboard-content">
-                        </div>
+                        <!-- Leaderboard will be rendered here -->
+                    </div>
                 </div>
 
                 <div class="app-view" id="requestee-app">
@@ -1613,6 +1616,7 @@
                 currentConversation: null,
                 twitterNavStack: [],
                 twitterRootView: null,
+                replyingToTweetId: null,
                 myCard: {
                     name: 'John Doe',
                     number: '555-1234',
@@ -2211,10 +2215,22 @@
                 const replyBtn = e.target.closest('.tweet-reply-btn');
                 if (replyBtn) {
                     e.stopPropagation();
-                    if (!document.getElementById('twitter-app').classList.contains('active')) {
-                        closeApp(); 
+                    
+                    const tweetItem = replyBtn.closest('.tweet-item');
+                    if (!tweetItem) return;
+                    state.replyingToTweetId = parseInt(tweetItem.dataset.tweetId);
+
+                    document.getElementById('twitter-user-profile-view').classList.remove('active');
+                    document.getElementById('twitter-thread-view').classList.remove('active');
+
+                    const twitterAppView = document.getElementById('twitter-app');
+                    if (!twitterAppView.classList.contains('active')) {
+                        twitterAppView.classList.add('active');
+                        state.currentApp = 'twitter';
                     }
+                    
                     document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
+
                     tweetComposeContainer.style.display = 'block';
                     tweetText.value = `${replyBtn.dataset.handle} `;
                     tweetText.focus();
@@ -2281,18 +2297,48 @@
             document.getElementById('twitter-thread-back').addEventListener('click', goBackTwitterThread);
             
             tweetText.addEventListener('input', () => tweetCount.textContent = `${tweetText.value.length}/280`);
+            
             newTweetBtn.addEventListener('click', () => {
                 const isVisible = tweetComposeContainer.style.display === 'block';
-                tweetComposeContainer.style.display = isVisible ? 'none' : 'block';
-                if (!isVisible) tweetText.focus();
+                if (isVisible) {
+                    tweetComposeContainer.style.display = 'none';
+                    state.replyingToTweetId = null;
+                    tweetText.value = '';
+                } else {
+                    state.replyingToTweetId = null;
+                    tweetText.value = '';
+                    tweetComposeContainer.style.display = 'block';
+                    tweetText.focus();
+                }
             });
 
             postTweetBtn.addEventListener('click', () => {
                 const text = tweetText.value.trim();
                 if (!text) return;
-                const newTweet = { id: Date.now(), handle: state.twitterProfile.handle, text, time: 'Just now', likes: 0, retweets: 0, liked: false, replies: [] };
-                state.tweets.push(newTweet);
-                sendNUI('postTweet', { text });
+
+                const newTweet = {
+                    id: Date.now(),
+                    handle: state.twitterProfile.handle,
+                    text: text,
+                    time: 'Just now',
+                    likes: 0,
+                    retweets: 0,
+                    liked: false,
+                    replies: []
+                };
+
+                if (state.replyingToTweetId !== null) {
+                    const parentTweet = findTweetById(state.replyingToTweetId);
+                    if (parentTweet) {
+                        parentTweet.replies.push(newTweet);
+                        sendNUI('postReply', { text: newTweet.text, parentId: state.replyingToTweetId });
+                    }
+                    state.replyingToTweetId = null;
+                } else {
+                    state.tweets.push(newTweet);
+                    sendNUI('postTweet', { text: newTweet.text });
+                }
+
                 renderTwitterFeed();
                 renderMyTwitterProfile();
                 tweetText.value = '';
@@ -2548,6 +2594,58 @@
             document.getElementById('modal-cancel').addEventListener('click', hideModal);
             document.getElementById('modal-confirm').addEventListener('click', () => { if (state.modalCallback) state.modalCallback(); });
 
+            const inputModal = document.getElementById('input-modal');
+            let currentRequestService = null;
+
+            const showInputModal = (title, placeholder, service) => {
+                document.getElementById('input-modal-title').textContent = title;
+                const textarea = document.getElementById('input-modal-textarea');
+                textarea.placeholder = placeholder;
+                textarea.value = '';
+                inputModal.classList.add('active');
+                currentRequestService = service;
+            };
+
+            const hideInputModal = () => {
+                inputModal.classList.remove('active');
+                currentRequestService = null;
+            };
+
+            document.getElementById('input-modal-cancel').addEventListener('click', hideInputModal);
+
+            document.getElementById('input-modal-confirm').addEventListener('click', () => {
+                if (currentRequestService) {
+                    const reason = document.getElementById('input-modal-textarea').value.trim();
+                    if (reason) {
+                        sendNUI('makeRequest', { service: currentRequestService, reason });
+                        notify(`${currentRequestService} requested.`);
+                        hideInputModal();
+                    } else {
+                        notify('Please provide a reason for your request.');
+                    }
+                }
+            });
+
+            const setupRequesteeListeners = () => {
+                const requestButtons = [
+                    { id: 'request-mechanic', service: 'Mechanic', placeholder: 'e.g., My car broke down at Legion Square...' },
+                    { id: 'request-realtor', service: 'Realtor', placeholder: 'e.g., I would like to view a property...' },
+                    { id: 'request-pdm', service: 'PDM', placeholder: 'e.g., I am looking to purchase a new vehicle...' },
+                    { id: 'request-doctor', service: 'Doctor', placeholder: 'e.g., I am injured and require medical attention...' },
+                    { id: 'request-lawyer', service: 'Lawyer', placeholder: 'e.g., I need legal representation...' },
+                    { id: 'request-general', service: 'General', placeholder: 'Describe your general request...' }
+                ];
+
+                requestButtons.forEach(buttonInfo => {
+                    const button = document.getElementById(buttonInfo.id);
+                    if (button) {
+                        button.addEventListener('click', () => {
+                            showInputModal(`Requesting ${buttonInfo.service}`, buttonInfo.placeholder, buttonInfo.service);
+                        });
+                    }
+                });
+            };
+
             window.addEventListener('message', e => { if (e.data.type === 'phone:show') { phoneWrapper.style.display = 'block'; document.body.style.display = 'flex'; } });
             const callerView = document.getElementById('incoming-call-view');
             document.getElementById('call-reject-btn').addEventListener('click', () => { callerView.style.display = 'none'; sendNUI('rejectCall'); });
@@ -2558,6 +2656,7 @@
             renderMessageThreads();
             renderJobs();
             updateBankBalance();
+            setupRequesteeListeners();
 
             phoneWrapper.style.display = 'block';
             document.body.style.display = 'flex';
@@ -2565,3 +2664,4 @@
     </script>
 </body>
 </html>
+
