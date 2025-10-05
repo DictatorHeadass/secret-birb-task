@@ -779,7 +779,6 @@
         .tweet-item {
             flex-direction: column; 
             align-items: flex-start;
-            cursor: pointer;
         }
         .tweet-item:active {
             transform: scale(1);
@@ -1123,7 +1122,7 @@
                             <i class="fas fa-camera" style="font-size: 64px; color: #555;"></i>
                             <p style="color: #555; font-size: 14px;">Camera feed would appear here</p>
                         </div>
-                        <div style="height: 120px; background: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; padding: 20px;">
+                        <div style="height: 130px; background: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; padding: 20px;padding-bottom: 55px;">
                             <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
                                 <i class="fas fa-images"></i>
                             </button>
@@ -1174,15 +1173,6 @@
                     </button>
                 </div>
                 
-                <div class="app-view" id="tweet-detail-view">
-                    <div class="app-header">
-                        <div class="app-title">Tweet</div>
-                    </div>
-                    <div class="app-content" id="tweet-detail-content">
-                        <!-- Tweet and replies will be rendered here by JS -->
-                    </div>
-                </div>
-
                 <div class="app-view" id="twitter-user-profile-view">
                     <div class="app-header">
                         <div class="app-title">Profile</div>
@@ -1827,14 +1817,6 @@
                     return;
                 }
                 
-                const tweetDetailView = document.getElementById('tweet-detail-view');
-                if (tweetDetailView.classList.contains('active')) {
-                    tweetDetailView.classList.remove('active');
-                    document.getElementById('twitter-app').classList.add('active');
-                    state.currentApp = 'twitter';
-                    return;
-                }
-
                 const foodLeaderboardView = document.getElementById('food-leaderboard-view');
                 if (foodLeaderboardView.classList.contains('active')) {
                     foodLeaderboardView.classList.remove('active');
@@ -2042,7 +2024,6 @@
             const tweetText = document.getElementById('tweet-text');
             const tweetCount = document.getElementById('tweet-count');
             const twitterUserProfileView = document.getElementById('twitter-user-profile-view');
-            const tweetDetailView = document.getElementById('tweet-detail-view');
 
             const findTweetById = (id, tweets = state.tweets) => {
                 for (const tweet of tweets) {
@@ -2080,128 +2061,27 @@
                 }
 
                 return `
-                    <div class="list-item tweet-item" data-tweet-id="${tweet.id}">
+                    <div class="list-item tweet-item" style="flex-direction: column; align-items: flex-start;" data-tweet-id="${tweet.id}">
                         ${tweetContentHTML}
                         <div class="tweet-actions">
                             <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.retweetOf ? tweet.retweetOf.handle : tweet.handle}"><i class="fas fa-reply"></i></span>
                             ${!tweet.retweetOf ? `<span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>` : ''}
                             <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
                         </div>
+                        <div class="tweet-replies-container" style="display: none; width: 100%; margin-top: 10px; padding-left: 20px; border-left: 2px solid var(--bg-tertiary);"></div>
                     </div>`;
             }
 
             const renderTweets = (container, tweets) => {
-                container.innerHTML = '';
-                [...tweets].reverse().forEach(tweet => {
-                    container.innerHTML += createTweetHTML(tweet);
-                });
-                attachTweetActionListeners();
-            };
-            
-            const openTweetDetail = (tweetId) => {
-                const tweet = findTweetById(tweetId);
-                if (!tweet) return;
-
-                const content = document.getElementById('tweet-detail-content');
-                content.innerHTML = `
-                    <button class="btn btn-secondary" id="tweet-detail-back" style="width: auto; padding: 8px 16px; margin-bottom: 15px;">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </button>
-                    <div id="main-tweet-container"></div>
-                    <h3 style="color: var(--text-secondary); margin: 20px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Replies</h3>
-                    <div id="tweet-replies-container"></div>
-                `;
-
-                document.getElementById('main-tweet-container').innerHTML = createTweetHTML(tweet);
-                renderTweets(document.getElementById('tweet-replies-container'), tweet.replies || []);
-
-                document.getElementById('twitter-app').classList.remove('active');
-                tweetDetailView.classList.add('active');
-                state.currentApp = 'tweet-detail';
-                
-                document.getElementById('tweet-detail-back').addEventListener('click', () => closeApp());
-            };
-
-
-            const attachTweetActionListeners = () => {
-                document.querySelectorAll('.tweet-item').forEach(item => item.addEventListener('click', (e) => {
-                    if (e.target.closest('.tweet-action-btn') || e.target.closest('.tweet-handle')) return;
-                    openTweetDetail(parseInt(item.dataset.tweetId));
-                }));
-
-                document.querySelectorAll('.tweet-handle').forEach(btn => btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openTwitterProfile(btn.dataset.handle);
-                }));
-                
-                document.querySelectorAll('.tweet-reply-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (state.currentApp !== 'twitter') {
-                            closeApp(); // Go back to main twitter view
-                        }
-                        document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
-                        tweetComposeContainer.style.display = 'block';
-                        tweetText.value = `${btn.dataset.handle} `;
-                        tweetText.focus();
-                    });
-                });
-
-                document.querySelectorAll('.tweet-like-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const tweetId = parseInt(btn.closest('[data-tweet-id]').dataset.tweetId);
-                        const tweet = findTweetById(tweetId);
-                        if(tweet) {
-                            tweet.liked = !tweet.liked;
-                            tweet.likes += tweet.liked ? 1 : -1;
-                            sendNUI('likeTweet', { tweetId: tweetId, liked: tweet.liked });
-                            
-                            // Re-render all views that might show this tweet
-                            renderTwitterFeed();
-                            renderMyTwitterProfile();
-                            if (twitterUserProfileView.classList.contains('active')) {
-                                const handle = document.getElementById('view-profile-handle').textContent;
-                                openTwitterProfile(handle);
-                            }
-                            if (tweetDetailView.classList.contains('active')) {
-                                const mainTweetId = parseInt(document.querySelector('#main-tweet-container .tweet-item').dataset.tweetId);
-                                openTweetDetail(mainTweetId);
-                            }
-                        }
-                    });
-                });
-
-                document.querySelectorAll('.tweet-retweet-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const tweetId = parseInt(btn.closest('[data-tweet-id]').dataset.tweetId);
-                        const originalTweet = findTweetById(tweetId);
-                        
-                        if (originalTweet && !originalTweet.retweetOf) {
-                            originalTweet.retweets++;
-
-                            const newRetweet = {
-                                id: Date.now(), handle: state.twitterProfile.handle, time: 'Just now', likes: 0, liked: false,
-                                retweetOf: { handle: originalTweet.handle, text: originalTweet.text }
-                            };
-
-                            state.tweets.push(newRetweet);
-                            sendNUI('retweet', { originalTweetId: tweetId });
-                            notify('Retweeted!');
-
-                            renderTwitterFeed();
-                            renderMyTwitterProfile();
-                        }
-                    });
-                });
+                 container.innerHTML = [...tweets].reverse().map(tweet => createTweetHTML(tweet)).join('');
             };
 
             const renderTwitterFeed = () => renderTweets(tweetListContainer, state.tweets);
+
             const renderMyTwitterProfile = () => {
                 document.getElementById('twitter-profile-handle').textContent = state.twitterProfile.handle;
                 document.getElementById('twitter-profile-stats').textContent = `${state.allTwitterUsers[state.twitterProfile.handle].followers} Followers • ${state.twitterProfile.following.length} Following`;
-                const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || t.retweetOf?.handle === state.twitterProfile.handle);
+                const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || (t.retweetOf && t.handle === state.twitterProfile.handle));
                 renderTweets(myTweetListContainer, myTweets);
             };
 
@@ -2246,6 +2126,106 @@
                 sendNUI('toggleFollow', { handle });
                 renderMyTwitterProfile();
             });
+            
+            const tweetClickHandler = e => {
+                // Action: Reply
+                const replyBtn = e.target.closest('.tweet-reply-btn');
+                if (replyBtn) {
+                    e.stopPropagation();
+                    if (state.currentApp !== 'twitter') closeApp();
+                    document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
+                    tweetComposeContainer.style.display = 'block';
+                    tweetText.value = `${replyBtn.dataset.handle} `;
+                    tweetText.focus();
+                    return;
+                }
+
+                // Action: Like
+                const likeBtn = e.target.closest('.tweet-like-btn');
+                if (likeBtn) {
+                    e.stopPropagation();
+                    const tweetId = parseInt(likeBtn.closest('[data-tweet-id]').dataset.tweetId);
+                    const tweet = findTweetById(tweetId);
+                    if (tweet) {
+                        tweet.liked = !tweet.liked;
+                        tweet.likes += tweet.liked ? 1 : -1;
+                        sendNUI('likeTweet', { tweetId: tweetId, liked: tweet.liked });
+                        likeBtn.innerHTML = `<i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}`;
+                    }
+                    return;
+                }
+
+                // Action: Retweet
+                const retweetBtn = e.target.closest('.tweet-retweet-btn');
+                if (retweetBtn) {
+                    e.stopPropagation();
+                    const tweetId = parseInt(retweetBtn.closest('[data-tweet-id]').dataset.tweetId);
+                    const originalTweet = findTweetById(tweetId);
+                    if (originalTweet && !originalTweet.retweetOf) {
+                        if (state.tweets.some(t => t.retweetOf && t.retweetOf.handle === originalTweet.handle && t.handle === state.twitterProfile.handle)) {
+                            notify("You've already retweeted this.");
+                            return;
+                        }
+                        originalTweet.retweets++;
+                        const newRetweet = {
+                            id: Date.now(), handle: state.twitterProfile.handle, time: 'Just now', likes: 0, liked: false, replies: [],
+                            retweetOf: { handle: originalTweet.handle, text: originalTweet.text }
+                        };
+                        state.tweets.push(newRetweet);
+                        sendNUI('retweet', { originalTweetId: tweetId });
+                        notify('Retweeted!');
+                        retweetBtn.innerHTML = `<i class="fas fa-retweet"></i> ${originalTweet.retweets}`;
+                        // Re-render main views to show the new retweet
+                        renderTwitterFeed();
+                        renderMyTwitterProfile();
+                    }
+                    return;
+                }
+
+                // Action: View Profile
+                const handleLink = e.target.closest('.tweet-handle');
+                if (handleLink) {
+                    e.stopPropagation();
+                    openTwitterProfile(handleLink.dataset.handle);
+                    return;
+                }
+
+                // Default Action: Expand/Collapse Replies
+                const tweetItem = e.target.closest('.tweet-item');
+                if (tweetItem) {
+                    const repliesContainer = tweetItem.querySelector('.tweet-replies-container');
+                    if (!repliesContainer) return;
+
+                    const isVisible = repliesContainer.style.display === 'block';
+
+                    const siblings = [...tweetItem.parentElement.children];
+                    siblings.forEach(sibling => {
+                        if (sibling !== tweetItem && sibling.classList.contains('tweet-item')) {
+                            const siblingReplies = sibling.querySelector('.tweet-replies-container');
+                            if (siblingReplies) {
+                                siblingReplies.style.display = 'none';
+                                siblingReplies.innerHTML = '';
+                            }
+                        }
+                    });
+
+                    if (!isVisible) {
+                        const tweetId = parseInt(tweetItem.dataset.tweetId);
+                        const tweet = findTweetById(tweetId);
+                        if (tweet && tweet.replies && tweet.replies.length > 0) {
+                            renderTweets(repliesContainer, tweet.replies);
+                            repliesContainer.style.display = 'block';
+                        }
+                    } else {
+                        repliesContainer.style.display = 'none';
+                        repliesContainer.innerHTML = '';
+                    }
+                }
+            };
+
+            const twitterAppContainer = document.getElementById('twitter-app');
+            twitterAppContainer.addEventListener('click', tweetClickHandler);
+            twitterUserProfileView.addEventListener('click', tweetClickHandler);
             
             tweetText.addEventListener('input', () => tweetCount.textContent = `${tweetText.value.length}/280`);
             newTweetBtn.addEventListener('click', () => {
@@ -2532,3 +2512,4 @@
     </script>
 </body>
 </html>
+
