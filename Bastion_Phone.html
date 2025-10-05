@@ -763,17 +763,17 @@
 
         /* Twitter Profile Styles */
         .twitter-profile-header {
+            position: relative; /* Added for settings button */
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid var(--bg-tertiary);
         }
         .twitter-profile-handle {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--accent);
+            font-size: 16px;
+            color: var(--text-secondary);
         }
         .twitter-profile-stats {
-            margin-top: 8px;
+            margin-top: 12px;
             font-size: 14px;
             color: var(--text-secondary);
         }
@@ -1161,6 +1161,9 @@
                             </div>
                             <div class="tab-content" id="twitter-profile" style="padding: 0;">
                                 <div class="twitter-profile-header">
+                                    <button id="twitter-settings-btn" class="btn btn-secondary" style="position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; padding: 0; border-radius: 50%; z-index: 5;"><i class="fas fa-cog"></i></button>
+                                    <div id="twitter-profile-pfp" class="list-item-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px;"></div>
+                                    <div id="twitter-profile-name" style="font-size: 20px; font-weight: bold; color: var(--text-primary); margin-bottom: 4px;"></div>
                                     <div id="twitter-profile-handle" class="twitter-profile-handle"></div>
                                     <div id="twitter-profile-stats" class="twitter-profile-stats"></div>
                                 </div>
@@ -1482,7 +1485,7 @@
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Version</div>
-                                <div class="list-item-subtitle">Phone OS v2.5.1</div>
+                                <div class="list-item-subtitle">Birb OS v2.5.9</div>
                             </div>
                         </div>
 
@@ -1519,6 +1522,29 @@
                         <button class="btn btn-secondary" style="margin-top: 10px;" id="cancel-contact-btn">Cancel</button>
                     </div>
                 </div>
+
+                <!-- Twitter Settings App View -->
+                <div class="app-view" id="twitter-settings-app">
+                    <div class="app-header">
+                        <div class="app-title">Edit Profile</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" id="twitter-settings-name" placeholder="Your display name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Handle</label>
+                            <input type="text" class="form-input" id="twitter-settings-handle" placeholder="@yourhandle">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Profile Picture URL</label>
+                            <input type="text" class="form-input" id="twitter-settings-photo" placeholder="e.g., https://i.imgur.com/image.png">
+                        </div>
+                        <button class="btn btn-primary" id="save-twitter-settings-btn">Save Changes</button>
+                        <button class="btn btn-secondary" style="margin-top: 10px;" id="cancel-twitter-settings-btn">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <div id="gesture"></div>
@@ -1528,7 +1554,6 @@
                     <div class="modal-title" id="modal-title">Confirm Action</div>
                     <div class="modal-message" id="modal-message">Are you sure?</div>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
                         <button class="btn btn-primary" id="modal-confirm">Confirm</button>
                     </div>
                 </div>
@@ -1576,7 +1601,7 @@
                 },
                 bills: [
                     { id: 1, name: 'Los Santos Power & Water', amount: 150, due: '2 days' },
-                    { id: 2, name: 'Badger Phone Service', amount: 85, due: '5 days' },
+                    { id: 2, name: 'Bastion Phone Service Payment', amount: 85, due: '5 days' },
                     { id: 3, name: 'Dynasty8 Real Estate (Rent)', amount: 2500, due: '12 days' },
                 ],
                 primaryJob: 'Taxi Driver',
@@ -1585,21 +1610,21 @@
                 twitterProfile: {
                     handle: '@JohnDoe',
                     followers: 125,
-                    following: ['@LSPDBoss']
+                    following: ['@LSPD']
                 },
                 tweets: [
-                    { id: 1, handle: '@LSPDBoss', text: 'Reminder: Do not call 911 for pizza deliveries. We will find you.', time: '1h ago', likes: 15, retweets: 3, liked: true, replies: [
+                    { id: 1, handle: '@LSPD', text: 'Reminder: Do not call 911 for pizza deliveries. We will find you.', time: '1h ago', likes: 15, retweets: 3, liked: true, replies: [
                         { id: 101, handle: '@JohnDoe', text: 'What if it\'s an emergency pizza?', time: '55m ago', likes: 5, retweets: 0, liked: false, replies: [
-                             { id: 102, handle: '@LSPDBoss', text: 'Still no.', time: '50m ago', likes: 25, retweets: 2, liked: true, replies: [] }
+                             { id: 102, handle: '@LSPD', text: 'Still no.', time: '50m ago', likes: 25, retweets: 2, liked: true, replies: [] }
                         ]}
                     ]},
-                    { id: 2, handle: '@FastDriver42', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false, replies: [] },
+                    { id: 2, handle: '@ToastMcLovin', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false, replies: [] },
                     { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive!', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] }
                 ],
                 allTwitterUsers: {
                     '@JohnDoe': { followers: 125, photoUrl: 'https://i.imgur.com/1q3n4U7.png' },
-                    '@LSPDBoss': { followers: 2500, photoUrl: '' },
-                    '@FastDriver42': { followers: 312, photoUrl: 'https://i.imgur.com/83w0f9d.png' }
+                    '@LSPD': { followers: 2500, photoUrl: '' },
+                    '@ToastMcLovin': { followers: 312, photoUrl: 'https://i.imgur.com/83w0f9d.png' }
                 },
                 foodFerryLeaderboard: [
                     { rank: 1, name: 'Speedy Gonzales', orders: 152 },
@@ -1811,7 +1836,7 @@
 
             const openApp = (appName, data = {}) => {
                 if (state.currentApp) {
-                    const currentView = document.getElementById(`${state.currentApp}-app`);
+                    const currentView = document.getElementById(`${state.currentApp}-app`) || document.getElementById(state.currentApp);
                     if (currentView) currentView.classList.remove('active');
                 }
                 homeScreen.classList.add('hidden');
@@ -2124,9 +2149,18 @@
             const renderTwitterFeed = () => renderTweets(tweetListContainer, state.tweets);
 
             const renderMyTwitterProfile = () => {
-                document.getElementById('twitter-profile-handle').textContent = state.twitterProfile.handle;
-                document.getElementById('twitter-profile-stats').textContent = `${state.allTwitterUsers[state.twitterProfile.handle].followers} Followers • ${state.twitterProfile.following.length} Following`;
-                const myTweets = state.tweets.filter(t => t.handle === state.twitterProfile.handle || (t.retweetOf && t.handle === state.twitterProfile.handle));
+                const handle = state.twitterProfile.handle;
+                const user = state.allTwitterUsers[handle];
+                const myCard = state.myCard;
+
+                document.getElementById('twitter-profile-name').textContent = myCard.name;
+                document.getElementById('twitter-profile-handle').textContent = handle;
+                const pfpElement = document.getElementById('twitter-profile-pfp');
+                const pfpContact = { name: myCard.name, photoUrl: user.photoUrl };
+                setAvatar(pfpElement, pfpContact);
+
+                document.getElementById('twitter-profile-stats').textContent = `${user.followers} Followers • ${state.twitterProfile.following.length} Following`;
+                const myTweets = state.tweets.filter(t => t.handle === handle || (t.retweetOf && t.handle === handle));
                 renderTweets(myTweetListContainer, myTweets);
             };
 
@@ -2347,6 +2381,79 @@
                 notify('Tweet sent!');
             });
             
+            const openTwitterSettings = () => {
+                const handle = state.twitterProfile.handle;
+                const user = state.allTwitterUsers[handle];
+                const myCard = state.myCard;
+
+                document.getElementById('twitter-settings-name').value = myCard.name;
+                document.getElementById('twitter-settings-handle').value = handle;
+                document.getElementById('twitter-settings-photo').value = user.photoUrl || '';
+
+                openApp('twitter-settings');
+            };
+
+            document.getElementById('twitter-settings-btn').addEventListener('click', openTwitterSettings);
+
+            document.getElementById('cancel-twitter-settings-btn').addEventListener('click', () => {
+                closeApp();
+                openApp('twitter');
+                document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+            });
+            
+            document.getElementById('save-twitter-settings-btn').addEventListener('click', () => {
+                const newName = document.getElementById('twitter-settings-name').value.trim();
+                const newHandle = document.getElementById('twitter-settings-handle').value.trim();
+                const newPhoto = document.getElementById('twitter-settings-photo').value.trim();
+
+                if (!newName || !newHandle) {
+                    notify('Username and Handle cannot be empty.');
+                    return;
+                }
+
+                if (!newHandle.startsWith('@')) {
+                    notify('Handle must start with @');
+                    return;
+                }
+
+                if (state.allTwitterUsers[newHandle] && newHandle !== state.twitterProfile.handle) {
+                    notify('That handle is already taken.');
+                    return;
+                }
+                
+                const oldHandle = state.twitterProfile.handle;
+                state.myCard.name = newName;
+                state.twitterProfile.handle = newHandle;
+
+                const userData = state.allTwitterUsers[oldHandle];
+                userData.photoUrl = newPhoto;
+                if (oldHandle !== newHandle) {
+                    state.allTwitterUsers[newHandle] = userData;
+                    delete state.allTwitterUsers[oldHandle];
+                }
+                
+                const updateTweetHandles = (tweets) => {
+                    for (const tweet of tweets) {
+                        if (tweet.handle === oldHandle) tweet.handle = newHandle;
+                        if (tweet.retweetOf && tweet.retweetOf.handle === oldHandle) tweet.retweetOf.handle = newHandle;
+                        if (tweet.replies && tweet.replies.length > 0) updateTweetHandles(tweet.replies);
+                    }
+                };
+                updateTweetHandles(state.tweets);
+
+                sendNUI('updateTwitterProfile', { name: newName, handle: newHandle, photoUrl: newPhoto });
+                
+                renderMyTwitterProfile();
+                renderTwitterFeed();
+                renderMyContactCard();
+
+                notify('Profile updated successfully!');
+
+                closeApp();
+                openApp('twitter');
+                document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+            });
+
             const primaryJobWidget = document.getElementById('primary-job-widget');
             const secondaryJobWidget = document.getElementById('secondary-job-widget');
 
@@ -2579,10 +2686,6 @@
                 showModal('About Food Ferry', 'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', () => hideModal());
                 document.getElementById('modal-confirm').textContent = 'Close';
             });
-            document.getElementById('modal-cancel').addEventListener('click', () => {
-                 document.getElementById('modal-confirm').textContent = 'Confirm';
-            });
-
 
             const showModal = (title, message, callback) => {
                 document.getElementById('modal-title').textContent = title;
@@ -2591,7 +2694,6 @@
                 state.modalCallback = callback;
             };
             const hideModal = () => { modal.classList.remove('active'); state.modalCallback = null; };
-            document.getElementById('modal-cancel').addEventListener('click', hideModal);
             document.getElementById('modal-confirm').addEventListener('click', () => { if (state.modalCallback) state.modalCallback(); });
 
             const inputModal = document.getElementById('input-modal');
@@ -2664,4 +2766,3 @@
     </script>
 </body>
 </html>
-
