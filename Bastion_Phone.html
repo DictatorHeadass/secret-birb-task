@@ -35,6 +35,7 @@
             background: transparent;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
+            color: var(--text-primary);
         }
 
         #phone-wrapper {
@@ -1485,7 +1486,7 @@
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Version</div>
-                                <div class="list-item-subtitle">Birb OS v2.5.9</div>
+                                <div class="list-item-subtitle">Phone OS v2.5.1</div>
                             </div>
                         </div>
 
@@ -1554,6 +1555,7 @@
                     <div class="modal-title" id="modal-title">Confirm Action</div>
                     <div class="modal-message" id="modal-message">Are you sure?</div>
                     <div class="modal-actions">
+                        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
                         <button class="btn btn-primary" id="modal-confirm">Confirm</button>
                     </div>
                 </div>
@@ -1601,7 +1603,7 @@
                 },
                 bills: [
                     { id: 1, name: 'Los Santos Power & Water', amount: 150, due: '2 days' },
-                    { id: 2, name: 'Bastion Phone Service Payment', amount: 85, due: '5 days' },
+                    { id: 2, name: 'Badger Phone Service', amount: 85, due: '5 days' },
                     { id: 3, name: 'Dynasty8 Real Estate (Rent)', amount: 2500, due: '12 days' },
                 ],
                 primaryJob: 'Taxi Driver',
@@ -2686,6 +2688,10 @@
                 showModal('About Food Ferry', 'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', () => hideModal());
                 document.getElementById('modal-confirm').textContent = 'Close';
             });
+            document.getElementById('modal-cancel').addEventListener('click', () => {
+                 document.getElementById('modal-confirm').textContent = 'Confirm';
+            });
+
 
             const showModal = (title, message, callback) => {
                 document.getElementById('modal-title').textContent = title;
@@ -2694,6 +2700,7 @@
                 state.modalCallback = callback;
             };
             const hideModal = () => { modal.classList.remove('active'); state.modalCallback = null; };
+            document.getElementById('modal-cancel').addEventListener('click', hideModal);
             document.getElementById('modal-confirm').addEventListener('click', () => { if (state.modalCallback) state.modalCallback(); });
 
             const inputModal = document.getElementById('input-modal');
@@ -2766,3 +2773,5 @@
     </script>
 </body>
 </html>
+
+
