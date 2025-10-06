@@ -1,0 +1,3093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Sec Phone</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --accent: #00d9ff;
+            --accent-dim: rgba(0, 217, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --danger: #ff3b5c;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --orange: #ff9800;
+        }
+
+        body {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        #phone-wrapper {
+            width: 400px;
+            height: 850px;
+            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            border-radius: 45px;
+            padding: 12px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        #phone-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            border-radius: 38px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        #status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+
+        .status-left { display: flex; gap: 12px; align-items: center; }
+        .status-right { display: flex; gap: 8px; align-items: center; }
+        .status-icon { font-size: 12px; }
+
+        /* Dynamic Island */
+        #dynamic-island {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            border-radius: 25px;
+            padding: 8px 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 150;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #dynamic-island.active {
+            display: flex;
+            animation: islandExpand 0.3s ease;
+        }
+
+        @keyframes islandExpand {
+            from { width: 120px; opacity: 0; }
+            to { width: auto; opacity: 1; }
+        }
+
+        .island-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success), #00c853);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .island-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .island-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .island-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .island-end-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .island-end-btn:active { transform: scale(0.9); }
+
+        /* Container for all screens */
+        #screen-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Home Screen */
+        #home-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+
+        #home-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #wallpaper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0.15;
+            z-index: 0;
+        }
+
+        #home-content {
+            flex: 1;
+            padding: 70px 20px 120px 20px;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        #home-content::-webkit-scrollbar { width: 0; }
+
+        #apps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .app:active { transform: scale(0.88); }
+
+        .app-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            position: relative;
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .app-name {
+            font-size: 12px;
+            color: var(--text-primary);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .app-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 12px;
+            min-width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 2px 8px rgba(255, 59, 92, 0.4);
+        }
+
+        /* Dock */
+        #dock {
+            position: absolute;
+            bottom: 4%;
+            left: 20px;
+            right: 20px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(40px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 90;
+        }
+
+        .dock-app {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .dock-app:active { transform: scale(0.9); }
+
+        /* App View */
+        .app-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            display: none;
+            flex-direction: column;
+            z-index: 80;
+            padding-top: 50px;
+            box-sizing: border-box;
+        }
+
+        .app-view.active {
+            display: flex;
+            animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .app-header {
+            height: 65px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            flex-shrink: 0;
+            margin-top: -20px;
+            position: relative;
+        }
+        
+        .app-header .btn {
+            height: 50px;
+            font-size: 14px;
+            font-weight: 600;
+			z-index: 101;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .app-content::-webkit-scrollbar { width: 4px; }
+        .app-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+        /* Tabs */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            padding: 15px 20px 0 20px;
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        .form-textarea {
+            resize: none;
+            min-height: 100px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #00b8d4);
+            color: white;
+            box-shadow: 0 4px 16px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:active { transform: scale(0.97); }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #d32f4f);
+            color: white;
+            box-shadow: 0 4px 16px rgba(255, 59, 92, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* List Items */
+        .list-item {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .list-item:hover { background: var(--bg-tertiary); }
+        .list-item:active { transform: scale(0.98); }
+
+        .list-item-main { flex: 1; }
+
+        .list-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .list-item-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .list-item-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+		
+		/* Avatar Style for Messages and Contacts */
+        .list-item-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dialpad */
+        .dialpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .dial-btn {
+            aspect-ratio: 1;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .dial-btn:active {
+            background: var(--bg-tertiary);
+            transform: scale(0.95);
+        }
+
+        .dial-num {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .dial-letters {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+
+        .widget {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .widget-header {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .widget-balance {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Message Bubbles */
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .message-received {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-sent {
+            background: var(--accent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px 0;
+        }
+
+        .message-input-container {
+    		position: sticky;
+    		bottom: 4%;
+    		background: var(--bg-primary);
+    		padding: 15px 0;
+    		border-top: 1px solid rgba(255, 255, 255, 0.05);
+    		display: flex;
+    		gap: 10px;
+		}
+
+        .message-bubble .embedded-image, .tweet-item .embedded-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 8px;
+            display: block;
+        }
+
+        /* Food Ferry Specific Styles */
+        .food-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--orange), #ff5722);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .food-header i { font-size: 48px; margin-bottom: 10px; }
+        .food-header h2 { font-size: 24px; margin: 0; }
+        .food-header p { font-size: 14px; opacity: 0.9; margin: 5px 0 0 0; }
+
+        .food-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+
+        .food-stat { text-align: center; }
+        .food-stat-value { font-size: 20px; font-weight: 700; color: var(--warning); }
+        .food-stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+
+        /* Modal */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 85%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .modal-title { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+        .modal-message { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 12px; }
+        .modal-actions .btn { margin: 0; }
+
+        /* App-specific colors */
+        .app-phone .app-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .app-messages .app-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .app-bank .app-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .app-camera .app-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .app-twitter .app-icon { background: linear-gradient(135deg, #1DA1F2, #0d8bd9); }
+        .app-ping .app-icon { background: linear-gradient(135deg, #fa709a, #fee140); }
+        .app-job .app-icon { background: linear-gradient(135deg, #30cfd0, #330867); }
+        .app-food .app-icon { background: linear-gradient(135deg, #ff9a56, #ff6a88); }
+        .app-requestee .app-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .app-settings .app-icon { background: linear-gradient(135deg, #6c757d, #5a6268); }
+        .app-garage .app-icon { background: linear-gradient(135deg, #868f96, #596164); }
+        .app-lifeinvader .app-icon { background: linear-gradient(135deg, #e4405f, #fbad50); }
+        
+        /* Twitter Floating Action Button */
+        #twitter-app #new-tweet-btn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            border-radius: 50%;
+            padding: 0;
+            margin: 0;
+            font-size: 22px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(29, 161, 242, 0.4);
+        }
+
+        /* Contact Action Buttons */
+        .contact-action-btn {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            font-size: 15px !important;
+            flex-shrink: 0;
+            flex-grow: 1;
+        }
+        
+        /* Expandable Contact List Styles */
+        .contact-item {
+            flex-wrap: wrap;
+            padding: 12px 16px;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+        .contact-actions {
+            max-height: 0;
+            overflow: hidden;
+            width: 100%;
+            display: flex;
+            gap: 8px;
+            justify-content: space-around;
+            transition: max-height 0.3s ease-out, margin-top 0.3s ease-out, padding-top 0.3s ease-out;
+        }
+        .contact-item.expanded .contact-actions {
+            max-height: 100px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        /* Active Job Widget Style */
+        .job-widget {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .job-widget.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-dim);
+        }
+
+        /* Twitter Profile Styles */
+        .twitter-profile-header {
+            position: relative; /* Added for settings button */
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        .twitter-profile-handle {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+        .twitter-profile-stats {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .tweet-item {
+            flex-direction: column; 
+            align-items: flex-start;
+        }
+        .tweet-item:active {
+            transform: scale(1);
+        }
+        .tweet-actions {
+            display: flex;
+            gap: 25px;
+            margin-top: 12px;
+            color: var(--text-secondary);
+        }
+        .tweet-action-btn {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .tweet-action-btn:hover {
+            color: var(--accent);
+        }
+        .tweet-action-btn .fa-heart.liked {
+            color: var(--danger);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch-label {
+            position: relative; 
+            display: inline-block; 
+            width: 50px; 
+            height: 28px;
+        }
+
+        .toggle-switch-label input { 
+            opacity: 0; 
+            width: 0; 
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute; 
+            cursor: pointer; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background-color: var(--bg-tertiary); 
+            transition: 0.3s; 
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute; 
+            content: ""; 
+            height: 20px; 
+            width: 20px; 
+            left: 4px; 
+            bottom: 4px; 
+            background-color: white; 
+            transition: 0.3s; 
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Gesture Bar */
+        #gesture {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+			filter: drop-shadow(1px 1px 4px #0A0A0A);
+            width: 120px;
+            height: 15px;
+            line-height: 3px;
+            text-align: center;
+            font-size: 38px;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        #gesture::before {
+            content: '⬢'; /* Hexagon character */
+        }
+    </style>
+</head>
+<body>
+    <div id="phone-wrapper">
+        <div id="phone-screen">
+            <div id="status-bar">
+                <div class="status-left">
+                    <span id="time">18:57</span>
+                </div>
+                <div class="status-right">
+                    <i class="fas fa-signal status-icon"></i>
+                    <i class="fas fa-wifi status-icon"></i>
+                    <span><i class="fas fa-battery-three-quarters"></i> 92%</span>
+                </div>
+            </div>
+
+            <div id="dynamic-island">
+                <div class="island-icon">
+                    <i class="fas fa-phone-alt"></i>
+                </div>
+                <div class="island-content">
+                    <div class="island-title" id="island-title">Calling...</div>
+                    <div class="island-subtitle" id="island-subtitle">555-0123</div>
+                </div>
+                <div class="island-end-btn" id="island-end-call">
+                    <i class="fas fa-phone-slash" style="font-size: 14px;"></i>
+                </div>
+            </div>
+
+            <div id="screen-container">
+                <div id="home-screen">
+                    <div id="wallpaper"></div>
+                    <div id="home-content">
+                        <div id="apps-grid">
+                            <div class="app app-phone" data-app="phone">
+                                <div class="app-icon"><i class="fas fa-phone-alt"></i></div>
+                                <div class="app-name">Phone</div>
+                            </div>
+                            <div class="app app-messages" data-app="messages">
+                                <div class="app-icon">
+                                    <i class="fas fa-comment-dots"></i>
+                                    <div class="app-badge">5</div>
+                                </div>
+                                <div class="app-name">Messages</div>
+                            </div>
+                            <div class="app app-bank" data-app="bank">
+                                <div class="app-icon"><i class="fas fa-university"></i></div>
+                                <div class="app-name">Bank</div>
+                            </div>
+                            <div class="app app-camera" data-app="camera">
+                                <div class="app-icon"><i class="fas fa-camera"></i></div>
+                                <div class="app-name">Camera</div>
+                            </div>
+                            <div class="app app-twitter" data-app="twitter">
+                                <div class="app-icon"><i class="fab fa-twitter"></i></div>
+                                <div class="app-name">Tweeter</div>
+                            </div>
+                            <div class="app app-lifeinvader" data-app="lifeinvader">
+                                <div class="app-icon"><i class="fas fa-users"></i></div>
+                                <div class="app-name">LifeInvader</div>
+                            </div>
+                            <div class="app app-ping" data-app="ping">
+                                <div class="app-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                <div class="app-name">Pingr</div>
+                            </div>
+                            <div class="app app-job" data-app="job">
+                                <div class="app-icon"><i class="fas fa-briefcase"></i></div>
+                                <div class="app-name">Jobs</div>
+                            </div>
+                            <div class="app app-food" data-app="food">
+                                <div class="app-icon"><i class="fas fa-utensils"></i></div>
+                                <div class="app-name">Food Ferry</div>
+                            </div>
+                            <div class="app app-requestee" data-app="requestee">
+                                <div class="app-icon"><i class="fas fa-hands-helping"></i></div>
+                                <div class="app-name">Requestee</div>
+                            </div>
+                            <div class="app app-settings" data-app="settings">
+                                <div class="app-icon"><i class="fas fa-cog"></i></div>
+                                <div class="app-name">Settings</div>
+                            </div>
+                            <div class="app app-garage" data-app="garage">
+                                <div class="app-icon"><i class="fas fa-warehouse"></i></div>
+                                <div class="app-name">Garage</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dock">
+                        <div class="dock-app app-phone" data-app="phone" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="dock-app app-messages" data-app="messages" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="dock-app app-bank" data-app="bank" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="dock-app app-camera" data-app="camera" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="phone-app">
+                    <div class="app-header">
+                        <div class="app-title">Phone</div>
+                    </div>
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-tab="dialpad">Dialpad</button>
+                        <button class="tab-btn" data-tab="contacts">Contacts</button>
+                        <button class="tab-btn" data-tab="recents">Recents</button>
+                    </div>
+                    <div class="app-content">
+                        <div class="tab-content active" id="dialpad">
+                            <div class="form-group">
+                                <input type="text" class="form-input" id="phone-input" placeholder="Enter phone number" readonly>
+                            </div>
+                            <div class="dialpad">
+                                <div class="dial-btn" data-num="1"><span class="dial-num">1</span></div>
+                                <div class="dial-btn" data-num="2"><span class="dial-num">2</span><span class="dial-letters">ABC</span></div>
+                                <div class="dial-btn" data-num="3"><span class="dial-num">3</span><span class="dial-letters">DEF</span></div>
+                                <div class="dial-btn" data-num="4"><span class="dial-num">4</span><span class="dial-letters">GHI</span></div>
+                                <div class="dial-btn" data-num="5"><span class="dial-num">5</span><span class="dial-letters">JKL</span></div>
+                                <div class="dial-btn" data-num="6"><span class="dial-num">6</span><span class="dial-letters">MNO</span></div>
+                                <div class="dial-btn" data-num="7"><span class="dial-num">7</span><span class="dial-letters">PQRS</span></div>
+                                <div class="dial-btn" data-num="8"><span class="dial-num">8</span><span class="dial-letters">TUV</span></div>
+                                <div class="dial-btn" data-num="9"><span class="dial-num">9</span><span class="dial-letters">WXYZ</span></div>
+                                <div class="dial-btn" data-num="*"><span class="dial-num">*</span></div>
+                                <div class="dial-btn" data-num="0"><span class="dial-num">0</span><span class="dial-letters">+</span></div>
+                                <div class="dial-btn" data-num="#"><span class="dial-num">#</span></div>
+                            </div>
+                            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                                <button class="btn btn-primary" id="call-btn" style="flex: 2;">
+                                    <i class="fas fa-phone-alt"></i> Call
+                                </button>
+                                <button class="btn btn-secondary" id="clear-btn" style="flex: 1;">
+                                    <i class="fas fa-backspace"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="contacts">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                                <input type="text" class="form-input" id="contact-search" placeholder="Search contacts..." style="margin-bottom: 0;">
+                                <button class="btn btn-primary" id="new-contact-btn" style="width: auto; padding: 0 18px; margin: 0; flex-shrink: 0;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div id="my-contact-card-container"></div>
+                            <div id="contacts-list">
+                                </div>
+                        </div>
+
+                        <div class="tab-content" id="recents">
+                            <div id="recents-list">
+                                <div class="list-item recent-call" data-number="555-0202">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">
+                                            <i class="fas fa-phone-slash" style="color: var(--danger); font-size: 12px; margin-right: 8px;"></i>
+                                            Jane Doe
+                                        </div>
+                                        <div class="list-item-subtitle">Missed • Today, 10:30 AM</div>
+                                    </div>
+                                    <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; margin: 0;">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                                <div class="list-item recent-call" data-number="555-0101">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">
+                                            <i class="fas fa-phone" style="color: var(--success); font-size: 12px; margin-right: 8px;"></i>
+                                            Adam Smith
+                                        </div>
+                                        <div class="list-item-subtitle">Outgoing • Yesterday, 3:15 PM</div>
+                                    </div>
+                                    <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; margin: 0;">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                                <div class="list-item recent-call" data-number="555-0303">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">
+                                            <i class="fas fa-phone" style="color: var(--accent); font-size: 12px; margin-right: 8px;"></i>
+                                            Mechanic Mike
+                                        </div>
+                                        <div class="list-item-subtitle">Incoming • 2 days ago</div>
+                                    </div>
+                                    <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; margin: 0;">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="messages-app">
+                    <div class="app-header">
+                        <div class="app-title">Messages</div>
+                    </div>
+                    <div class="app-content" id="messages-list-view">
+                        <div class="form-group">
+                            <input type="text" class="form-input" id="message-search" placeholder="Search messages...">
+                        </div>
+                        </div>
+
+                    <div class="app-content" id="conversation-view" style="display: none; padding: 0; flex-direction: column;">
+                        <div style="margin-bottom: 15px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <button class="btn btn-secondary" id="back-to-messages" style="width: auto; padding: 8px 16px; margin: 0 15px 0 0;">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <div id="conversation-avatar" class="list-item-avatar" style="margin-right: 15px;">J</div>
+                                <div>
+                                    <h3 id="conversation-contact" style="color: var(--text-primary); margin: 0;">Jane Doe</h3>
+                                    <p id="conversation-number" style="color: var(--text-secondary); font-size: 13px; margin: 5px 0 0 0;">555-0202</p>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary" id="call-from-message" style="width: 45px; height: 45px; padding: 0; margin: 0; border-radius: 50%;">
+                                    <i class="fas fa-phone-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="messages-container" id="messages-container" style="flex: 1; overflow-y: auto; padding: 0 20px;">
+                        </div>
+
+                        <div class="message-input-container" style="padding: 15px 20px;">
+                            <button class="btn btn-secondary" id="attach-image" style="width: auto; padding: 0 20px; margin: 0;">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="text" class="form-input" id="message-input" placeholder="Type a message..." style="flex: 1; margin: 0;">
+                            <button class="btn btn-primary" id="send-message" style="width: auto; padding: 0 20px; margin: 0;">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="bank-app">
+                    <div class="app-header">
+                        <div class="app-title">Banking</div>
+                    </div>
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-tab="bank-transfer">Transfer</button>
+                        <button class="tab-btn" data-tab="bank-bills">Bills</button>
+                    </div>
+                    <div class="app-content" style="padding: 0;">
+                        <div class="tab-content active" id="bank-transfer" style="padding: 20px;">
+                            <div class="form-group">
+                                <label class="form-label">Account</label>
+                                <select class="form-select" id="bank-account-select">
+                                    <option value="personal">Personal Account</option>
+                                    <option value="business">Business Account</option>
+                                    <option value="escrow">Escrow Account</option>
+                                </select>
+                            </div>
+                            <div class="widget" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <div class="widget-header" style="color: rgba(255,255,255,0.8);">Account Balance</div>
+                                <div class="widget-balance">$0</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Recipient ID</label>
+                                <input type="text" class="form-input" id="transfer-id" placeholder="Enter player or account ID">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" id="transfer-amount" placeholder="$0">
+                            </div>
+                            <button class="btn btn-primary" id="transfer-btn">
+                                <i class="fas fa-paper-plane"></i> Send Money
+                            </button>
+                            <h3 style="color: var(--text-secondary); margin: 30px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Transactions</h3>
+                            <div id="transactions-list">
+                                <div class="list-item">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">Jane Doe</div>
+                                        <div class="list-item-subtitle">Yesterday, 3:42 PM</div>
+                                    </div>
+                                    <div class="list-item-value" style="color: var(--danger);">-$500</div>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-item-main">
+                                        <div class="list-item-title">Taxi Payment</div>
+                                        <div class="list-item-subtitle">Today, 10:15 AM</div>
+                                    </div>
+                                    <div class="list-item-value" style="color: var(--success);">+$150</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="bank-bills" style="padding: 20px;">
+                            <!-- Bills content will be rendered here by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="camera-app">
+                    <div class="app-header">
+                        <div class="app-title">Camera</div>
+                    </div>
+                    <div class="app-content" style="padding: 0; display: flex; flex-direction: column; height: 100%;">
+                        <div style="flex: 1; background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;">
+                            <i class="fas fa-camera" style="font-size: 64px; color: #555;"></i>
+                            <p style="color: #555; font-size: 14px;">Camera feed would appear here</p>
+                        </div>
+                        <div style="height: 130px; background: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; padding: 20px;padding-bottom: 55px;">
+                            <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
+                                <i class="fas fa-images"></i>
+                            </button>
+                            <button class="btn btn-primary" style="width: 70px; height: 75px; padding: 0; border-radius: 50%;">
+                                <i class="fas fa-circle" style="font-size: 24px;"></i>
+                            </button>
+                            <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="twitter-app">
+                    <div class="app-header">
+                        <div class="app-title">Tweeter</div>
+                    </div>
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-tab="twitter-feed">Feed</button>
+                        <button class="tab-btn" data-tab="twitter-profile">Profile</button>
+                    </div>
+                    <div class="app-content" style="padding: 0; display: flex; flex-direction: column;">
+                        <div id="tweet-compose-container" style="display: none; padding: 20px; border-bottom: 1px solid var(--bg-tertiary);">
+                            <div class="form-group">
+                                <textarea class="form-textarea" id="tweet-text" placeholder="What's happening in Los Santos?" maxlength="280"></textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 15px; color: var(--text-secondary); font-size: 13px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label class="toggle-switch-label">
+                                                <input type="checkbox" id="tweet-anonymous-toggle">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span>Anonymous</span>
+                                        </div>
+                                        <div id="tweet-key-info" style="display: none; align-items: center; gap: 5px;">
+                                            <i class="fas fa-key"></i> Keys: <span id="tweet-key-count">0</span>
+                                        </div>
+                                    </div>
+                                    <span id="tweet-count" style="font-size: 12px; color: var(--text-secondary);">0/280</span>
+                                </div>
+                                 <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 15px;">
+                                     <button class="btn btn-secondary" id="attach-tweet-image" style="width: auto; padding: 10px 16px; margin: 0 8px 0 0;"><i class="fas fa-paperclip"></i></button>
+                                     <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex-grow: 1; overflow-y: auto;">
+                            <div class="tab-content active" id="twitter-feed" style="padding: 20px;">
+                                <div id="tweet-list"></div>
+                            </div>
+                            <div class="tab-content" id="twitter-profile" style="padding: 0;">
+                                <div class="twitter-profile-header">
+                                    <button id="twitter-settings-btn" class="btn btn-secondary" style="position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; padding: 0; border-radius: 50%; z-index: 5;"><i class="fas fa-cog"></i></button>
+                                    <div id="twitter-profile-pfp" class="list-item-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px;"></div>
+                                    <div id="twitter-profile-name" style="font-size: 20px; font-weight: bold; color: var(--text-primary); margin-bottom: 4px;"></div>
+                                    <div id="twitter-profile-handle" class="twitter-profile-handle"></div>
+                                    <div id="twitter-profile-stats" class="twitter-profile-stats"></div>
+                                </div>
+                                 <h3 style="color: var(--text-secondary); margin: 20px 20px 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">My Tweets</h3>
+                                <div id="my-tweet-list" style="padding: 0 20px 20px 20px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="new-tweet-btn">
+                        <i class="fas fa-feather-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="app-view" id="twitter-user-profile-view">
+                    <div class="app-header">
+                        <div class="app-title">Profile</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="twitter-profile-header">
+                            <div id="view-profile-avatar" class="list-item-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px;"></div>
+                            <div id="view-profile-handle" class="twitter-profile-handle"></div>
+                            <div id="view-profile-stats" class="twitter-profile-stats"></div>
+                            <button id="follow-btn" class="btn btn-primary" style="width: auto; padding: 10px 30px; margin-top: 15px;">Follow</button>
+                        </div>
+                        <h3 style="color: var(--text-secondary); margin: 20px 20px 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Tweets</h3>
+                        <div id="view-profile-tweet-list" style="padding: 0 0 20px 0;"></div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="twitter-thread-view">
+                    <div class="app-header">
+                        <div style="position: absolute; left: 20px;top: 8%;">
+                            <button class="btn btn-secondary" id="twitter-thread-back" style="width: auto; padding: 10px 16px; margin: 0; top: 1%;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                        <div class="app-title">Thread</div>
+                    </div>
+                    <div class="app-content" style="padding: 0; overflow-y: auto; ">
+                        <div id="main-tweet-container" style="padding: 20px; border-bottom: 5px solid var(--bg-tertiary);"></div>
+                        <h3 style="color: var(--text-secondary); margin: 20px 20px 0px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Replies</h3>
+                        <div id="thread-replies-list" style="padding: 0 20px 20px 20px;"></div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="ping-app">
+                    <div class="app-header">
+                        <div class="app-title">Pingr</div>
+                    </div>
+                    <div class="app-content">
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">Send your current GPS location to another player.</p>
+
+                        <div class="form-group">
+                            <label class="form-label">Target Player ID</label>
+                            <input type="number" class="form-input" id="ping-target" placeholder="Enter player ID (e.g., 42)">
+                        </div>
+
+                        <button class="btn btn-primary" id="send-ping">
+                            <i class="fas fa-location-arrow"></i> Send My Location
+                        </button>
+
+                        <h3 style="color: var(--text-secondary); margin: 30px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Received Pings</h3>
+
+                        <div class="list-item">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Player #12</div>
+                                <div class="list-item-subtitle">Legion Square</div>
+                            </div>
+                            <button class="btn btn-secondary" style="width: auto; padding: 8px 16px; margin: 0;">
+                                <i class="fas fa-map-marked-alt"></i>
+                            </button>
+                        </div>
+
+                        <div class="list-item">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Adam Smith</div>
+                                <div class="list-item-subtitle">Vinewood Hills</div>
+                            </div>
+                            <button class="btn btn-secondary" style="width: auto; padding: 8px 16px; margin: 0;">
+                                <i class="fas fa-map-marked-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="job-app">
+                    <div class="app-header">
+                        <div class="app-title">Job Center</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="widget job-widget" id="primary-job-widget">
+                            <div class="widget-header" style="color: rgba(255,255,255,0.8);">Primary Job</div>
+                            <div class="widget-balance" style="font-size: 28px;" id="primary-job-display">Unemployed</div>
+                        </div>
+
+                        <div class="widget job-widget" id="secondary-job-widget">
+                            <div class="widget-header" style="color: rgba(255,255,255,0.8);">Secondary Job</div>
+                            <div class="widget-balance" style="font-size: 28px;" id="secondary-job-display">Unemployed</div>
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Job Actions</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Select Action</label>
+                            <select class="form-select" id="job-action-select">
+                                <option value="">Choose an action...</option>
+                                <option value="bill">Bill Customer</option>
+                                <option value="hire">Hire Employee</option>
+                                <option value="fire">Fire Employee</option>
+                                <option value="promote">Promote Employee</option>
+                                <option value="demote">Demote Employee</option>
+                            </select>
+                        </div>
+
+                        <div id="job-action-form" style="display: none; background: var(--bg-secondary); padding: 20px; border-radius: 15px;">
+                            <div class="form-group" id="job-action-target-group" style="display: none;">
+                                <label class="form-label">Target Player</label>
+                                <select class="form-select" id="job-action-target-select"></select>
+                            </div>
+                            <div class="form-group" id="job-action-amount-group" style="display: none;">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" id="job-action-amount-input" placeholder="$0">
+                            </div>
+                            <div class="form-group" id="job-action-reason-group" style="display: none;">
+                                <label class="form-label" id="job-action-reason-label">Reason</label>
+                                <input type="text" class="form-input" id="job-action-reason-input" placeholder="Service description...">
+                            </div>
+                            <button class="btn btn-primary" id="job-action-execute-btn">Execute</button>
+                        </div>
+
+                        <div style="margin-top: 30px; display: flex; gap: 12px;">
+                             <button class="btn btn-danger" id="quit-job-primary" style="flex: 1;">
+                                <i class="fas fa-sign-out-alt"></i> Quit Primary
+                            </button>
+                             <button class="btn btn-danger" id="quit-job-secondary" style="flex: 1;">
+                                <i class="fas fa-sign-out-alt"></i> Quit Secondary
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-view" id="food-app">
+                    <div class="app-header">
+                        <div class="app-title">Food Ferry</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="food-header">
+                            <i class="fas fa-shipping-fast"></i>
+                            <h2>Food Ferry</h2>
+                            <p>Feeding You Faster</p>
+                        </div>
+
+                        <button class="btn" id="food-toggle-orders" style="background: var(--orange); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
+                            <i class="fas fa-list"></i> TOGGLE ORDERS
+                        </button>
+
+                        <button class="btn btn-danger" id="food-view-rankings" style="margin-bottom: 15px;">
+                            <i class="fas fa-crown"></i> VIEW RANKINGS
+                        </button>
+
+                        <button class="btn btn-secondary" id="food-about-btn" style="margin-bottom: 20px;">
+                            <i class="fas fa-info-circle"></i> ABOUT
+                        </button>
+
+                        <div class="food-stats">
+                            <div class="food-stat">
+                                <div class="food-stat-value">3.0 ⭐</div>
+                                <div class="food-stat-label">Average Rating</div>
+                            </div>
+                            <div class="food-stat">
+                                <div class="food-stat-value">0 📋</div>
+                                <div class="food-stat-label">Orders Completed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="app-view" id="food-leaderboard-view">
+                    <div class="app-header">
+                        <div style="position: absolute; left: 20px;">
+                            <button class="btn btn-secondary" id="food-leaderboard-back" style="width: auto; padding: 8px 16px; margin: 0;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                        <div class="app-title">Rankings</div>
+                    </div>
+                    <div class="app-content" id="food-leaderboard-content">
+                        <!-- Leaderboard will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="app-view" id="requestee-app">
+                    <div class="app-header">
+                        <div class="app-title">Requestee</div>
+                    </div>
+                    <div class="app-content">
+                        <p style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6; text-align: center;">Need a service done? Choose one of the options below to request someone from that job to enter the city to assist you.</p>
+
+                        <button class="btn" id="request-mechanic" style="background: linear-gradient(135deg, #ff9800, #ff5722); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
+                            <i class="fas fa-wrench"></i> REQUEST MECHANIC
+                        </button>
+
+                        <button class="btn" id="request-realtor" style="background: linear-gradient(135deg, #009688, #00bcd4); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(0, 150, 136, 0.3);">
+                            <i class="fas fa-home"></i> REQUEST REALTOR
+                        </button>
+
+                        <button class="btn" id="request-pdm" style="background: linear-gradient(135deg, #e91e63, #f06292); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(233, 30, 99, 0.3);">
+                            <i class="fas fa-car"></i> REQUEST PDM
+                        </button>
+
+                        <button class="btn" id="request-doctor" style="background: linear-gradient(135deg, #2196f3, #64b5f6); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);">
+                            <i class="fas fa-user-md"></i> REQUEST DOCTOR
+                        </button>
+
+                        <button class="btn" id="request-lawyer" style="background: linear-gradient(135deg, #9c27b0, #ba68c8); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(156, 39, 176, 0.3);">
+                            <i class="fas fa-gavel"></i> REQUEST LAWYER
+                        </button>
+
+                        <button class="btn" id="request-general" style="background: linear-gradient(135deg, #4caf50, #66bb6a); color: white; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);">
+                            <i class="fas fa-hands-helping"></i> GENERAL REQUEST
+                        </button>
+
+                        <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5; text-align: center; padding: 15px; background: var(--bg-secondary); border-radius: 10px;">
+                            When making a request, your name and phone number will be shared publicly.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="app-view" id="settings-app">
+                    <div class="app-header">
+                        <div class="app-title">Settings</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Your Phone Number</div>
+                                <div class="list-item-subtitle" id="settings-phone-number">555-1234</div>
+                            </div>
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">High-Sec</h3>
+                        <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
+                            <label class="form-label">Anonymous Name</label>
+                            <input type="text" class="form-input" id="anonymous-name-input" placeholder="e.g., The Ghost">
+                        </div>
+
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Appearance</h3>
+
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Theme</div>
+                                <div class="list-item-subtitle">Choose light or dark mode</div>
+                            </div>
+                            <select class="form-select" id="theme-select" style="width: auto; padding: 8px 12px; margin: 0;">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
+                            <label class="form-label">Custom Wallpaper</label>
+                            <input type="text" class="form-input" id="wallpaper-url" placeholder="Enter ImgBB image URL" style="margin: 0 0 10px 0;">
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" id="apply-wallpaper" style="flex: 1; padding: 10px; margin: 0;">
+                                    Apply
+                                </button>
+                                <button class="btn btn-secondary" id="reset-wallpaper" style="flex: 1; padding: 10px; margin: 0;">
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Notifications</h3>
+
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Show Notifications</div>
+                                <div class="list-item-subtitle">Display app notifications</div>
+                            </div>
+                            <label class="toggle-switch-label">
+                                <input type="checkbox" id="notifications-toggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Notification Sound</div>
+                                <div class="list-item-subtitle">Play sound on notification</div>
+                            </div>
+                            <label class="toggle-switch-label">
+                                <input type="checkbox" id="notification-sound-toggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">System</h3>
+
+                        <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
+                            <label class="form-label">Ringtone Volume</label>
+                            <input type="range" id="volume-slider" min="0" max="100" value="70" style="width: 100%; margin: 0;">
+                            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: var(--text-secondary);">
+                                <span>0%</span>
+                                <span id="volume-display">70%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Airplane Mode</div>
+                                <div class="list-item-subtitle">Disable all connections</div>
+                            </div>
+                            <label class="toggle-switch-label">
+                                <input type="checkbox" id="airplane-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">About</h3>
+
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Version</div>
+                                <div class="list-item-subtitle">Avian OS v2.6.0</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-danger" style="margin-top: 30px;">
+                            <i class="fas fa-power-off"></i> Reset All Settings
+                        </button>
+                    </div>
+                </div>
+
+                <div class="app-view" id="garage-app">
+                    <div class="app-header">
+                        <div class="app-title">My Garage</div>
+                    </div>
+                    <div class="app-content" id="garage-list">
+                        <!-- Vehicle list will be rendered here -->
+                    </div>
+                </div>
+
+                 <div class="app-view" id="lifeinvader-app">
+                    <div class="app-header">
+                        <div class="app-title">LifeInvader</div>
+                    </div>
+                    <div class="app-content">
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">Post anonymously to the city's feed. Your High-Sec anonymous name will be used.</p>
+                        <div class="form-group">
+                            <textarea class="form-textarea" id="lifeinvader-post" placeholder="What's on your mind?" style="min-height: 150px;"></textarea>
+                        </div>
+                        <div style="text-align: right; color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;">
+                            <i class="fas fa-key"></i> Encryption Keys Left: <span id="lifeinvader-key-count">0</span>
+                        </div>
+                        <button class="btn btn-primary" id="post-lifeinvader">
+                            <i class="fas fa-paper-plane"></i> Post Anonymously
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="app-view" id="contact-editor-app">
+                    <div class="app-header">
+                        <div class="app-title" id="contact-editor-title">New Contact</div>
+                    </div>
+                    <div class="app-content">
+                        <input type="hidden" id="contact-editor-id">
+                        <div class="form-group" style="text-align: center;">
+                            <div id="contact-editor-avatar" class="list-item-avatar" style="width: 100px; height: 100px; font-size: 40px; margin: 0 auto 20px;">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="contact-editor-name" placeholder="Contact Name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" class="form-input" id="contact-editor-number" placeholder="555-0123">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Photo URL</label>
+                            <input type="text" class="form-input" id="contact-editor-photo" placeholder="e.g., https://i.imgur.com/image.png">
+                        </div>
+                        <button class="btn btn-primary" id="save-contact-btn">Save Contact</button>
+                        <button class="btn btn-secondary" style="margin-top: 10px;" id="cancel-contact-btn">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Twitter Settings App View -->
+                <div class="app-view" id="twitter-settings-app">
+                    <div class="app-header">
+                        <div class="app-title">Edit Profile</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" id="twitter-settings-name" placeholder="Your display name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Handle</label>
+                            <input type="text" class="form-input" id="twitter-settings-handle" placeholder="@yourhandle">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Profile Picture URL</label>
+                            <input type="text" class="form-input" id="twitter-settings-photo" placeholder="e.g., https://i.imgur.com/image.png">
+                        </div>
+                        <button class="btn btn-primary" id="save-twitter-settings-btn">Save Changes</button>
+                        <button class="btn btn-secondary" style="margin-top: 10px;" id="cancel-twitter-settings-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gesture"></div>
+
+            <div class="modal-overlay" id="modal">
+                <div class="modal">
+                    <div class="modal-title" id="modal-title">Confirm Action</div>
+                    <div class="modal-message" id="modal-message">Are you sure?</div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                        <button class="btn btn-primary" id="modal-confirm">Confirm</button>
+                    </div>
+                </div>
+            </div>
+			
+			<div class="modal-overlay" id="input-modal">
+                <div class="modal">
+                    <div class="modal-title" id="input-modal-title">Enter Details</div>
+                    <div class="form-group" style="margin: 20px 0;">
+                        <textarea class="form-textarea" id="input-modal-textarea" placeholder="Describe your request..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="input-modal-cancel">Cancel</button>
+                        <button class="btn btn-primary" id="input-modal-confirm">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="incoming-call-view" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-primary); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 80px 20px;">
+                <div style="text-align: center;">
+                    <div id="caller-avatar" class="list-item-avatar" style="width: 100px; height: 100px; background: var(--bg-tertiary); margin: 0 auto 20px; font-size: 40px;">J</div>
+                    <div id="caller-name" style="font-size: 28px; font-weight: 600; color: var(--text-primary);">Jane Doe</div>
+                    <div id="caller-number" style="font-size: 18px; color: var(--text-secondary); margin-top: 8px;">555-0202</div>
+                </div>
+                <div style="display: flex; justify-content: space-around; width: 100%;">
+                    <button id="call-reject-btn" class="btn" style="background: var(--danger); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                    <button id="call-accept-btn" class="btn" style="background: var(--success); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                        <i class="fas fa-phone"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateRandomPlate = () => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let plate = '';
+                for (let i = 0; i < 8; i++) {
+                    plate += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return plate;
+            };
+
+            const state = {
+                balance: {
+                    personal: 16250,
+                    business: 85000,
+                    escrow: 1200,
+                    cash: 450
+                },
+                bills: [
+                    { id: 1, name: 'Los Santos Power & Water', amount: 150, due: '2 days' },
+                    { id: 2, name: 'Badger Phone Service', amount: 85, due: '5 days' },
+                    { id: 3, name: 'Dynasty8 Real Estate (Rent)', amount: 2500, due: '12 days' },
+                ],
+                primaryJob: 'Taxi Driver',
+                secondaryJob: 'Food Ferry',
+                activeJob: 'primary',
+                twitterProfile: {
+                    handle: '@JohnDoe',
+                    followers: 125,
+                    following: ['@LSPD']
+                },
+                tweets: [
+                    { id: 1, handle: '@LSPD', text: 'Reminder: Do not call 911 for pizza deliveries. We will find you.', time: '1h ago', likes: 15, retweets: 3, liked: true, replies: [
+                        { id: 101, handle: '@JohnDoe', text: 'What if it\'s an emergency pizza?', time: '55m ago', likes: 5, retweets: 0, liked: false, replies: [
+                             { id: 102, handle: '@LSPD', text: 'Still no.', time: '50m ago', likes: 25, retweets: 2, liked: true, replies: [] }
+                        ]}
+                    ]},
+                    { id: 2, handle: '@ToastMcLovin', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false, replies: [] },
+                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive! https://i.imgur.com/83w0f9d.png', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] },
+                    { id: 4, handle: null, text: 'Saw something strange near the observatory tonight... be careful out there.', time: '3h ago', likes: 22, retweets: 8, liked: false, replies: [] }
+                ],
+                allTwitterUsers: {
+                    '@JohnDoe': { followers: 125, photoUrl: 'https://i.imgur.com/1q3n4U7.png' },
+                    '@LSPD': { followers: 2500, photoUrl: '' },
+                    '@ToastMcLovin': { followers: 312, photoUrl: 'https://i.imgur.com/83w0f9d.png' }
+                },
+                foodFerryLeaderboard: [
+                    { rank: 1, name: 'Speedy Gonzales', orders: 152 },
+                    { rank: 2, name: 'Adam Smith', orders: 131 },
+                    { rank: 3, name: 'Jane Doe', orders: 98 },
+                    { rank: 4, name: 'John Doe', orders: 34 }
+                ],
+                vehicles: [
+                    { name: 'Stratum Zirconium', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Parked' },
+                    { name: 'Banshee 900R', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Out' },
+                    { name: 'Sultan RS', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Parked' }
+                ],
+                currentApp: null,
+                modalCallback: null,
+                callActive: false,
+                callNumber: '',
+                callDuration: 0,
+                callInterval: null,
+                currentConversation: null,
+                twitterNavStack: [],
+                twitterRootView: null,
+                replyingToTweetId: null,
+                myCard: {
+                    name: 'John Doe',
+                    number: '555-1234',
+                    photoUrl: 'https://i.imgur.com/1q3n4U7.png'
+                },
+                contacts: [
+                    { id: 1, name: 'Adam Smith', number: '555-0101', photoUrl: 'https://i.imgur.com/83w0f9d.png' },
+                    { id: 2, name: 'Jane Doe', number: '555-0202', photoUrl: 'https://i.imgur.com/b1EPD1g.png' },
+                    { id: 3, name: 'Mechanic Mike', number: '555-0303', photoUrl: '' },
+                    { id: 4, name: 'Emergency Services', number: '911', photoUrl: '' }
+                ],
+                conversations: {
+                    '555-0101': [ { type: 'sent', text: 'Are we still meeting today?', time: '2:30 PM' }, { type: 'received', text: 'See you at the meeting', time: '2:45 PM' } ],
+                    '555-0202': [ { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM' }, { type: 'sent', text: 'Sure, what time?', time: '10:26 AM' }, { type: 'received', text: 'Just got the car back, thanks! Here is a pic of it cleaned up: https://i.imgur.com/1q3n4U7.png', time: '11:42 AM' } ],
+                    '555-0303': [ { type: 'received', text: 'Need any repairs?', time: '9:15 AM' }, { type: 'sent', text: 'Can you fix my engine?', time: '9:16 AM' }, { type: 'received', text: 'Sure, I\'m free now', time: '9:17 AM' } ],
+                    '555-9999': [ { type: 'received', text: 'You won $1,000,000!', time: 'Yesterday' } ]
+                },
+                nearbyPlayers: [
+                    { id: 1, name: 'Adam Smith' },
+                    { id: 2, name: 'Jane Doe' },
+                    { id: 8, name: 'Some Guy' }
+                ],
+                encryptionKeys: 5, // User's encryption keys
+                settings: {
+                    theme: 'dark',
+                    wallpaper: null,
+                    notifications: true,
+                    notificationSound: true,
+                    volume: 70,
+                    airplaneMode: false,
+                    anonymousName: 'Anonymous'
+                }
+            };
+            
+            const sendNUI = (eventName, data = {}) => console.log(`MOCK NUI: [${eventName}]`, data);
+            const getContactByNumber = (number) => state.contacts.find(c => c.number === number);
+            const notify = (message) => console.log('Notification:', message);
+
+            const linkify = (text) => {
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                return text.replace(urlRegex, (url) => {
+                    if (/\.(jpg|jpeg|png|gif)$/i.test(url)) {
+                        return `<img src="${url}" class="embedded-image" alt="User Image">`;
+                    } else {
+                        return `<a href="${url}" target="_blank" style="color: var(--accent);">${url}</a>`;
+                    }
+                });
+            };
+
+            const setAvatar = (element, contact, handle, isAnonymous = false) => {
+                if (isAnonymous) {
+                    element.style.backgroundImage = '';
+                    element.innerHTML = '<i class="fas fa-user-secret"></i>';
+                    return;
+                }
+
+                let photoUrl = contact ? contact.photoUrl : null;
+                let name = contact ? contact.name : (handle || '#');
+
+                if (!photoUrl && handle && state.allTwitterUsers[handle]) {
+                    photoUrl = state.allTwitterUsers[handle].photoUrl;
+                }
+
+                if (photoUrl) {
+                    element.style.backgroundImage = `url(${photoUrl})`;
+                    element.textContent = '';
+                    element.innerHTML = '';
+                } else {
+                    element.style.backgroundImage = '';
+                    element.textContent = name.charAt(0) === '@' ? name.charAt(1).toUpperCase() : name.charAt(0).toUpperCase();
+                     element.innerHTML = '';
+                }
+            };
+
+            const renderMyContactCard = () => {
+                const container = document.getElementById('my-contact-card-container');
+                const card = state.myCard;
+                container.innerHTML = `
+                    <h3 style="color: var(--text-secondary); margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">My Card</h3>
+                    <div class="list-item" data-number="${card.number}" style="background: var(--bg-tertiary); flex-wrap: wrap;">
+                        <div class="contact-info">
+                            <div class="list-item-avatar"></div>
+                            <div class="list-item-main" style="margin-left: 15px;">
+                                <div class="list-item-title">${card.name} (You)</div>
+                                <div class="list-item-subtitle">${card.number}</div>
+                            </div>
+                        </div>
+                        <div style="width: 100%; display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--bg-tertiary);">
+                            <button id="share-my-card-btn" class="btn btn-secondary contact-action-btn" title="Share My Card"><i class="fas fa-share-square"></i></button>
+                            <button id="edit-my-card-btn" class="btn btn-secondary contact-action-btn" title="Edit My Card"><i class="fas fa-pencil-alt"></i></button>
+                        </div>
+                    </div>
+                    <h3 style="color: var(--text-secondary); margin: 20px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Contacts</h3>
+                `;
+                setAvatar(container.querySelector('.list-item-avatar'), card);
+
+                document.getElementById('edit-my-card-btn').addEventListener('click', e => { e.stopPropagation(); openContactEditor('my-card'); });
+                document.getElementById('share-my-card-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    sendNUI('shareContact', state.myCard);
+                    notify(`Shared your contact card.`);
+                });
+            };
+
+            const renderContacts = () => {
+                renderMyContactCard();
+                const list = document.getElementById('contacts-list');
+                list.innerHTML = '';
+                state.contacts
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .forEach(contact => {
+                        const isEmergency = contact.number === '911';
+                        const item = document.createElement('div');
+                        item.className = 'list-item contact-item';
+                        item.setAttribute('data-number', contact.number);
+                        item.innerHTML = `
+                            <div class="contact-info">
+                                <div class="list-item-avatar"></div>
+                                <div class="list-item-main" style="margin-left: 15px;">
+                                    <div class="list-item-title">${contact.name}</div>
+                                    <div class="list-item-subtitle">${contact.number}</div>
+                                </div>
+                            </div>
+                            <div class="contact-actions">
+                                ${!isEmergency ? `<button class="btn btn-secondary contact-share contact-action-btn" title="Share"><i class="fas fa-share-square"></i></button>` : ''}
+                                ${!isEmergency ? `<button class="btn btn-secondary contact-edit contact-action-btn" title="Edit"><i class="fas fa-pencil-alt"></i></button>` : ''}
+                                <button class="btn ${isEmergency ? 'btn-danger' : 'btn-primary'} contact-call contact-action-btn" title="Call"><i class="fas fa-phone"></i></button>
+                                ${!isEmergency ? `<button class="btn btn-secondary contact-message contact-action-btn" title="Message"><i class="fas fa-comment"></i></button>` : ''}
+                                ${!isEmergency ? `<button class="btn btn-danger contact-delete contact-action-btn" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
+                            </div>
+                        `;
+                        setAvatar(item.querySelector('.list-item-avatar'), contact);
+                        list.appendChild(item);
+                    });
+                attachContactListeners();
+            };
+            
+            const renderMessageThreads = () => {
+                const container = document.getElementById('messages-list-view');
+                container.querySelectorAll('.message-thread').forEach(el => el.remove());
+                Object.keys(state.conversations).forEach(number => {
+                    const thread = state.conversations[number];
+                    if (thread.length === 0) return;
+                    const lastMessage = thread[thread.length - 1];
+                    const contact = getContactByNumber(number);
+                    const name = contact ? contact.name : number;
+                    const item = document.createElement('div');
+                    item.className = 'list-item message-thread';
+                    item.setAttribute('data-contact', name);
+                    item.setAttribute('data-number', number);
+                    item.innerHTML = `
+                        <div class="list-item-avatar"></div>
+                        <div class="list-item-main" style="margin-left: 15px;">
+                            <div class="list-item-title">${name}</div>
+                            <div class="list-item-subtitle">${lastMessage.text.length > 30 ? lastMessage.text.substring(0, 30) + '...' : lastMessage.text}</div>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 12px;">${lastMessage.time.split(' ')[0]}</div>
+                    `;
+                    setAvatar(item.querySelector('.list-item-avatar'), contact);
+                    container.appendChild(item);
+                });
+                attachMessageThreadListeners();
+            };
+
+            const renderGarage = () => {
+                const list = document.getElementById('garage-list');
+                if (!state.vehicles || state.vehicles.length === 0) {
+                    list.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding-top: 20px;">You do not own any vehicles.</p>`;
+                    return;
+                }
+                list.innerHTML = state.vehicles.map(vehicle => {
+                    const statusColor = vehicle.status === 'Parked' ? 'var(--success)' : 'var(--warning)';
+                    return `
+                    <div class="list-item vehicle-item" data-plate="${vehicle.plate}">
+                        <div class="list-item-main">
+                            <div class="list-item-title">${vehicle.name}</div>
+                            <div class="list-item-subtitle" style="margin-top: 8px;"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> ${vehicle.garage}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="list-item-value" style="font-size: 14px; background: #000; padding: 5px 10px; border-radius: 5px; border: 1px solid #fff; font-family: 'Courier New', monospace; letter-spacing: 1px;">${vehicle.plate}</div>
+                            <div style="font-size: 12px; color: ${statusColor}; font-weight: 600; margin-top: 8px;">${vehicle.status}</div>
+                        </div>
+                    </div>
+                `}).join('');
+
+                list.querySelectorAll('.vehicle-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const plate = item.dataset.plate;
+                        sendNUI('trackVehicle', { plate });
+                        notify(`Tracking vehicle with plate ${plate}...`);
+                    });
+                });
+            };
+
+            const phoneWrapper = document.getElementById('phone-wrapper');
+            const homeScreen = document.getElementById('home-screen');
+            const apps = document.querySelectorAll('.app, .dock-app');
+            const gesture = document.getElementById('gesture');
+            const modal = document.getElementById('modal');
+            const dynamicIsland = document.getElementById('dynamic-island');
+            const islandEndCall = document.getElementById('island-end-call');
+
+            const updateTime = () => {
+                const now = new Date();
+                document.getElementById('time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            };
+            updateTime();
+            setInterval(updateTime, 60000);
+
+            const updateKeyCounts = () => {
+                const lifeinvaderCount = document.getElementById('lifeinvader-key-count');
+                if (lifeinvaderCount) lifeinvaderCount.textContent = state.encryptionKeys;
+
+                const tweetCount = document.getElementById('tweet-key-count');
+                if (tweetCount) tweetCount.textContent = state.encryptionKeys;
+            };
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.getAttribute('data-tab');
+                    const parent = btn.closest('.app-view');
+                    if (!parent) return;
+                    parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    const activeContent = parent.querySelector(`#${tabName}`);
+                    if (activeContent) activeContent.classList.add('active');
+                });
+            });
+
+            const showDynamicIsland = (number) => {
+                state.callActive = true;
+                state.callNumber = number;
+                state.callDuration = 0;
+                document.getElementById('island-title').textContent = 'Calling...';
+                document.getElementById('island-subtitle').textContent = number;
+                dynamicIsland.classList.add('active');
+                state.callInterval = setInterval(() => {
+                    state.callDuration++;
+                    const minutes = Math.floor(state.callDuration / 60);
+                    const seconds = state.callDuration % 60;
+                    document.getElementById('island-title').textContent = 'In Call';
+                    document.getElementById('island-subtitle').textContent = `${number} • ${minutes}:${String(seconds).padStart(2, '0')}`;
+                }, 1000);
+            };
+
+            const hideDynamicIsland = () => {
+                state.callActive = false;
+                dynamicIsland.classList.remove('active');
+                if (state.callInterval) clearInterval(state.callInterval);
+                state.callInterval = null;
+            };
+
+            islandEndCall.addEventListener('click', () => {
+                sendNUI('endCall');
+                hideDynamicIsland();
+                notify('Call ended');
+            });
+
+            const openApp = (appName, data = {}) => {
+                if (state.currentApp) {
+                    const currentView = document.getElementById(`${state.currentApp}-app`) || document.getElementById(state.currentApp);
+                    if (currentView) currentView.classList.remove('active');
+                }
+                homeScreen.classList.add('hidden');
+                updateKeyCounts();
+                const targetView = document.getElementById(`${appName}-app`);
+                if (targetView) {
+                    targetView.classList.add('active');
+                    state.currentApp = appName;
+                    if(appName === 'twitter') {
+                         renderTwitterFeed();
+                         renderMyTwitterProfile();
+                    } else if(appName === 'bank') {
+                        renderBills();
+                    } else if(appName === 'garage') {
+                        renderGarage();
+                    }
+                }
+            };
+            
+            const goBackTwitterThread = () => {
+                if (state.twitterNavStack.length === 0) return;
+                state.twitterNavStack.pop();
+
+                if (state.twitterNavStack.length === 0) {
+                    document.getElementById('twitter-thread-view').classList.remove('active');
+                    const rootView = document.getElementById(state.twitterRootView);
+                    if (rootView) {
+                        rootView.classList.add('active');
+                        state.currentApp = state.twitterRootView;
+                    } else { // Fallback
+                        document.getElementById('twitter-app').classList.add('active');
+                        state.currentApp = 'twitter';
+                    }
+                    state.twitterRootView = null;
+                } else {
+                    const parentTweetId = state.twitterNavStack[state.twitterNavStack.length - 1];
+                    renderThreadView(parentTweetId);
+                }
+            };
+
+            const closeApp = () => {
+                if (state.currentApp === 'twitter-thread-view') {
+                    goBackTwitterThread();
+                    return;
+                }
+
+                const userProfileView = document.getElementById('twitter-user-profile-view');
+                if (userProfileView.classList.contains('active')) {
+                    userProfileView.classList.remove('active');
+                    document.getElementById('twitter-app').classList.add('active');
+                    state.currentApp = 'twitter';
+                    return;
+                }
+                
+                const foodLeaderboardView = document.getElementById('food-leaderboard-view');
+                if (foodLeaderboardView.classList.contains('active')) {
+                    foodLeaderboardView.classList.remove('active');
+                    document.getElementById('food-app').classList.add('active');
+                    state.currentApp = 'food';
+                    return;
+                }
+                
+                if (state.currentApp) {
+                    const currentView = document.getElementById(`${state.currentApp}-app`) || document.getElementById(state.currentApp);
+                    if (currentView) currentView.classList.remove('active');
+                }
+
+                state.currentApp = null;
+                document.getElementById('messages-list-view').style.display = 'block';
+                document.getElementById('conversation-view').style.display = 'none';
+                homeScreen.classList.remove('hidden');
+            };
+            
+            const closePhone = () => {
+                phoneWrapper.style.display = 'none';
+                document.body.style.display = 'none';
+                sendNUI('phoneClosed');
+            };
+
+            apps.forEach(app => app.addEventListener('click', () => openApp(app.dataset.app)));
+            gesture.addEventListener('click', () => state.currentApp ? closeApp() : closePhone());
+
+            const phoneInput = document.getElementById('phone-input');
+            document.querySelectorAll('.dial-btn[data-num]').forEach(btn => {
+                btn.addEventListener('click', () => phoneInput.value += btn.dataset.num);
+            });
+            document.getElementById('clear-btn').addEventListener('click', () => phoneInput.value = phoneInput.value.slice(0, -1));
+            document.getElementById('call-btn').addEventListener('click', () => {
+                if (phoneInput.value) {
+                    showModal('Make Call', `Call ${phoneInput.value}?`, () => {
+                        sendNUI('makeCall', { number: phoneInput.value });
+                        showDynamicIsland(phoneInput.value);
+                        phoneInput.value = '';
+                        hideModal();
+                    });
+                }
+            });
+
+            const editorTitle = document.getElementById('contact-editor-title');
+            const editorId = document.getElementById('contact-editor-id');
+            const editorAvatar = document.getElementById('contact-editor-avatar');
+            const editorName = document.getElementById('contact-editor-name');
+            const editorNumber = document.getElementById('contact-editor-number');
+            const editorPhoto = document.getElementById('contact-editor-photo');
+
+            const openContactEditor = (contactIdentifier = null) => {
+                let contact, isMyCard = false;
+                editorNumber.readOnly = false;
+                editorNumber.style.cssText = 'opacity: 1; cursor: text;';
+                if (contactIdentifier === 'my-card') {
+                    contact = state.myCard;
+                    isMyCard = true;
+                } else {
+                    contact = contactIdentifier ? getContactByNumber(contactIdentifier) : null;
+                }
+                if (contact) {
+                    editorTitle.textContent = isMyCard ? 'Edit My Card' : 'Edit Contact';
+                    editorId.value = isMyCard ? 'my-card' : contact.number;
+                    editorName.value = contact.name;
+                    editorNumber.value = contact.number;
+                    editorPhoto.value = contact.photoUrl || '';
+                    setAvatar(editorAvatar, contact);
+                    if (isMyCard) {
+                        editorNumber.readOnly = true;
+                        editorNumber.style.cssText = 'opacity: 0.6; cursor: not-allowed;';
+                    }
+                } else {
+                    editorTitle.textContent = 'New Contact';
+                    ['id', 'name', 'number', 'photo'].forEach(f => document.getElementById(`contact-editor-${f}`).value = '');
+                    editorAvatar.style.backgroundImage = '';
+                    editorAvatar.innerHTML = '<i class="fas fa-camera"></i>';
+                }
+                openApp('contact-editor');
+            };
+
+            document.getElementById('new-contact-btn').addEventListener('click', () => openContactEditor());
+
+            document.getElementById('save-contact-btn').addEventListener('click', () => {
+                const name = editorName.value.trim(), number = editorNumber.value.trim(), photoUrl = editorPhoto.value.trim(), originalId = editorId.value;
+                if (!name || !number) return notify('Name and Number are required.');
+                if (originalId === 'my-card') {
+                    state.myCard.name = name;
+                    state.myCard.photoUrl = photoUrl;
+                    sendNUI('updateMyCard', { ...state.myCard });
+                    notify('Your card has been updated!');
+                } else if (originalId) {
+                    const contact = getContactByNumber(originalId);
+                    if (contact) {
+                        contact.name = name;
+                        contact.number = number;
+                        contact.photoUrl = photoUrl;
+                        if (originalId !== number && state.conversations[originalId]) {
+                            state.conversations[number] = state.conversations[originalId];
+                            delete state.conversations[originalId];
+                        }
+                    }
+                    sendNUI('updateContact', { name, number, photoUrl, originalNumber: originalId });
+                    notify('Contact saved!');
+                } else {
+                    state.contacts.push({ name, number, photoUrl });
+                    sendNUI('createContact', { name, number, photoUrl });
+                    notify('Contact created!');
+                }
+                renderContacts();
+                renderMessageThreads();
+                if (state.currentApp === 'messages' && state.currentConversation) {
+                    const cNum = document.getElementById('conversation-number').textContent;
+                    if (cNum === originalId || cNum === number) {
+                        const updatedContact = getContactByNumber(number);
+                        if (updatedContact) openConversation(updatedContact.name, updatedContact.number);
+                    }
+                }
+                closeApp();
+                openApp('phone');
+                document.querySelector('#phone-app .tab-btn[data-tab="contacts"]').click();
+            });
+
+            document.getElementById('cancel-contact-btn').addEventListener('click', () => {
+                closeApp();
+                openApp('phone');
+                document.querySelector('#phone-app .tab-btn[data-tab="contacts"]').click();
+            });
+
+            const attachContactListeners = () => {
+                document.querySelectorAll('.contact-item .contact-info').forEach(card => card.addEventListener('click', () => card.closest('.contact-item').classList.toggle('expanded')));
+                document.querySelectorAll('.contact-action-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.stopPropagation();
+                        const number = e.target.closest('.list-item').dataset.number;
+                        const contact = getContactByNumber(number);
+                        if (btn.classList.contains('contact-share')) { sendNUI('shareContact', contact); notify(`Shared ${contact.name}'s card.`); }
+                        if (btn.classList.contains('contact-call')) { sendNUI('makeCall', { number, name: contact ? contact.name : number }); showDynamicIsland(number); }
+                        if (btn.classList.contains('contact-message')) { openApp('messages'); openConversation(contact.name, number); }
+                        if (btn.classList.contains('contact-edit')) openContactEditor(number);
+                        if (btn.classList.contains('contact-delete')) {
+                            showModal('Delete Contact', `Delete ${contact.name}?`, () => {
+                                state.contacts = state.contacts.filter(c => c.number !== number);
+                                renderContacts();
+                                sendNUI('deleteContact', { number });
+                                notify(`${contact.name} deleted`);
+                                hideModal();
+                            });
+                        }
+                    });
+                });
+            };
+            
+            document.getElementById('contact-search').addEventListener('input', e => {
+                const search = e.target.value.toLowerCase();
+                document.querySelectorAll('#contacts-list .contact-item').forEach(item => {
+                    item.style.display = item.querySelector('.list-item-title').textContent.toLowerCase().includes(search) ? 'flex' : 'none';
+                });
+            });
+
+            const openConversation = (contactName, number) => {
+                state.currentConversation = number;
+                const contact = getContactByNumber(number);
+                document.getElementById('messages-list-view').style.display = 'none';
+                document.getElementById('conversation-view').style.display = 'flex';
+                document.getElementById('conversation-contact').textContent = contactName;
+                document.getElementById('conversation-number').textContent = number;
+                setAvatar(document.getElementById('conversation-avatar'), contact);
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
+                (state.conversations[number] || []).forEach(msg => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `message-bubble message-${msg.type}`;
+                    bubble.innerHTML = `<div>${linkify(msg.text)}</div><div class="message-time">${msg.time}</div>`;
+                    messagesContainer.appendChild(bubble);
+                });
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            };
+
+            const attachMessageThreadListeners = () => document.querySelectorAll('.message-thread').forEach(thread => thread.addEventListener('click', () => openConversation(thread.dataset.contact, thread.dataset.number)));
+            document.getElementById('back-to-messages').addEventListener('click', () => { document.getElementById('messages-list-view').style.display = 'block'; document.getElementById('conversation-view').style.display = 'none'; state.currentConversation = null; });
+            const messageInput = document.getElementById('message-input');
+            
+            document.getElementById('send-message').addEventListener('click', () => {
+                const text = messageInput.value.trim();
+                if (text && state.currentConversation) {
+                    sendNUI('sendMessage', { number: state.currentConversation, message: text });
+                    
+                    const now = new Date();
+                    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    if (!state.conversations[state.currentConversation]) {
+                        state.conversations[state.currentConversation] = [];
+                    }
+                    state.conversations[state.currentConversation].push({
+                        type: 'sent',
+                        text: text,
+                        time: time
+                    });
+                    
+                    const contact = getContactByNumber(state.currentConversation);
+                    const contactName = contact ? contact.name : state.currentConversation;
+                    openConversation(contactName, state.currentConversation);
+                    renderMessageThreads(); // Update the main list view with the new last message
+                    
+                    messageInput.value = '';
+                }
+            });
+
+            messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('send-message').click(); });
+            document.getElementById('message-search').addEventListener('input', e => {
+                const search = e.target.value.toLowerCase();
+                document.querySelectorAll('.message-thread').forEach(thread => thread.style.display = thread.dataset.contact.toLowerCase().includes(search) ? 'flex' : 'none');
+            });
+            document.getElementById('call-from-message').addEventListener('click', () => { if (state.currentConversation) { sendNUI('makeCall', { number: state.currentConversation }); showDynamicIsland(state.currentConversation); } });
+            document.querySelectorAll('.recent-call button').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); const number = e.target.closest('.recent-call').dataset.number; sendNUI('makeCall', { number }); showDynamicIsland(number); }));
+            
+            const tweetListContainer = document.getElementById('tweet-list');
+            const myTweetListContainer = document.getElementById('my-tweet-list');
+            const newTweetBtn = document.getElementById('new-tweet-btn');
+            const tweetComposeContainer = document.getElementById('tweet-compose-container');
+            const postTweetBtn = document.getElementById('post-tweet');
+            const tweetText = document.getElementById('tweet-text');
+            const tweetCount = document.getElementById('tweet-count');
+            const twitterUserProfileView = document.getElementById('twitter-user-profile-view');
+            const twitterThreadView = document.getElementById('twitter-thread-view');
+
+            const findTweetById = (id, tweets = state.tweets) => {
+                for (const tweet of tweets) {
+                    if (tweet.id === id) return tweet;
+                    if (tweet.replies && tweet.replies.length > 0) {
+                        const foundInReply = findTweetById(id, tweet.replies);
+                        if (foundInReply) return foundInReply;
+                    }
+                }
+                return null;
+            };
+
+            const createTweetHTML = (tweet) => {
+                const isAnonymous = tweet.handle === null;
+                const displayName = isAnonymous ? state.settings.anonymousName : tweet.handle;
+                
+                let tweetContentHTML;
+                 if (tweet.retweetOf) {
+                     tweetContentHTML = `
+                        <div style="width: 100%; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">
+                            <i class="fas fa-retweet"></i> <span class="tweet-handle" data-handle="${tweet.handle}" style="cursor: pointer;">${displayName}</span> retweeted
+                        </div>
+                        <div style="width: 100%; border: 1px solid var(--bg-tertiary); border-radius: 10px; padding: 10px;">
+                            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                                <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle || state.settings.anonymousName}</span>
+                            </div>
+                            <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${linkify(tweet.retweetOf.text)}</p>
+                        </div>
+                    `;
+                } else {
+                     tweetContentHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                           <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="list-item-avatar" style="width: 32px; height: 32px; font-size: 14px;"></div>
+                                <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: ${isAnonymous ? 'default' : 'pointer'};">${displayName}</span>
+                           </div>
+                            <span style="color: var(--text-secondary); font-size: 12px;">${tweet.time}</span>
+                        </div>
+                        <p style="color: var(--text-primary); margin: 0; line-height: 1.5; padding-left: 42px;">${linkify(tweet.text)}</p>
+                    `;
+                }
+
+
+                const tweetItem = document.createElement('div');
+                tweetItem.className = 'list-item tweet-item';
+                tweetItem.style.flexDirection = 'column';
+                tweetItem.style.alignItems = 'flex-start';
+                tweetItem.dataset.tweetId = tweet.id;
+                
+                tweetItem.innerHTML = `
+                    ${tweetContentHTML}
+                    <div class="tweet-actions" style="padding-left: 42px;">
+                        <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.retweetOf ? tweet.retweetOf.handle : displayName}"><i class="fas fa-reply"></i></span>
+                        ${!tweet.retweetOf ? `<span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>` : ''}
+                        <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
+                    </div>
+                `;
+                
+                if (!tweet.retweetOf) {
+                    const avatar = tweetItem.querySelector('.list-item-avatar');
+                    setAvatar(avatar, null, tweet.handle, isAnonymous);
+                }
+
+                return tweetItem.outerHTML;
+            }
+
+            const renderTweets = (container, tweets) => {
+                 container.innerHTML = [...tweets].reverse().map(tweet => createTweetHTML(tweet)).join('');
+            };
+
+            const renderTwitterFeed = () => renderTweets(tweetListContainer, state.tweets);
+
+            const renderMyTwitterProfile = () => {
+                const handle = state.twitterProfile.handle;
+                const user = state.allTwitterUsers[handle];
+                const myCard = state.myCard;
+
+                document.getElementById('twitter-profile-name').textContent = myCard.name;
+                document.getElementById('twitter-profile-handle').textContent = handle;
+                const pfpElement = document.getElementById('twitter-profile-pfp');
+                const pfpContact = { name: myCard.name, photoUrl: user.photoUrl };
+                setAvatar(pfpElement, pfpContact);
+
+                document.getElementById('twitter-profile-stats').textContent = `${user.followers} Followers • ${state.twitterProfile.following.length} Following`;
+                const myTweets = state.tweets.filter(t => t.handle === handle || (t.retweetOf && t.handle === handle));
+                renderTweets(myTweetListContainer, myTweets);
+            };
+
+            const renderThreadView = (tweetId) => {
+                const tweet = findTweetById(parseInt(tweetId));
+                if (!tweet) return;
+
+                const mainTweetContainer = document.getElementById('main-tweet-container');
+                mainTweetContainer.innerHTML = createTweetHTML(tweet);
+
+                const repliesList = document.getElementById('thread-replies-list');
+                const repliesHeader = repliesList.previousElementSibling;
+                if (tweet.replies && tweet.replies.length > 0) {
+                    renderTweets(repliesList, tweet.replies);
+                    repliesHeader.style.display = 'block';
+                } else {
+                    repliesList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding-top: 20px;">No replies yet.</p>';
+                    repliesHeader.style.display = 'none';
+                }
+            };
+
+            const openTweetThread = (tweetId) => {
+                if (state.twitterNavStack.length === 0) {
+                    const twitterApp = document.getElementById('twitter-app');
+                    const profileView = document.getElementById('twitter-user-profile-view');
+                    if (twitterApp.classList.contains('active')) {
+                        state.twitterRootView = 'twitter-app';
+                        twitterApp.classList.remove('active');
+                    } else if (profileView.classList.contains('active')) {
+                        state.twitterRootView = 'twitter-user-profile-view';
+                        profileView.classList.remove('active');
+                    }
+                }
+                
+                state.twitterNavStack.push(tweetId);
+                
+                document.getElementById('twitter-thread-view').classList.add('active');
+                state.currentApp = 'twitter-thread-view';
+                
+                renderThreadView(tweetId);
+            };
+
+            const openTwitterProfile = (handle) => {
+                if (!handle) return; // Can't open profile for anonymous users
+                if(handle === state.twitterProfile.handle) {
+                    document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+                    return;
+                }
+                const user = state.allTwitterUsers[handle];
+                if (!user) return notify("User not found");
+                document.getElementById('view-profile-handle').textContent = handle;
+                document.getElementById('view-profile-stats').textContent = `${user.followers} Followers`;
+                setAvatar(document.getElementById('view-profile-avatar'), null, handle);
+                const followBtn = document.getElementById('follow-btn');
+                const isFollowing = state.twitterProfile.following.includes(handle);
+                followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
+                followBtn.dataset.handle = handle;
+                const userTweets = state.tweets.filter(t => t.handle === handle || (t.retweetOf && t.handle === handle));
+                renderTweets(document.getElementById('view-profile-tweet-list'), userTweets);
+                document.getElementById('twitter-app').classList.remove('active');
+                twitterUserProfileView.classList.add('active');
+                state.currentApp = 'twitter-user-profile-view';
+            };
+            
+            document.getElementById('follow-btn').addEventListener('click', (e) => {
+                const handle = e.target.dataset.handle;
+                const user = state.allTwitterUsers[handle];
+                if (!user) return;
+
+                const followingIndex = state.twitterProfile.following.indexOf(handle);
+                if (followingIndex > -1) {
+                    state.twitterProfile.following.splice(followingIndex, 1);
+                    user.followers--;
+                    e.target.textContent = 'Follow';
+                } else {
+                    state.twitterProfile.following.push(handle);
+                    user.followers++;
+                    e.target.textContent = 'Unfollow';
+                }
+
+                document.getElementById('view-profile-stats').textContent = `${user.followers} Followers`;
+                sendNUI('toggleFollow', { handle });
+                renderMyTwitterProfile();
+            });
+            
+            const tweetClickHandler = e => {
+                const replyBtn = e.target.closest('.tweet-reply-btn');
+                if (replyBtn) {
+                    e.stopPropagation();
+                    
+                    const tweetItem = replyBtn.closest('.tweet-item');
+                    if (!tweetItem) return;
+                    state.replyingToTweetId = parseInt(tweetItem.dataset.tweetId);
+
+                    document.getElementById('twitter-user-profile-view').classList.remove('active');
+                    document.getElementById('twitter-thread-view').classList.remove('active');
+
+                    const twitterAppView = document.getElementById('twitter-app');
+                    if (!twitterAppView.classList.contains('active')) {
+                        twitterAppView.classList.add('active');
+                        state.currentApp = 'twitter';
+                    }
+                    
+                    document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
+
+                    tweetComposeContainer.style.display = 'block';
+                    const replyHandle = replyBtn.dataset.handle;
+                    if (replyHandle !== state.settings.anonymousName) {
+                        tweetText.value = `${replyHandle} `;
+                    } else {
+                        tweetText.value = '';
+                    }
+                    tweetText.focus();
+                    return;
+                }
+
+                const likeBtn = e.target.closest('.tweet-like-btn');
+                if (likeBtn) {
+                    e.stopPropagation();
+                    const tweetId = parseInt(likeBtn.closest('[data-tweet-id]').dataset.tweetId);
+                    const tweet = findTweetById(tweetId);
+                    if (tweet) {
+                        tweet.liked = !tweet.liked;
+                        tweet.likes += tweet.liked ? 1 : -1;
+                        sendNUI('likeTweet', { tweetId: tweetId, liked: tweet.liked });
+                        likeBtn.innerHTML = `<i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}`;
+                    }
+                    return;
+                }
+
+                const retweetBtn = e.target.closest('.tweet-retweet-btn');
+                if (retweetBtn) {
+                    e.stopPropagation();
+                    const tweetId = parseInt(retweetBtn.closest('[data-tweet-id]').dataset.tweetId);
+                    const originalTweet = findTweetById(tweetId);
+                    if (originalTweet && !originalTweet.retweetOf) {
+                        if (state.tweets.some(t => t.retweetOf && t.retweetOf.id === originalTweet.id && t.handle === state.twitterProfile.handle)) {
+                            notify("You've already retweeted this.");
+                            return;
+                        }
+                        originalTweet.retweets++;
+                        const isAnonymous = document.getElementById('tweet-anonymous-toggle').checked;
+                        const newRetweet = {
+                            id: Date.now(),
+                            handle: isAnonymous ? null : state.twitterProfile.handle,
+                            time: 'Just now',
+                            likes: 0, liked: false, replies: [],
+                            retweetOf: { id: originalTweet.id, handle: originalTweet.handle, text: originalTweet.text }
+                        };
+                        state.tweets.push(newRetweet);
+                        sendNUI('retweet', { originalTweetId: tweetId, anonymous: isAnonymous });
+                        notify('Retweeted!');
+                        renderTwitterFeed();
+                        renderMyTwitterProfile();
+                    }
+                    return;
+                }
+
+                const handleLink = e.target.closest('.tweet-handle');
+                if (handleLink) {
+                    e.stopPropagation();
+                    openTwitterProfile(handleLink.dataset.handle);
+                    return;
+                }
+
+                const tweetItem = e.target.closest('.tweet-item');
+                if (tweetItem) {
+                    const tweetId = tweetItem.dataset.tweetId;
+                    openTweetThread(tweetId);
+                }
+            };
+
+            const twitterAppContainer = document.getElementById('twitter-app');
+            twitterAppContainer.addEventListener('click', tweetClickHandler);
+            twitterUserProfileView.addEventListener('click', tweetClickHandler);
+            twitterThreadView.addEventListener('click', tweetClickHandler);
+            document.getElementById('twitter-thread-back').addEventListener('click', goBackTwitterThread);
+            
+            tweetText.addEventListener('input', () => tweetCount.textContent = `${tweetText.value.length}/280`);
+            
+            newTweetBtn.addEventListener('click', () => {
+                const isVisible = tweetComposeContainer.style.display === 'block';
+                if (isVisible) {
+                    tweetComposeContainer.style.display = 'none';
+                    state.replyingToTweetId = null;
+                    tweetText.value = '';
+                } else {
+                    state.replyingToTweetId = null;
+                    tweetText.value = '';
+                    tweetComposeContainer.style.display = 'block';
+                    tweetText.focus();
+                }
+            });
+
+            postTweetBtn.addEventListener('click', () => {
+                const text = tweetText.value.trim();
+                if (!text) return;
+
+                const isAnonymous = document.getElementById('tweet-anonymous-toggle').checked;
+
+                if (isAnonymous && state.encryptionKeys <= 0) {
+                    notify('You have no encryption keys left to tweet anonymously.');
+                    return;
+                }
+
+                const newTweet = {
+                    id: Date.now(),
+                    handle: isAnonymous ? null : state.twitterProfile.handle,
+                    text: text,
+                    time: 'Just now',
+                    likes: 0,
+                    retweets: 0,
+                    liked: false,
+                    replies: []
+                };
+
+                if (state.replyingToTweetId !== null) {
+                    const parentTweet = findTweetById(state.replyingToTweetId);
+                    if (parentTweet) {
+                        parentTweet.replies.push(newTweet);
+                        sendNUI('postReply', { text: newTweet.text, parentId: state.replyingToTweetId, anonymous: isAnonymous });
+                    }
+                    state.replyingToTweetId = null;
+                } else {
+                    state.tweets.push(newTweet);
+                    sendNUI('postTweet', { text: newTweet.text, anonymous: isAnonymous });
+                }
+
+                if (isAnonymous) {
+                    state.encryptionKeys--;
+                    updateKeyCounts();
+                }
+
+                renderTwitterFeed();
+                if (!isAnonymous) renderMyTwitterProfile();
+                
+                tweetText.value = '';
+                tweetCount.textContent = '0/280';
+                tweetComposeContainer.style.display = 'none';
+                document.getElementById('tweet-anonymous-toggle').checked = false;
+                document.getElementById('tweet-key-info').style.display = 'none';
+                notify('Tweet sent!');
+            });
+            
+            const tweetAnonymousToggle = document.getElementById('tweet-anonymous-toggle');
+            const tweetKeyInfo = document.getElementById('tweet-key-info');
+            tweetAnonymousToggle.addEventListener('change', () => {
+                tweetKeyInfo.style.display = tweetAnonymousToggle.checked ? 'flex' : 'none';
+            });
+
+            const openTwitterSettings = () => {
+                const handle = state.twitterProfile.handle;
+                const user = state.allTwitterUsers[handle];
+                const myCard = state.myCard;
+
+                document.getElementById('twitter-settings-name').value = myCard.name;
+                document.getElementById('twitter-settings-handle').value = handle;
+                document.getElementById('twitter-settings-photo').value = user.photoUrl || '';
+
+                openApp('twitter-settings');
+            };
+
+            document.getElementById('twitter-settings-btn').addEventListener('click', openTwitterSettings);
+
+            document.getElementById('cancel-twitter-settings-btn').addEventListener('click', () => {
+                closeApp();
+                openApp('twitter');
+                document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+            });
+            
+            document.getElementById('save-twitter-settings-btn').addEventListener('click', () => {
+                const newName = document.getElementById('twitter-settings-name').value.trim();
+                const newHandle = document.getElementById('twitter-settings-handle').value.trim();
+                const newPhoto = document.getElementById('twitter-settings-photo').value.trim();
+
+                if (!newName || !newHandle) {
+                    notify('Username and Handle cannot be empty.');
+                    return;
+                }
+
+                if (!newHandle.startsWith('@')) {
+                    notify('Handle must start with @');
+                    return;
+                }
+
+                if (state.allTwitterUsers[newHandle] && newHandle !== state.twitterProfile.handle) {
+                    notify('That handle is already taken.');
+                    return;
+                }
+                
+                const oldHandle = state.twitterProfile.handle;
+                state.myCard.name = newName;
+                state.twitterProfile.handle = newHandle;
+
+                const userData = state.allTwitterUsers[oldHandle];
+                userData.photoUrl = newPhoto;
+                if (oldHandle !== newHandle) {
+                    state.allTwitterUsers[newHandle] = userData;
+                    delete state.allTwitterUsers[oldHandle];
+                }
+                
+                const updateTweetHandles = (tweets) => {
+                    for (const tweet of tweets) {
+                        if (tweet.handle === oldHandle) tweet.handle = newHandle;
+                        if (tweet.retweetOf && tweet.retweetOf.handle === oldHandle) tweet.retweetOf.handle = newHandle;
+                        if (tweet.replies && tweet.replies.length > 0) updateTweetHandles(tweet.replies);
+                    }
+                };
+                updateTweetHandles(state.tweets);
+
+                sendNUI('updateTwitterProfile', { name: newName, handle: newHandle, photoUrl: newPhoto });
+                
+                renderMyTwitterProfile();
+                renderTwitterFeed();
+                renderMyContactCard();
+
+                notify('Profile updated successfully!');
+
+                closeApp();
+                openApp('twitter');
+                document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+            });
+
+            const primaryJobWidget = document.getElementById('primary-job-widget');
+            const secondaryJobWidget = document.getElementById('secondary-job-widget');
+
+            const renderJobs = () => {
+                primaryJobWidget.classList.toggle('active', state.activeJob === 'primary' && state.primaryJob);
+                secondaryJobWidget.classList.toggle('active', state.activeJob === 'secondary' && state.secondaryJob);
+                primaryJobWidget.querySelector('#primary-job-display').textContent = state.primaryJob || 'Unemployed';
+                secondaryJobWidget.querySelector('#secondary-job-display').textContent = state.secondaryJob || 'Unemployed';
+                document.getElementById('quit-job-primary').style.display = state.primaryJob ? 'block' : 'none';
+                document.getElementById('quit-job-secondary').style.display = state.secondaryJob ? 'block' : 'none';
+            };
+
+            primaryJobWidget.addEventListener('click', () => { if(state.primaryJob) { state.activeJob = 'primary'; renderJobs(); notify('Primary job is now active.'); }});
+            secondaryJobWidget.addEventListener('click', () => { if(state.secondaryJob) { state.activeJob = 'secondary'; renderJobs(); notify('Secondary job is now active.'); }});
+
+            const jobActionSelect = document.getElementById('job-action-select');
+            const jobActionForm = document.getElementById('job-action-form');
+            const jobActionTargetGroup = document.getElementById('job-action-target-group');
+            const jobActionTargetSelect = document.getElementById('job-action-target-select');
+            const jobActionAmountGroup = document.getElementById('job-action-amount-group');
+            const jobActionAmountInput = document.getElementById('job-action-amount-input');
+            const jobActionReasonGroup = document.getElementById('job-action-reason-group');
+            const jobActionReasonLabel = document.getElementById('job-action-reason-label');
+            const jobActionReasonInput = document.getElementById('job-action-reason-input');
+
+            const populateNearbyPlayers = () => {
+                jobActionTargetSelect.innerHTML = '<option value="">Select nearby player...</option>';
+                state.nearbyPlayers.forEach(p => jobActionTargetSelect.innerHTML += `<option value="${p.id}">${p.name} (ID: ${p.id})</option>`);
+            };
+
+            jobActionSelect.addEventListener('change', () => {
+                const action = jobActionSelect.value;
+                jobActionForm.style.display = action ? 'block' : 'none';
+                if (!action) return;
+                populateNearbyPlayers();
+                jobActionTargetGroup.style.display = ['bill', 'hire', 'fire', 'promote', 'demote'].includes(action) ? 'block' : 'none';
+                jobActionAmountGroup.style.display = action === 'bill' ? 'block' : 'none';
+                jobActionReasonGroup.style.display = action !== '' ? 'block' : 'none';
+                jobActionReasonLabel.textContent = action === 'bill' ? 'Service Description' : 'Reason (Optional)';
+            });
+            
+            document.getElementById('job-action-execute-btn').addEventListener('click', () => {
+                const action = jobActionSelect.value, targetId = jobActionTargetSelect.value, amount = jobActionAmountInput.value;
+                if (!action) return;
+                if (jobActionTargetGroup.style.display === 'block' && !targetId) return notify('Please select a target player.');
+                if (action === 'bill' && (!amount || amount <= 0)) return notify('Please enter a valid amount.');
+                sendNUI('jobAction', { action, targetId, amount, reason: jobActionReasonInput.value, activeJobType: state.activeJob });
+                notify(`Job action '${action}' sent.`);
+                jobActionSelect.value = '';
+                jobActionForm.style.display = 'none';
+            });
+            
+            document.getElementById('quit-job-primary').addEventListener('click', () => showModal('Quit Job', 'Quit primary job?', () => { sendNUI('quitJob', { jobType: 'primary' }); state.primaryJob = null; renderJobs(); hideModal(); }));
+            document.getElementById('quit-job-secondary').addEventListener('click', () => showModal('Quit Job', 'Quit secondary job?', () => { sendNUI('quitJob', { jobType: 'secondary' }); state.secondaryJob = null; renderJobs(); hideModal(); }));
+
+            const anonymousNameInput = document.getElementById('anonymous-name-input');
+            anonymousNameInput.value = state.settings.anonymousName;
+            anonymousNameInput.addEventListener('change', () => {
+                const newName = anonymousNameInput.value.trim();
+                if (newName) {
+                    state.settings.anonymousName = newName;
+                    sendNUI('updateSettings', { anonymousName: newName });
+                    notify(`Anonymous name set to: ${newName}`);
+                } else {
+                    anonymousNameInput.value = state.settings.anonymousName;
+                }
+            });
+
+            const themeSelect = document.getElementById('theme-select');
+            const notificationsToggle = document.getElementById('notifications-toggle');
+            const notificationSoundToggle = document.getElementById('notification-sound-toggle');
+            const airplaneToggle = document.getElementById('airplane-toggle');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeDisplay = document.getElementById('volume-display');
+            const wallpaperUrl = document.getElementById('wallpaper-url');
+            const wallpaperElement = document.getElementById('wallpaper');
+
+            const applyTheme = (theme) => {
+                if (theme === 'light') {
+                    document.documentElement.style.setProperty('--bg-primary', '#ffffff');
+                    document.documentElement.style.setProperty('--bg-secondary', '#f5f5f5');
+                    document.documentElement.style.setProperty('--bg-tertiary', '#e0e0e0');
+                    document.documentElement.style.setProperty('--text-primary', '#000000');
+                    document.documentElement.style.setProperty('--text-secondary', '#666666');
+                } else {
+                    document.documentElement.style.setProperty('--bg-primary', '#0a0a0a');
+                    document.documentElement.style.setProperty('--bg-secondary', '#1a1a1a');
+                    document.documentElement.style.setProperty('--bg-tertiary', '#2a2a2a');
+                    document.documentElement.style.setProperty('--text-primary', '#ffffff');
+                    document.documentElement.style.setProperty('--text-secondary', '#a0a0a0');
+                }
+            };
+
+            themeSelect.addEventListener('change', () => {
+                state.settings.theme = themeSelect.value;
+                applyTheme(state.settings.theme);
+                sendNUI('updateSettings', { theme: state.settings.theme });
+                notify(`${state.settings.theme === 'light' ? 'Light' : 'Dark'} mode enabled`);
+            });
+
+            [notificationsToggle, notificationSoundToggle, airplaneToggle].forEach(toggle => {
+                toggle.addEventListener('change', () => {
+                     const key = toggle.id.replace('-toggle', '').replace(/-(\w)/g, (match, p1) => p1.toUpperCase());
+                     state.settings[key] = toggle.checked;
+                     sendNUI('updateSettings', { [key]: toggle.checked });
+                });
+            });
+
+            volumeSlider.addEventListener('input', () => {
+                state.settings.volume = parseInt(volumeSlider.value);
+                volumeDisplay.textContent = `${state.settings.volume}%`;
+                sendNUI('updateSettings', { volume: state.settings.volume });
+            });
+
+            document.getElementById('apply-wallpaper').addEventListener('click', () => {
+                const url = wallpaperUrl.value.trim();
+                if (url) {
+                    state.settings.wallpaper = url;
+                    wallpaperElement.style.backgroundImage = `url(${url})`;
+                    wallpaperElement.style.backgroundSize = 'cover';
+                    wallpaperElement.style.backgroundPosition = 'center';
+                    sendNUI('updateSettings', { wallpaper: url });
+                    notify('Wallpaper applied!');
+                }
+            });
+
+            document.getElementById('reset-wallpaper').addEventListener('click', () => {
+                state.settings.wallpaper = null;
+                wallpaperElement.style.backgroundImage = '';
+                wallpaperUrl.value = '';
+                sendNUI('updateSettings', { wallpaper: null });
+                notify('Wallpaper reset!');
+            });
+			
+            const bankAccountSelect = document.getElementById('bank-account-select');
+            const updateBankBalance = () => document.querySelector('#bank-app .widget-balance').textContent = (state.balance[bankAccountSelect.value] || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            bankAccountSelect.addEventListener('change', updateBankBalance);
+            document.getElementById('transfer-btn').addEventListener('click', () => {
+                const id = document.getElementById('transfer-id').value, amount = parseInt(document.getElementById('transfer-amount').value);
+                if (id && amount > 0) showModal('Transfer Money', `Send $${amount} to ID ${id}?`, () => { sendNUI('transferMoney', { recipient: id, amount, fromAccount: bankAccountSelect.value }); hideModal(); });
+                else notify('Please enter a valid ID and amount.');
+            });
+
+            const renderBills = () => {
+                const container = document.getElementById('bank-bills');
+                if (state.bills.length === 0) {
+                     container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">You have no outstanding bills.</p>';
+                     return;
+                }
+                container.innerHTML = state.bills.map(bill => `
+                    <div class="list-item" style="flex-direction: column; align-items: stretch;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <div class="list-item-title">${bill.name}</div>
+                                <div class="list-item-subtitle">Due in ${bill.due}</div>
+                            </div>
+                            <div class="list-item-value" style="color: var(--warning);">$${bill.amount.toLocaleString()}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid var(--bg-tertiary); padding-top: 15px;">
+                            <select class="form-select bill-pay-account" style="flex: 2; margin: 0; padding: 10px;">
+                                ${Object.keys(state.balance).filter(k=>k!=='cash').map(acc => `<option value="${acc}">${acc.charAt(0).toUpperCase() + acc.slice(1)} ($${state.balance[acc].toLocaleString()})</option>`).join('')}
+                            </select>
+                            <button class="btn btn-primary pay-bill-btn" data-bill-id="${bill.id}" style="flex: 1; margin: 0; padding: 10px; font-size: 14px;">Pay Bill</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.querySelectorAll('.pay-bill-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const billId = parseInt(btn.dataset.billId);
+                        const bill = state.bills.find(b => b.id === billId);
+                        const selectedAccount = btn.closest('.list-item').querySelector('.bill-pay-account').value;
+                        
+                        if (bill && selectedAccount && state.balance[selectedAccount] >= bill.amount) {
+                             showModal('Pay Bill', `Pay $${bill.amount} for ${bill.name} from your ${selectedAccount} account?`, () => {
+                                state.balance[selectedAccount] -= bill.amount;
+                                state.bills = state.bills.filter(b => b.id !== billId);
+                                sendNUI('payBill', { billId, fromAccount: selectedAccount });
+                                notify('Bill paid successfully!');
+                                updateBankBalance();
+                                renderBills();
+                                hideModal();
+                            });
+                        } else {
+                            notify('Insufficient funds in selected account.');
+                        }
+                    });
+                });
+            };
+
+            const renderLeaderboard = () => {
+                const container = document.getElementById('food-leaderboard-content');
+                container.innerHTML = state.foodFerryLeaderboard
+                    .map(entry => `
+                        <div class="list-item">
+                             <div class="list-item-avatar" style="background: var(--bg-tertiary);">${entry.rank}</div>
+                             <div class="list-item-main" style="margin-left: 15px;">
+                                <div class="list-item-title">${entry.name}</div>
+                            </div>
+                            <div class="list-item-value" style="color: var(--warning);">${entry.orders} Orders</div>
+                        </div>
+                    `).join('');
+            };
+
+            document.getElementById('food-view-rankings').addEventListener('click', () => {
+                homeScreen.classList.add('hidden');
+                document.getElementById('food-app').classList.remove('active');
+                document.getElementById('food-leaderboard-view').classList.add('active');
+                state.currentApp = 'food-leaderboard';
+                renderLeaderboard();
+            });
+
+            document.getElementById('food-leaderboard-back').addEventListener('click', closeApp);
+            
+            document.getElementById('food-about-btn').addEventListener('click', () => {
+                showModal(
+                    'About Food Ferry', 
+                    'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', 
+                    () => hideModal(),
+                    { confirmText: 'Close', showCancel: false }
+                );
+            });
+
+
+            const showModal = (title, message, callback, options = {}) => {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-message').textContent = message;
+
+                const confirmBtn = document.getElementById('modal-confirm');
+                const cancelBtn = document.getElementById('modal-cancel');
+
+                confirmBtn.textContent = options.confirmText || 'Confirm';
+                cancelBtn.style.display = options.showCancel === false ? 'none' : 'flex';
+                
+                modal.classList.add('active');
+                state.modalCallback = callback;
+            };
+
+            const hideModal = () => {
+                modal.classList.remove('active');
+                state.modalCallback = null;
+                document.getElementById('modal-confirm').textContent = 'Confirm';
+                document.getElementById('modal-cancel').style.display = 'flex';
+            };
+
+            document.getElementById('modal-confirm').addEventListener('click', () => {
+                if (state.modalCallback) {
+                    state.modalCallback();
+                }
+            });
+
+            document.getElementById('modal-cancel').addEventListener('click', hideModal);
+			
+			const inputModal = document.getElementById('input-modal');
+            let currentRequestService = null;
+
+            const showInputModal = (title, placeholder, service) => {
+                document.getElementById('input-modal-title').textContent = title;
+                const textarea = document.getElementById('input-modal-textarea');
+                textarea.placeholder = placeholder;
+                textarea.value = '';
+                inputModal.classList.add('active');
+                currentRequestService = service;
+            };
+
+            const hideInputModal = () => {
+                inputModal.classList.remove('active');
+                currentRequestService = null;
+            };
+
+            document.getElementById('input-modal-cancel').addEventListener('click', hideInputModal);
+
+            document.getElementById('input-modal-confirm').addEventListener('click', () => {
+                const textInput = document.getElementById('input-modal-textarea').value.trim();
+                
+                if (currentRequestService === 'attach-message-image') {
+                    if (textInput) {
+                        const messageInput = document.getElementById('message-input');
+                        messageInput.value = (messageInput.value + ' ' + textInput).trim();
+                    }
+                    hideInputModal();
+                    return;
+                }
+
+                if (currentRequestService === 'attach-tweet-image') {
+                    if (textInput) {
+                        const tweetText = document.getElementById('tweet-text');
+                        tweetText.value = (tweetText.value + ' ' + textInput).trim();
+                        tweetText.dispatchEvent(new Event('input'));
+                    }
+                    hideInputModal();
+                    return;
+                }
+                
+                if (currentRequestService) {
+                    if (textInput) {
+                        sendNUI('makeRequest', { service: currentRequestService, reason: textInput });
+                        notify(`${currentRequestService} requested.`);
+                        hideInputModal();
+                    } else {
+                        notify('Please provide a reason for your request.');
+                    }
+                }
+            });
+
+            document.getElementById('post-lifeinvader').addEventListener('click', () => {
+                const postContent = document.getElementById('lifeinvader-post').value.trim();
+                if(postContent) {
+                    if (state.encryptionKeys <= 0) {
+                        notify('You have no encryption keys left to post anonymously.');
+                        return;
+                    }
+                    state.encryptionKeys--;
+                    updateKeyCounts();
+                    sendNUI('postToLifeInvader', {
+                        username: state.settings.anonymousName,
+                        content: postContent
+                    });
+                    notify('Posted to LifeInvader anonymously.');
+                    document.getElementById('lifeinvader-post').value = '';
+                    closeApp();
+                } else {
+                    notify('Post cannot be empty.');
+                }
+            });
+
+            document.getElementById('attach-image').addEventListener('click', () => {
+                showInputModal('Attach Image URL', 'https://.../image.png', 'attach-message-image');
+            });
+            
+            document.getElementById('attach-tweet-image').addEventListener('click', () => {
+                showInputModal('Attach Image URL', 'https://.../image.png', 'attach-tweet-image');
+            });
+
+            const setupRequesteeListeners = () => {
+                const requestButtons = [
+                    { id: 'request-mechanic', service: 'Mechanic', placeholder: 'e.g., My car broke down at Legion Square...' },
+                    { id: 'request-realtor', service: 'Realtor', placeholder: 'e.g., I would like to view a property...' },
+                    { id: 'request-pdm', service: 'PDM', placeholder: 'e.g., I am looking to purchase a new vehicle...' },
+                    { id: 'request-doctor', service: 'Doctor', placeholder: 'e.g., I am injured and require medical attention...' },
+                    { id: 'request-lawyer', service: 'Lawyer', placeholder: 'e.g., I need legal representation...' },
+                    { id: 'request-general', service: 'General', placeholder: 'Describe your general request...' }
+                ];
+
+                requestButtons.forEach(buttonInfo => {
+                    const button = document.getElementById(buttonInfo.id);
+                    if (button) {
+                        button.addEventListener('click', () => {
+                            showInputModal(`Requesting ${buttonInfo.service}`, buttonInfo.placeholder, buttonInfo.service);
+                        });
+                    }
+                });
+            };
+
+            window.addEventListener('message', e => { if (e.data.type === 'phone:show') { phoneWrapper.style.display = 'block'; document.body.style.display = 'flex'; } });
+            const callerView = document.getElementById('incoming-call-view');
+            document.getElementById('call-reject-btn').addEventListener('click', () => { callerView.style.display = 'none'; sendNUI('rejectCall'); });
+            document.getElementById('call-accept-btn').addEventListener('click', () => { const num = callerView.querySelector('#caller-number').textContent; callerView.style.display = 'none'; showDynamicIsland(num); sendNUI('acceptCall'); });
+            document.addEventListener('keyup', e => { if (e.key === 'Escape') { if (modal.classList.contains('active')) hideModal(); else if (inputModal.classList.contains('active')) hideInputModal(); else if (state.currentApp) closeApp(); else closePhone(); }});
+            
+            renderContacts();
+            renderMessageThreads();
+            renderJobs();
+            updateBankBalance();
+            setupRequesteeListeners();
+            updateKeyCounts();
+
+            phoneWrapper.style.display = 'block';
+            document.body.style.display = 'flex';
+		});
+    </script>
+</body>
+</html>
