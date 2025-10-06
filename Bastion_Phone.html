@@ -626,6 +626,13 @@
     		gap: 10px;
 		}
 
+        .message-bubble .embedded-image, .tweet-item .embedded-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 8px;
+            display: block;
+        }
+
         /* Food Ferry Specific Styles */
         .food-header {
             text-align: center;
@@ -694,6 +701,7 @@
         .app-food .app-icon { background: linear-gradient(135deg, #ff9a56, #ff6a88); }
         .app-requestee .app-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
         .app-settings .app-icon { background: linear-gradient(135deg, #6c757d, #5a6268); }
+        .app-garage .app-icon { background: linear-gradient(135deg, #868f96, #596164); }
         
         /* Twitter Floating Action Button */
         #twitter-app #new-tweet-btn {
@@ -901,6 +909,10 @@
                             <div class="app app-settings" data-app="settings">
                                 <div class="app-icon"><i class="fas fa-cog"></i></div>
                                 <div class="app-name">Settings</div>
+                            </div>
+                            <div class="app app-garage" data-app="garage">
+                                <div class="app-icon"><i class="fas fa-warehouse"></i></div>
+                                <div class="app-name">Garage</div>
                             </div>
                         </div>
                     </div>
@@ -1152,7 +1164,10 @@
                                 <textarea class="form-textarea" id="tweet-text" placeholder="What's happening in Los Santos?" maxlength="280"></textarea>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                                     <span id="tweet-count" style="font-size: 12px; color: var(--text-secondary);">0/280</span>
-                                    <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
+                                    <div>
+                                         <button class="btn btn-secondary" id="attach-tweet-image" style="width: auto; padding: 10px 16px; margin: 0 8px 0 0;"><i class="fas fa-paperclip"></i></button>
+                                         <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1495,6 +1510,15 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="app-view" id="garage-app">
+                    <div class="app-header">
+                        <div class="app-title">My Garage</div>
+                    </div>
+                    <div class="app-content" id="garage-list">
+                        <!-- Vehicle list will be rendered here -->
+                    </div>
+                </div>
                 
                 <div class="app-view" id="contact-editor-app">
                     <div class="app-header">
@@ -1555,6 +1579,7 @@
                     <div class="modal-title" id="modal-title">Confirm Action</div>
                     <div class="modal-message" id="modal-message">Are you sure?</div>
                     <div class="modal-actions">
+                        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
                         <button class="btn btn-primary" id="modal-confirm">Confirm</button>
                     </div>
                 </div>
@@ -1593,6 +1618,15 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const generateRandomPlate = () => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let plate = '';
+                for (let i = 0; i < 8; i++) {
+                    plate += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return plate;
+            };
+
             const state = {
                 balance: {
                     personal: 16250,
@@ -1620,7 +1654,7 @@
                         ]}
                     ]},
                     { id: 2, handle: '@ToastMcLovin', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false, replies: [] },
-                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive!', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] }
+                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive! https://i.imgur.com/83w0f9d.png', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] }
                 ],
                 allTwitterUsers: {
                     '@JohnDoe': { followers: 125, photoUrl: 'https://i.imgur.com/1q3n4U7.png' },
@@ -1632,6 +1666,11 @@
                     { rank: 2, name: 'Adam Smith', orders: 131 },
                     { rank: 3, name: 'Jane Doe', orders: 98 },
                     { rank: 4, name: 'John Doe', orders: 34 }
+                ],
+                vehicles: [
+                    { name: 'Stratum Zirconium', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Parked' },
+                    { name: 'Banshee 900R', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Out' },
+                    { name: 'Sultan RS', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Parked' }
                 ],
                 currentApp: null,
                 modalCallback: null,
@@ -1656,7 +1695,7 @@
                 ],
                 conversations: {
                     '555-0101': [ { type: 'sent', text: 'Are we still meeting today?', time: '2:30 PM' }, { type: 'received', text: 'See you at the meeting', time: '2:45 PM' } ],
-                    '555-0202': [ { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM' }, { type: 'sent', text: 'Sure, what time?', time: '10:26 AM' }, { type: 'received', text: 'Just got the car back, thanks!', time: '11:42 AM' } ],
+                    '555-0202': [ { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM' }, { type: 'sent', text: 'Sure, what time?', time: '10:26 AM' }, { type: 'received', text: 'Just got the car back, thanks! Here is a pic of it cleaned up: https://i.imgur.com/1q3n4U7.png', time: '11:42 AM' } ],
                     '555-0303': [ { type: 'received', text: 'Need any repairs?', time: '9:15 AM' }, { type: 'sent', text: 'Can you fix my engine?', time: '9:16 AM' }, { type: 'received', text: 'Sure, I\'m free now', time: '9:17 AM' } ],
                     '555-9999': [ { type: 'received', text: 'You won $1,000,000!', time: 'Yesterday' } ]
                 },
@@ -1678,6 +1717,17 @@
             const sendNUI = (eventName, data = {}) => console.log(`MOCK NUI: [${eventName}]`, data);
             const getContactByNumber = (number) => state.contacts.find(c => c.number === number);
             const notify = (message) => console.log('Notification:', message);
+
+            const linkify = (text) => {
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                return text.replace(urlRegex, (url) => {
+                    if (/\.(jpg|jpeg|png|gif)$/i.test(url)) {
+                        return `<img src="${url}" class="embedded-image" alt="User Image">`;
+                    } else {
+                        return `<a href="${url}" target="_blank" style="color: var(--accent);">${url}</a>`;
+                    }
+                });
+            };
 
             const setAvatar = (element, contact, handle) => {
                 let photoUrl = contact ? contact.photoUrl : null;
@@ -1701,7 +1751,7 @@
                 const card = state.myCard;
                 container.innerHTML = `
                     <h3 style="color: var(--text-secondary); margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">My Card</h3>
-                    <div class="list-item" data-number="${card.number}" style="background: var(--bg-tertiary);">
+                    <div class="list-item" data-number="${card.number}" style="background: var(--bg-tertiary); flex-wrap: wrap;">
                         <div class="contact-info">
                             <div class="list-item-avatar"></div>
                             <div class="list-item-main" style="margin-left: 15px;">
@@ -1709,13 +1759,21 @@
                                 <div class="list-item-subtitle">${card.number}</div>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 5px;">
-                            <button id="edit-my-card-btn" class="btn btn-secondary contact-action-btn" style="width: auto !important; padding: 0 12px !important;" title="Edit My Card"><i class="fas fa-pencil-alt"></i></button>
+                        <div style="width: 100%; display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--bg-tertiary);">
+                            <button id="share-my-card-btn" class="btn btn-secondary contact-action-btn" title="Share My Card"><i class="fas fa-share-square"></i></button>
+                            <button id="edit-my-card-btn" class="btn btn-secondary contact-action-btn" title="Edit My Card"><i class="fas fa-pencil-alt"></i></button>
                         </div>
                     </div>
-                     <h3 style="color: var(--text-secondary); margin: 20px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Contacts</h3>
+                    <h3 style="color: var(--text-secondary); margin: 20px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Contacts</h3>
                 `;
-                 setAvatar(container.querySelector('.list-item-avatar'), card);
+                setAvatar(container.querySelector('.list-item-avatar'), card);
+
+                document.getElementById('edit-my-card-btn').addEventListener('click', e => { e.stopPropagation(); openContactEditor('my-card'); });
+                document.getElementById('share-my-card-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    sendNUI('shareContact', state.myCard);
+                    notify(`Shared your contact card.`);
+                });
             };
 
             const renderContacts = () => {
@@ -1768,7 +1826,7 @@
                         <div class="list-item-avatar"></div>
                         <div class="list-item-main" style="margin-left: 15px;">
                             <div class="list-item-title">${name}</div>
-                            <div class="list-item-subtitle">${lastMessage.text}</div>
+                            <div class="list-item-subtitle">${lastMessage.text.length > 30 ? lastMessage.text.substring(0, 30) + '...' : lastMessage.text}</div>
                         </div>
                         <div style="color: var(--text-secondary); font-size: 12px;">${lastMessage.time.split(' ')[0]}</div>
                     `;
@@ -1776,6 +1834,36 @@
                     container.appendChild(item);
                 });
                 attachMessageThreadListeners();
+            };
+
+            const renderGarage = () => {
+                const list = document.getElementById('garage-list');
+                if (!state.vehicles || state.vehicles.length === 0) {
+                    list.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding-top: 20px;">You do not own any vehicles.</p>`;
+                    return;
+                }
+                list.innerHTML = state.vehicles.map(vehicle => {
+                    const statusColor = vehicle.status === 'Parked' ? 'var(--success)' : 'var(--warning)';
+                    return `
+                    <div class="list-item vehicle-item" data-plate="${vehicle.plate}">
+                        <div class="list-item-main">
+                            <div class="list-item-title">${vehicle.name}</div>
+                            <div class="list-item-subtitle" style="margin-top: 8px;"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> ${vehicle.garage}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="list-item-value" style="font-size: 14px; background: #000; padding: 5px 10px; border-radius: 5px; border: 1px solid #fff; font-family: 'Courier New', monospace; letter-spacing: 1px;">${vehicle.plate}</div>
+                            <div style="font-size: 12px; color: ${statusColor}; font-weight: 600; margin-top: 8px;">${vehicle.status}</div>
+                        </div>
+                    </div>
+                `}).join('');
+
+                list.querySelectorAll('.vehicle-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const plate = item.dataset.plate;
+                        sendNUI('trackVehicle', { plate });
+                        notify(`Tracking vehicle with plate ${plate}...`);
+                    });
+                });
             };
 
             const phoneWrapper = document.getElementById('phone-wrapper');
@@ -1850,6 +1938,8 @@
                          renderMyTwitterProfile();
                     } else if(appName === 'bank') {
                         renderBills();
+                    } else if(appName === 'garage') {
+                        renderGarage();
                     }
                 }
             };
@@ -2019,7 +2109,6 @@
             });
 
             const attachContactListeners = () => {
-                document.getElementById('edit-my-card-btn').addEventListener('click', e => { e.stopPropagation(); openContactEditor('my-card'); });
                 document.querySelectorAll('.contact-item .contact-info').forEach(card => card.addEventListener('click', () => card.closest('.contact-item').classList.toggle('expanded')));
                 document.querySelectorAll('.contact-action-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
@@ -2063,7 +2152,7 @@
                 (state.conversations[number] || []).forEach(msg => {
                     const bubble = document.createElement('div');
                     bubble.className = `message-bubble message-${msg.type}`;
-                    bubble.innerHTML = `<div>${msg.text}</div><div class="message-time">${msg.time}</div>`;
+                    bubble.innerHTML = `<div>${linkify(msg.text)}</div><div class="message-time">${msg.time}</div>`;
                     messagesContainer.appendChild(bubble);
                 });
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -2072,13 +2161,33 @@
             const attachMessageThreadListeners = () => document.querySelectorAll('.message-thread').forEach(thread => thread.addEventListener('click', () => openConversation(thread.dataset.contact, thread.dataset.number)));
             document.getElementById('back-to-messages').addEventListener('click', () => { document.getElementById('messages-list-view').style.display = 'block'; document.getElementById('conversation-view').style.display = 'none'; state.currentConversation = null; });
             const messageInput = document.getElementById('message-input');
+            
             document.getElementById('send-message').addEventListener('click', () => {
                 const text = messageInput.value.trim();
                 if (text && state.currentConversation) {
                     sendNUI('sendMessage', { number: state.currentConversation, message: text });
+                    
+                    const now = new Date();
+                    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    if (!state.conversations[state.currentConversation]) {
+                        state.conversations[state.currentConversation] = [];
+                    }
+                    state.conversations[state.currentConversation].push({
+                        type: 'sent',
+                        text: text,
+                        time: time
+                    });
+                    
+                    const contact = getContactByNumber(state.currentConversation);
+                    const contactName = contact ? contact.name : state.currentConversation;
+                    openConversation(contactName, state.currentConversation);
+                    renderMessageThreads(); // Update the main list view with the new last message
+                    
                     messageInput.value = '';
                 }
             });
+
             messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('send-message').click(); });
             document.getElementById('message-search').addEventListener('input', e => {
                 const search = e.target.value.toLowerCase();
@@ -2119,7 +2228,7 @@
                             <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
                                 <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle}</span>
                             </div>
-                            <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.retweetOf.text}</p>
+                            <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${linkify(tweet.retweetOf.text)}</p>
                         </div>
                     `;
                 } else {
@@ -2128,7 +2237,7 @@
                             <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: pointer;">${tweet.handle}</span>
                             <span style="color: var(--text-secondary); font-size: 12px;">${tweet.time}</span>
                         </div>
-                        <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${tweet.text}</p>
+                        <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${linkify(tweet.text)}</p>
                     `;
                 }
 
@@ -2684,19 +2793,45 @@
             document.getElementById('food-leaderboard-back').addEventListener('click', closeApp);
             
             document.getElementById('food-about-btn').addEventListener('click', () => {
-                showModal('About Food Ferry', 'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', () => hideModal());
-                document.getElementById('modal-confirm').textContent = 'Close';
+                showModal(
+                    'About Food Ferry', 
+                    'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', 
+                    () => hideModal(),
+                    { confirmText: 'Close', showCancel: false }
+                );
             });
 
 
-            const showModal = (title, message, callback) => {
+            const showModal = (title, message, callback, options = {}) => {
                 document.getElementById('modal-title').textContent = title;
                 document.getElementById('modal-message').textContent = message;
+
+                const confirmBtn = document.getElementById('modal-confirm');
+                const cancelBtn = document.getElementById('modal-cancel');
+
+                confirmBtn.textContent = options.confirmText || 'Confirm';
+                cancelBtn.style.display = options.showCancel === false ? 'none' : 'flex';
+                
                 modal.classList.add('active');
                 state.modalCallback = callback;
             };
-           
-            const inputModal = document.getElementById('input-modal');
+
+            const hideModal = () => {
+                modal.classList.remove('active');
+                state.modalCallback = null;
+                document.getElementById('modal-confirm').textContent = 'Confirm';
+                document.getElementById('modal-cancel').style.display = 'flex';
+            };
+
+            document.getElementById('modal-confirm').addEventListener('click', () => {
+                if (state.modalCallback) {
+                    state.modalCallback();
+                }
+            });
+
+            document.getElementById('modal-cancel').addEventListener('click', hideModal);
+			
+			const inputModal = document.getElementById('input-modal');
             let currentRequestService = null;
 
             const showInputModal = (title, placeholder, service) => {
@@ -2716,16 +2851,44 @@
             document.getElementById('input-modal-cancel').addEventListener('click', hideInputModal);
 
             document.getElementById('input-modal-confirm').addEventListener('click', () => {
+                const textInput = document.getElementById('input-modal-textarea').value.trim();
+                
+                if (currentRequestService === 'attach-message-image') {
+                    if (textInput) {
+                        const messageInput = document.getElementById('message-input');
+                        messageInput.value = (messageInput.value + ' ' + textInput).trim();
+                    }
+                    hideInputModal();
+                    return;
+                }
+
+                if (currentRequestService === 'attach-tweet-image') {
+                    if (textInput) {
+                        const tweetText = document.getElementById('tweet-text');
+                        tweetText.value = (tweetText.value + ' ' + textInput).trim();
+                        tweetText.dispatchEvent(new Event('input'));
+                    }
+                    hideInputModal();
+                    return;
+                }
+                
                 if (currentRequestService) {
-                    const reason = document.getElementById('input-modal-textarea').value.trim();
-                    if (reason) {
-                        sendNUI('makeRequest', { service: currentRequestService, reason });
+                    if (textInput) {
+                        sendNUI('makeRequest', { service: currentRequestService, reason: textInput });
                         notify(`${currentRequestService} requested.`);
                         hideInputModal();
                     } else {
                         notify('Please provide a reason for your request.');
                     }
                 }
+            });
+
+            document.getElementById('attach-image').addEventListener('click', () => {
+                showInputModal('Attach Image URL', 'https://.../image.png', 'attach-message-image');
+            });
+            
+            document.getElementById('attach-tweet-image').addEventListener('click', () => {
+                showInputModal('Attach Image URL', 'https://.../image.png', 'attach-tweet-image');
             });
 
             const setupRequesteeListeners = () => {
@@ -2752,7 +2915,7 @@
             const callerView = document.getElementById('incoming-call-view');
             document.getElementById('call-reject-btn').addEventListener('click', () => { callerView.style.display = 'none'; sendNUI('rejectCall'); });
             document.getElementById('call-accept-btn').addEventListener('click', () => { const num = callerView.querySelector('#caller-number').textContent; callerView.style.display = 'none'; showDynamicIsland(num); sendNUI('acceptCall'); });
-            document.addEventListener('keyup', e => { if (e.key === 'Escape') { if (modal.classList.contains('active')) hideModal(); else if (state.currentApp) closeApp(); else closePhone(); }});
+            document.addEventListener('keyup', e => { if (e.key === 'Escape') { if (modal.classList.contains('active')) hideModal(); else if (inputModal.classList.contains('active')) hideInputModal(); else if (state.currentApp) closeApp(); else closePhone(); }});
             
             renderContacts();
             renderMessageThreads();
@@ -2766,5 +2929,4 @@
     </script>
 </body>
 </html>
-
 
