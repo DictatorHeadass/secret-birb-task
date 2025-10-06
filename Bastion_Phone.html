@@ -1486,7 +1486,7 @@
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Version</div>
-                                <div class="list-item-subtitle">Phone OS v2.5.1</div>
+                                <div class="list-item-subtitle">Avian OS v2.5.1</div>
                             </div>
                         </div>
 
@@ -1555,7 +1555,6 @@
                     <div class="modal-title" id="modal-title">Confirm Action</div>
                     <div class="modal-message" id="modal-message">Are you sure?</div>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
                         <button class="btn btn-primary" id="modal-confirm">Confirm</button>
                     </div>
                 </div>
@@ -2688,9 +2687,6 @@
                 showModal('About Food Ferry', 'Food Ferry is Los Santos\' premier food delivery service. Work as a driver to earn money and climb the ranks to become the top ferry pilot in the city!', () => hideModal());
                 document.getElementById('modal-confirm').textContent = 'Close';
             });
-            document.getElementById('modal-cancel').addEventListener('click', () => {
-                 document.getElementById('modal-confirm').textContent = 'Confirm';
-            });
 
 
             const showModal = (title, message, callback) => {
@@ -2699,10 +2695,7 @@
                 modal.classList.add('active');
                 state.modalCallback = callback;
             };
-            const hideModal = () => { modal.classList.remove('active'); state.modalCallback = null; };
-            document.getElementById('modal-cancel').addEventListener('click', hideModal);
-            document.getElementById('modal-confirm').addEventListener('click', () => { if (state.modalCallback) state.modalCallback(); });
-
+           
             const inputModal = document.getElementById('input-modal');
             let currentRequestService = null;
 
