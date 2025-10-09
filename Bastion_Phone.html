@@ -26,7 +26,7 @@
             --danger: #ff3b5c;
             --success: #00ff88;
             --warning: #ffaa00;
-            --orange: #ff9800;
+            --orange: #42baff;
             /* Custom Message Colors */
             --message-sent-bg: var(--accent);
             --message-sent-text: #ffffff;
@@ -117,7 +117,7 @@
         .island-icon {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             background: linear-gradient(135deg, var(--success), #00c853);
             display: flex;
             align-items: center;
@@ -152,7 +152,7 @@
         .island-end-btn {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             background: var(--danger);
             display: flex;
             align-items: center;
@@ -570,7 +570,7 @@
         .list-item-avatar {
             width: 48px;
             height: 48px;
-            border-radius: 50%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             background-color: var(--bg-tertiary);
             display: flex;
             align-items: center;
@@ -582,6 +582,10 @@
             background-position: center;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #incoming-call-view .btn {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         }
 
         /* Dialpad */
@@ -596,7 +600,7 @@
             aspect-ratio: 1;
             background: var(--bg-secondary);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -974,7 +978,7 @@
             height: 70px; /* Fixed height for consistency */
             width: 70px;  /* Fixed width for consistency */
             justify-self: center; /* Center button in grid cell */
-            border-radius: 50%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             border: none;
             font-size: 28px;
             font-weight: 500;
@@ -988,13 +992,6 @@
         }
         .calc-btn.op { background-color: var(--orange); color: white; }
         .calc-btn.func { background-color: #a0a0a0; color: black; }
-        .calc-btn.zero { 
-            grid-column: span 2; 
-            width: 155px; /* (70px * 2) + 15px gap */
-            border-radius: 35px; 
-            justify-content: flex-start;
-            padding-left: 25px;
-        }
         .calc-btn:active { 
             filter: brightness(1.2); 
         }
@@ -1525,7 +1522,7 @@
                     <div class="app-content">
                         <p style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6; text-align: center;">Need a service done? Choose one of the options below to request someone from that job to enter the city to assist you.</p>
 
-                        <button class="btn" id="request-mechanic" style="background: linear-gradient(135deg, #ff9800, #ff5722); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
+                        <button class="btn" id="request-mechanic" style="background: linear-gradient(135deg, #42baff, #0098e6); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(66, 186, 255, 0.3);">
                             <i class="fas fa-wrench"></i> REQUEST MECHANIC
                         </button>
 
@@ -1717,14 +1714,14 @@
                     <div class="app-content" id="news-content">
                         <div class="list-item news-article-card">
                             <img src="https://placehold.co/350x180/1a1a1a/ffffff?text=Weazel+News" class="embedded-image" alt="News Image">
-                            <div class="list-item-title" style="font-size: 18px;">Senate Election Heats Up</div>
-                            <div class="list-item-subtitle">Placeholder bullshit about election.</div>
+                            <div class="list-item-title" style="font-size: 18px;">Mayoral Election Heats Up</div>
+                            <div class="list-item-subtitle">Tensions rise as candidates make final pushes before election day. Debates focus on city budget and crime rates.</div>
                             <div style="font-size: 11px; color: var(--text-secondary);">Published 2h ago by Anna Mitchell</div>
                         </div>
                         <div class="list-item news-article-card">
                              <img src="https://placehold.co/350x180/1a1a1a/ffffff?text=Weazel+News" class="embedded-image" alt="News Image">
                             <div class="list-item-title" style="font-size: 18px;">New Businesses Open in Vespucci</div>
-                            <div class="list-item-subtitle">Placeholder bs for business..</div>
+                            <div class="list-item-subtitle">A new wave of artisanal coffee shops and boutiques are revitalizing the Vespucci Beach boardwalk.</div>
                              <div style="font-size: 11px; color: var(--text-secondary);">Published 1d ago by Tom Goldstein</div>
                         </div>
                     </div>
@@ -1781,7 +1778,8 @@
                             <button class="calc-btn" data-key="3">3</button>
                             <button class="calc-btn op" data-operator="add">+</button>
 
-                            <button class="calc-btn zero" data-key="0">0</button>
+                            <button class="calc-btn" data-key="0">0</button>
+                            <button class="calc-btn func" data-key="sqrt">√</button>
                             <button class="calc-btn" data-key="decimal">.</button>
                             <button class="calc-btn op" data-key="calculate">=</button>
                         </div>
@@ -1915,10 +1913,10 @@
                     <div id="caller-number" style="font-size: 18px; color: var(--text-secondary); margin-top: 8px;">555-0202</div>
                 </div>
                 <div style="display: flex; justify-content: space-around; width: 100%;">
-                    <button id="call-reject-btn" class="btn" style="background: var(--danger); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                    <button id="call-reject-btn" class="btn" style="background: var(--danger); width: 70px; height: 70px; font-size: 24px;">
                         <i class="fas fa-phone-slash"></i>
                     </button>
-                    <button id="call-accept-btn" class="btn" style="background: var(--success); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                    <button id="call-accept-btn" class="btn" style="background: var(--success); width: 70px; height: 70px; font-size: 24px;">
                         <i class="fas fa-phone"></i>
                     </button>
                 </div>
@@ -3598,6 +3596,9 @@
                     case 'percent':
                         inputPercent();
                         break;
+                    case 'sqrt':
+                        inputSqrt();
+                        break;
                     default:
                         if (/\d/.test(key)) {
                             inputDigit(key);
@@ -3627,6 +3628,16 @@
                 }
             }
             
+            function inputSqrt() {
+                const { displayValue } = calculator;
+                const value = parseFloat(displayValue);
+                if (value < 0) {
+                    calculator.displayValue = 'Error';
+                } else {
+                    calculator.displayValue = `${parseFloat(Math.sqrt(value).toPrecision(15))}`;
+                }
+            }
+
             function toggleSign() {
                 calculator.displayValue = (parseFloat(calculator.displayValue) * -1).toString();
             }
@@ -4124,4 +4135,9 @@
     </script>
 </body>
 </html>
+
+
+
+
+
 
