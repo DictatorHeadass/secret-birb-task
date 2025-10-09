@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Sec Phone</title>
+    <title>NEW Bastion Phone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SortableJS library for drag-and-drop functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -24,7 +26,13 @@
             --danger: #ff3b5c;
             --success: #00ff88;
             --warning: #ffaa00;
-            --orange: #ff9800;
+            --orange: #42baff;
+            /* Custom Message Colors */
+            --message-sent-bg: var(--accent);
+            --message-sent-text: #ffffff;
+            --message-received-bg: var(--bg-secondary);
+            --message-received-text: var(--text-primary);
+            --conversation-bg-image: none;
         }
 
         body {
@@ -175,6 +183,9 @@
             display: flex;
             flex-direction: column;
             transition: opacity 0.3s ease;
+            user-select: none; /* Disable text selection */
+            -webkit-user-select: none;
+            -moz-user-select: none;
         }
 
         #home-screen.hidden {
@@ -191,6 +202,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             opacity: 0.15;
             z-index: 0;
+            background-size: cover;
+            background-position: center;
         }
 
         #home-content {
@@ -207,6 +220,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
+            min-height: 100px; /* Ensure drop target area exists */
         }
 
         .app {
@@ -215,6 +229,20 @@
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative; /* For jiggle */
+        }
+        
+        /* Jiggle animation for edit mode */
+        #home-screen.edit-mode .app,
+        #home-screen.edit-mode .dock-app {
+            animation: jiggle 0.2s infinite;
+            cursor: grab;
+        }
+
+        @keyframes jiggle {
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+            100% { transform: rotate(-1deg); }
         }
 
         .app:active { transform: scale(0.88); }
@@ -258,6 +286,19 @@
             border: 2px solid var(--bg-primary);
             box-shadow: 0 2px 8px rgba(255, 59, 92, 0.4);
         }
+        
+        /* SortableJS helper classes for drag-and-drop visuals */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: var(--accent-dim);
+            border-radius: 18px;
+        }
+
+        .sortable-drag {
+            opacity: 0.9 !important;
+            transform: scale(1.1);
+            z-index: 100;
+        }
 
         /* Dock */
         #dock {
@@ -289,6 +330,7 @@
             transition: transform 0.2s ease;
             background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
             border: 1px solid rgba(255,255,255,0.2);
+            position: relative; /* Added for jiggle */
         }
 
         .dock-app:active { transform: scale(0.9); }
@@ -417,6 +459,26 @@
             font-family: inherit;
             transition: all 0.2s ease;
         }
+        
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 44px;
+            height: 44px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        input[type="color"]::-moz-color-swatch {
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
 
         .form-input:focus, .form-textarea:focus, .form-select:focus {
             outline: none;
@@ -454,6 +516,12 @@
             background: linear-gradient(135deg, var(--danger), #d32f4f);
             color: white;
             box-shadow: 0 4px 16px rgba(255, 59, 92, 0.3);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #ff8f00);
+            color: white;
+            box-shadow: 0 4px 16px rgba(255, 170, 0, 0.3);
         }
 
         .btn-secondary {
@@ -514,6 +582,10 @@
             background-position: center;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #incoming-call-view .btn {
+            border-radius: 50%;
         }
 
         /* Dialpad */
@@ -587,18 +659,19 @@
             border-radius: 18px;
             margin-bottom: 8px;
             word-wrap: break-word;
+            transition: background-color 0.3s ease;
         }
 
         .message-received {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
+            background: var(--message-received-bg);
+            color: var(--message-received-text);
             align-self: flex-start;
             border-bottom-left-radius: 4px;
         }
 
         .message-sent {
-            background: var(--accent);
-            color: white;
+            background: var(--message-sent-bg);
+            color: var(--message-sent-text);
             align-self: flex-end;
             border-bottom-right-radius: 4px;
         }
@@ -614,6 +687,10 @@
             flex-direction: column;
             gap: 4px;
             padding: 10px 0;
+            background-image: var(--conversation-bg-image);
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.3s ease;
         }
 
         .message-input-container {
@@ -640,6 +717,28 @@
             background: linear-gradient(135deg, var(--orange), #ff5722);
             border-radius: 15px;
             margin-bottom: 20px;
+        }
+        
+        #food-duty-status {
+            text-align: center;
+            padding: 12px;
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border: 1px solid;
+            transition: all 0.3s ease;
+        }
+
+        #food-duty-status.on-duty {
+            color: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        #food-duty-status.off-duty {
+            color: var(--danger);
+            border-color: var(--danger);
         }
 
         .food-header i { font-size: 48px; margin-bottom: 10px; }
@@ -689,23 +788,9 @@
         .modal-message { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
         .modal-actions { display: flex; gap: 12px; }
         .modal-actions .btn { margin: 0; }
-
-        /* App-specific colors */
-        .app-phone .app-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .app-messages .app-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        .app-bank .app-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .app-camera .app-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-        .app-twitter .app-icon { background: linear-gradient(135deg, #1DA1F2, #0d8bd9); }
-        .app-ping .app-icon { background: linear-gradient(135deg, #fa709a, #fee140); }
-        .app-job .app-icon { background: linear-gradient(135deg, #30cfd0, #330867); }
-        .app-food .app-icon { background: linear-gradient(135deg, #ff9a56, #ff6a88); }
-        .app-requestee .app-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
-        .app-settings .app-icon { background: linear-gradient(135deg, #6c757d, #5a6268); }
-        .app-garage .app-icon { background: linear-gradient(135deg, #868f96, #596164); }
-        .app-lifeinvader .app-icon { background: linear-gradient(135deg, #e4405f, #fbad50); }
         
         /* Twitter Floating Action Button */
-        #twitter-app #new-tweet-btn {
+        #twitter-app #new-tweet-btn, #lifeinvader-app #new-lifeinvader-post-btn {
             position: absolute;
             width: 60px;
             height: 60px;
@@ -787,12 +872,16 @@
             font-size: 14px;
             color: var(--text-secondary);
         }
-        .tweet-item {
-            flex-direction: column; 
+        .tweet-item, .lifeinvader-item {
+            flex-direction: row; /* Changed for PFP */
             align-items: flex-start;
+            gap: 12px;
         }
-        .tweet-item:active {
+        .tweet-item:active, .lifeinvader-item:active {
             transform: scale(1);
+        }
+        .tweet-content, .lifeinvader-content {
+             flex: 1;
         }
         .tweet-actions {
             display: flex;
@@ -814,51 +903,112 @@
             color: var(--danger);
         }
 
-        /* Toggle Switch */
-        .toggle-switch-label {
-            position: relative; 
-            display: inline-block; 
-            width: 50px; 
-            height: 28px;
+        /* News App fix for text overflow */
+        .news-article-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: default;
+        }
+        .news-article-card .list-item-title,
+        .news-article-card .list-item-subtitle {
+             white-space: normal; /* Allow text to wrap */
+             word-wrap: break-word; /* Break long words if necessary */
+             width: 100%;
+        }
+        .news-article-card .embedded-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px; /* Match container rounding */
+            margin-bottom: 5px;
+        }
+        
+        /* Photos App Grid */
+        #photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+        .photo-thumbnail {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #photo-viewer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+        }
+        #photo-viewer img {
+            max-width: 95%;
+            max-height: 80%;
+            border-radius: 10px;
+        }
+        #photo-viewer-close {
+            position: absolute; top: 60px; right: 20px; font-size: 24px; color: white; cursor: pointer;
+        }
+        
+        /* --- Calculator Styles (FIXED) --- */
+        #calculator-display {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 64px;
+            text-align: right;
+            padding: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+            font-weight: 300;
+            flex-shrink: 0;
+        }
+        #calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 0 10px;
+        }
+        .calc-btn {
+            height: 70px; /* Fixed height for consistency */
+            width: 70px;  /* Fixed width for consistency */
+            justify-self: center; /* Center button in grid cell */
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border: none;
+            font-size: 28px;
+            font-weight: 500;
+            cursor: pointer;
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: filter 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .calc-btn.op { background-color: var(--orange); color: white; }
+        .calc-btn.func { background-color: #a0a0a0; color: black; }
+        .calc-btn:active { 
+            filter: brightness(1.2); 
         }
 
-        .toggle-switch-label input { 
-            opacity: 0; 
-            width: 0; 
-            height: 0;
+        /* Employee Management specific styles */
+        .employee-actions {
+            display: flex;
+            gap: 8px;
         }
 
-        .toggle-slider {
-            position: absolute; 
-            cursor: pointer; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0; 
-            background-color: var(--bg-tertiary); 
-            transition: 0.3s; 
-            border-radius: 28px;
+        .employee-actions .btn {
+            font-size: 11px !important;
+            padding: 8px 10px !important;
+            width: auto;
+            flex-shrink: 0;
         }
 
-        .toggle-slider:before {
-            position: absolute; 
-            content: ""; 
-            height: 20px; 
-            width: 20px; 
-            left: 4px; 
-            bottom: 4px; 
-            background-color: white; 
-            transition: 0.3s; 
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--accent);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(22px);
-        }
 
         /* Gesture Bar */
         #gesture {
@@ -879,6 +1029,53 @@
 
         #gesture::before {
             content: '⬢'; /* Hexagon character */
+        }
+         /* Custom toggle switch for anonymous posting */
+        .anon-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .anon-toggle label {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+        .anon-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .anon-toggle .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: .3s;
+            border-radius: 22px;
+        }
+        .anon-toggle .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        .anon-toggle input:checked + .slider {
+            background-color: var(--danger);
+        }
+        .anon-toggle input:checked + .slider:before {
+            transform: translateX(18px);
         }
     </style>
 </head>
@@ -914,73 +1111,12 @@
                     <div id="wallpaper"></div>
                     <div id="home-content">
                         <div id="apps-grid">
-                            <div class="app app-phone" data-app="phone">
-                                <div class="app-icon"><i class="fas fa-phone-alt"></i></div>
-                                <div class="app-name">Phone</div>
-                            </div>
-                            <div class="app app-messages" data-app="messages">
-                                <div class="app-icon">
-                                    <i class="fas fa-comment-dots"></i>
-                                    <div class="app-badge">5</div>
-                                </div>
-                                <div class="app-name">Messages</div>
-                            </div>
-                            <div class="app app-bank" data-app="bank">
-                                <div class="app-icon"><i class="fas fa-university"></i></div>
-                                <div class="app-name">Bank</div>
-                            </div>
-                            <div class="app app-camera" data-app="camera">
-                                <div class="app-icon"><i class="fas fa-camera"></i></div>
-                                <div class="app-name">Camera</div>
-                            </div>
-                            <div class="app app-twitter" data-app="twitter">
-                                <div class="app-icon"><i class="fab fa-twitter"></i></div>
-                                <div class="app-name">Tweeter</div>
-                            </div>
-                            <div class="app app-lifeinvader" data-app="lifeinvader">
-                                <div class="app-icon"><i class="fas fa-users"></i></div>
-                                <div class="app-name">LifeInvader</div>
-                            </div>
-                            <div class="app app-ping" data-app="ping">
-                                <div class="app-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                <div class="app-name">Pingr</div>
-                            </div>
-                            <div class="app app-job" data-app="job">
-                                <div class="app-icon"><i class="fas fa-briefcase"></i></div>
-                                <div class="app-name">Jobs</div>
-                            </div>
-                            <div class="app app-food" data-app="food">
-                                <div class="app-icon"><i class="fas fa-utensils"></i></div>
-                                <div class="app-name">Food Ferry</div>
-                            </div>
-                            <div class="app app-requestee" data-app="requestee">
-                                <div class="app-icon"><i class="fas fa-hands-helping"></i></div>
-                                <div class="app-name">Requestee</div>
-                            </div>
-                            <div class="app app-settings" data-app="settings">
-                                <div class="app-icon"><i class="fas fa-cog"></i></div>
-                                <div class="app-name">Settings</div>
-                            </div>
-                            <div class="app app-garage" data-app="garage">
-                                <div class="app-icon"><i class="fas fa-warehouse"></i></div>
-                                <div class="app-name">Garage</div>
-                            </div>
+                            <!-- Apps will be rendered here by JavaScript -->
                         </div>
                     </div>
 
                     <div id="dock">
-                        <div class="dock-app app-phone" data-app="phone" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                            <i class="fas fa-phone-alt"></i>
-                        </div>
-                        <div class="dock-app app-messages" data-app="messages" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                            <i class="fas fa-comment-dots"></i>
-                        </div>
-                        <div class="dock-app app-bank" data-app="bank" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                            <i class="fas fa-university"></i>
-                        </div>
-                        <div class="dock-app app-camera" data-app="camera" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-                            <i class="fas fa-camera"></i>
-                        </div>
+                        <!-- Dock apps will be rendered here by JavaScript -->
                     </div>
                 </div>
 
@@ -1036,42 +1172,7 @@
 
                         <div class="tab-content" id="recents">
                             <div id="recents-list">
-                                <div class="list-item recent-call" data-number="555-0202">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">
-                                            <i class="fas fa-phone-slash" style="color: var(--danger); font-size: 12px; margin-right: 8px;"></i>
-                                            Jane Doe
-                                        </div>
-                                        <div class="list-item-subtitle">Missed • Today, 10:30 AM</div>
-                                    </div>
-                                    <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                        <i class="fas fa-phone"></i>
-                                    </button>
-                                </div>
-                                <div class="list-item recent-call" data-number="555-0101">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">
-                                            <i class="fas fa-phone" style="color: var(--success); font-size: 12px; margin-right: 8px;"></i>
-                                            Adam Smith
-                                        </div>
-                                        <div class="list-item-subtitle">Outgoing • Yesterday, 3:15 PM</div>
-                                    </div>
-                                    <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                        <i class="fas fa-phone"></i>
-                                    </button>
-                                </div>
-                                <div class="list-item recent-call" data-number="555-0303">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">
-                                            <i class="fas fa-phone" style="color: var(--accent); font-size: 12px; margin-right: 8px;"></i>
-                                            Mechanic Mike
-                                        </div>
-                                        <div class="list-item-subtitle">Incoming • 2 days ago</div>
-                                    </div>
-                                    <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; margin: 0;">
-                                        <i class="fas fa-phone"></i>
-                                    </button>
-                                </div>
+                                <!-- Recent calls will be rendered here by JS -->
                             </div>
                         </div>
                     </div>
@@ -1132,20 +1233,17 @@
                     <div class="app-content" style="padding: 0;">
                         <div class="tab-content active" id="bank-transfer" style="padding: 20px;">
                             <div class="form-group">
-                                <label class="form-label">Account</label>
-                                <select class="form-select" id="bank-account-select">
-                                    <option value="personal">Personal Account</option>
-                                    <option value="business">Business Account</option>
-                                    <option value="escrow">Escrow Account</option>
-                                </select>
+                                <label class="form-label">Your Account</label>
+                                <select class="form-select" id="bank-account-select"></select>
                             </div>
                             <div class="widget" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                                <div class="widget-header" style="color: rgba(255,255,255,0.8);">Account Balance</div>
+                                <div class="widget-header" id="bank-widget-header" style="color: rgba(255,255,255,0.8);">Account</div>
                                 <div class="widget-balance">$0</div>
+                                <div id="bank-widget-id" style="color: rgba(255,255,255,0.7); font-size: 14px; margin-top: 5px; font-family: 'Courier New', monospace;"></div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Recipient ID</label>
-                                <input type="text" class="form-input" id="transfer-id" placeholder="Enter player or account ID">
+                                <input type="text" class="form-input" id="transfer-id" placeholder="Enter Player or Account ID">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Amount</label>
@@ -1156,20 +1254,7 @@
                             </button>
                             <h3 style="color: var(--text-secondary); margin: 30px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Transactions</h3>
                             <div id="transactions-list">
-                                <div class="list-item">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Jane Doe</div>
-                                        <div class="list-item-subtitle">Yesterday, 3:42 PM</div>
-                                    </div>
-                                    <div class="list-item-value" style="color: var(--danger);">-$500</div>
-                                </div>
-                                <div class="list-item">
-                                    <div class="list-item-main">
-                                        <div class="list-item-title">Taxi Payment</div>
-                                        <div class="list-item-subtitle">Today, 10:15 AM</div>
-                                    </div>
-                                    <div class="list-item-value" style="color: var(--success);">+$150</div>
-                                </div>
+                                <!-- Sample Transactions -->
                             </div>
                         </div>
                         <div class="tab-content" id="bank-bills" style="padding: 20px;">
@@ -1188,10 +1273,10 @@
                             <p style="color: #555; font-size: 14px;">Camera feed would appear here</p>
                         </div>
                         <div style="height: 130px; background: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; padding: 20px;padding-bottom: 55px;">
-                            <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
-                                <i class="fas fa-images"></i>
+                             <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%; opacity: 0; pointer-events: none;">
+                                <!-- Placeholder for alignment -->
                             </button>
-                            <button class="btn btn-primary" style="width: 70px; height: 75px; padding: 0; border-radius: 50%;">
+                            <button class="btn btn-primary" id="take-picture-btn" style="width: 70px; height: 75px; padding: 0; border-radius: 50%;">
                                 <i class="fas fa-circle" style="font-size: 24px;"></i>
                             </button>
                             <button class="btn btn-secondary" style="width: 60px; height: 60px; padding: 0; border-radius: 50%;">
@@ -1199,6 +1284,22 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <div class="app-view" id="photos-app">
+                    <div class="app-header">
+                        <div class="app-title">Photos</div>
+                    </div>
+                    <div class="app-content" style="padding: 5px;">
+                        <div id="photos-grid">
+                           <!-- Photos will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+                
+                 <div id="photo-viewer">
+                    <i class="fas fa-times" id="photo-viewer-close"></i>
+                    <img id="photo-viewer-img" src="" alt="Full size view">
                 </div>
 
                 <div class="app-view" id="twitter-app">
@@ -1213,24 +1314,22 @@
                         <div id="tweet-compose-container" style="display: none; padding: 20px; border-bottom: 1px solid var(--bg-tertiary);">
                             <div class="form-group">
                                 <textarea class="form-textarea" id="tweet-text" placeholder="What's happening in Los Santos?" maxlength="280"></textarea>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 15px; color: var(--text-secondary); font-size: 13px;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <label class="toggle-switch-label">
-                                                <input type="checkbox" id="tweet-anonymous-toggle">
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                            <span>Anonymous</span>
-                                        </div>
-                                        <div id="tweet-key-info" style="display: none; align-items: center; gap: 5px;">
-                                            <i class="fas fa-key"></i> Keys: <span id="tweet-key-count">0</span>
-                                        </div>
-                                    </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
                                     <span id="tweet-count" style="font-size: 12px; color: var(--text-secondary);">0/280</span>
+                                    <div>
+                                         <button class="btn btn-secondary" id="attach-tweet-image" style="width: auto; padding: 10px 16px; margin: 0 8px 0 0;"><i class="fas fa-paperclip"></i></button>
+                                         <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
+                                    </div>
                                 </div>
-                                 <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 15px;">
-                                     <button class="btn btn-secondary" id="attach-tweet-image" style="width: auto; padding: 10px 16px; margin: 0 8px 0 0;"><i class="fas fa-paperclip"></i></button>
-                                     <button class="btn btn-primary" id="post-tweet" style="width: auto; padding: 10px 24px; margin: 0;">Tweet</button>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                                    <div class="anon-toggle">
+                                        Post Anonymously
+                                        <label>
+                                            <input type="checkbox" id="tweet-anon-toggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <span id="tweet-keys-count" style="font-size: 12px; color: var(--danger); font-weight: 600;"></span>
                                 </div>
                             </div>
                         </div>
@@ -1287,6 +1386,36 @@
                         <div id="thread-replies-list" style="padding: 0 20px 20px 20px;"></div>
                     </div>
                 </div>
+                
+                 <div class="app-view" id="lifeinvader-app">
+                    <div class="app-header">
+                        <div class="app-title">Lifeinvader</div>
+                    </div>
+                    <div class="app-content" style="padding: 0; display: flex; flex-direction: column;">
+                        <div id="lifeinvader-compose-container" style="padding: 20px;">
+                            <div class="form-group">
+                                <textarea class="form-textarea" id="lifeinvader-text" placeholder="What's on your mind?" maxlength="500"></textarea>
+                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                                    <span id="lifeinvader-count" style="font-size: 12px; color: var(--text-secondary);">0/500</span>
+                                    <div>
+                                         <button class="btn btn-primary" id="post-lifeinvader" style="width: auto; padding: 10px 24px; margin: 0;">Post</button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                                    <div class="anon-toggle">
+                                        Post Anonymously
+                                        <label>
+                                            <input type="checkbox" id="lifeinvader-anon-toggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <span id="lifeinvader-keys-count" style="font-size: 12px; color: var(--danger); font-weight: 600;"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="app-view" id="ping-app">
                     <div class="app-header">
@@ -1343,35 +1472,14 @@
                             <div class="widget-balance" style="font-size: 28px;" id="secondary-job-display">Unemployed</div>
                         </div>
 
-                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Job Actions</h3>
-
-                        <div class="form-group">
-                            <label class="form-label">Select Action</label>
-                            <select class="form-select" id="job-action-select">
-                                <option value="">Choose an action...</option>
-                                <option value="bill">Bill Customer</option>
-                                <option value="hire">Hire Employee</option>
-                                <option value="fire">Fire Employee</option>
-                                <option value="promote">Promote Employee</option>
-                                <option value="demote">Demote Employee</option>
-                            </select>
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Business Actions</h3>
+                        
+                        <div id="job-actions-container" style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn btn-primary" id="job-billing-btn"><i class="fas fa-file-invoice-dollar"></i> Bill Customer</button>
+                            <button class="btn btn-secondary" id="job-hire-btn"><i class="fas fa-user-plus"></i> Hire Employee</button>
+                            <button class="btn btn-secondary" id="job-manage-btn"><i class="fas fa-users-cog"></i> Manage Employees</button>
                         </div>
 
-                        <div id="job-action-form" style="display: none; background: var(--bg-secondary); padding: 20px; border-radius: 15px;">
-                            <div class="form-group" id="job-action-target-group" style="display: none;">
-                                <label class="form-label">Target Player</label>
-                                <select class="form-select" id="job-action-target-select"></select>
-                            </div>
-                            <div class="form-group" id="job-action-amount-group" style="display: none;">
-                                <label class="form-label">Amount</label>
-                                <input type="number" class="form-input" id="job-action-amount-input" placeholder="$0">
-                            </div>
-                            <div class="form-group" id="job-action-reason-group" style="display: none;">
-                                <label class="form-label" id="job-action-reason-label">Reason</label>
-                                <input type="text" class="form-input" id="job-action-reason-input" placeholder="Service description...">
-                            </div>
-                            <button class="btn btn-primary" id="job-action-execute-btn">Execute</button>
-                        </div>
 
                         <div style="margin-top: 30px; display: flex; gap: 12px;">
                              <button class="btn btn-danger" id="quit-job-primary" style="flex: 1;">
@@ -1384,6 +1492,62 @@
                     </div>
                 </div>
 
+                 <!-- Job App Sub-Views -->
+                <div class="app-view" id="job-billing-app">
+                    <div class="app-header">
+                         <div style="position: absolute; left: 20px;"><button class="btn btn-secondary job-back-btn" style="width: auto; padding: 8px 16px; margin: 0;"><i class="fas fa-arrow-left"></i></button></div>
+                        <div class="app-title">Create Bill</div>
+                    </div>
+                    <div class="app-content">
+                        <div class="form-group">
+                            <label class="form-label">Recipient ID</label>
+                            <input type="number" class="form-input" id="billing-recipient-id" placeholder="Enter Player ID">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bill Amount</label>
+                            <input type="number" class="form-input" id="billing-amount" placeholder="$0">
+                        </div>
+                         <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-textarea" id="billing-description" placeholder="e.g., Vehicle Repair, Service Fee..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" id="send-bill-btn">Send Bill</button>
+                    </div>
+                </div>
+
+                <div class="app-view" id="job-hire-app">
+                     <div class="app-header">
+                        <div style="position: absolute; left: 20px;"><button class="btn btn-secondary job-back-btn" style="width: auto; padding: 8px 16px; margin: 0;"><i class="fas fa-arrow-left"></i></button></div>
+                        <div class="app-title">Hire Employee</div>
+                    </div>
+                    <div class="app-content">
+                         <div class="form-group">
+                            <label class="form-label">Player ID</label>
+                            <input type="number" class="form-input" id="hire-player-id" placeholder="Enter Player ID to hire">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Role / Position</label>
+                            <select class="form-select" id="hire-role-select">
+                                <option>Trainee</option>
+                                <option>Employee</option>
+                                <option>Manager</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="send-hire-offer-btn">Send Offer</button>
+                    </div>
+                </div>
+
+                <div class="app-view" id="job-manage-app">
+                    <div class="app-header">
+                        <div style="position: absolute; left: 20px;"><button class="btn btn-secondary job-back-btn" style="width: auto; padding: 8px 16px; margin: 0;"><i class="fas fa-arrow-left"></i></button></div>
+                        <div class="app-title">Manage Employees</div>
+                    </div>
+                    <div class="app-content" id="employee-list">
+                        <!-- Employee list will be rendered here -->
+                    </div>
+                </div>
+
+
                 <div class="app-view" id="food-app">
                     <div class="app-header">
                         <div class="app-title">Food Ferry</div>
@@ -1394,9 +1558,13 @@
                             <h2>Food Ferry</h2>
                             <p>Feeding You Faster</p>
                         </div>
+                        
+                        <div id="food-duty-status" class="off-duty">
+                            You are not accepting orders.
+                        </div>
 
                         <button class="btn" id="food-toggle-orders" style="background: var(--orange); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
-                            <i class="fas fa-list"></i> TOGGLE ORDERS
+                            <i class="fas fa-list"></i> <span>TOGGLE ORDERS</span>
                         </button>
 
                         <button class="btn btn-danger" id="food-view-rankings" style="margin-bottom: 15px;">
@@ -1441,7 +1609,7 @@
                     <div class="app-content">
                         <p style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6; text-align: center;">Need a service done? Choose one of the options below to request someone from that job to enter the city to assist you.</p>
 
-                        <button class="btn" id="request-mechanic" style="background: linear-gradient(135deg, #ff9800, #ff5722); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);">
+                        <button class="btn" id="request-mechanic" style="background: linear-gradient(135deg, #42baff, #0098e6); color: white; margin-bottom: 15px; box-shadow: 0 4px 16px rgba(66, 186, 255, 0.3);">
                             <i class="fas fa-wrench"></i> REQUEST MECHANIC
                         </button>
 
@@ -1483,12 +1651,18 @@
                             </div>
                         </div>
 
-                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">High-Sec</h3>
-                        <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Security</h3>
+                         <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
                             <label class="form-label">Anonymous Name</label>
-                            <input type="text" class="form-input" id="anonymous-name-input" placeholder="e.g., The Ghost">
+                            <input type="text" class="form-input" id="settings-anon-name" placeholder="e.g. Anon">
                         </div>
-
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Encryption Keys</div>
+                                <div class="list-item-subtitle">For anonymous posting</div>
+                            </div>
+                            <div class="list-item-value" id="settings-keys-display">0</div>
+                        </div>
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Appearance</h3>
 
@@ -1502,10 +1676,23 @@
                                 <option value="light">Light</option>
                             </select>
                         </div>
+                        
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Sent Message Color</div>
+                            </div>
+                            <input type="color" id="sent-bubble-color-picker" value="#00d9ff">
+                        </div>
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Received Message Color</div>
+                            </div>
+                            <input type="color" id="received-bubble-color-picker" value="#1a1a1a">
+                        </div>
 
                         <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
                             <label class="form-label">Custom Wallpaper</label>
-                            <input type="text" class="form-input" id="wallpaper-url" placeholder="Enter ImgBB image URL" style="margin: 0 0 10px 0;">
+                            <input type="text" class="form-input" id="wallpaper-url" placeholder="Enter image URL" style="margin: 0 0 10px 0;">
                             <div style="display: flex; gap: 8px;">
                                 <button class="btn btn-primary" id="apply-wallpaper" style="flex: 1; padding: 10px; margin: 0;">
                                     Apply
@@ -1515,6 +1702,24 @@
                                 </button>
                             </div>
                         </div>
+                        
+                         <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
+                            <label class="form-label">Messages Background</label>
+                            <input type="text" class="form-input" id="conversation-bg-url" placeholder="Enter image URL" style="margin: 0 0 10px 0;">
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" id="apply-conversation-bg" style="flex: 1; padding: 10px; margin: 0;">
+                                    Apply
+                                </button>
+                                <button class="btn btn-secondary" id="reset-conversation-bg" style="flex: 1; padding: 10px; margin: 0;">
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Home Screen</h3>
+                         <button class="btn btn-primary" id="edit-layout-btn">
+                            <i class="fas fa-th"></i> Edit Layout
+                        </button>
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Notifications</h3>
 
@@ -1523,9 +1728,10 @@
                                 <div class="list-item-title">Show Notifications</div>
                                 <div class="list-item-subtitle">Display app notifications</div>
                             </div>
-                            <label class="toggle-switch-label">
-                                <input type="checkbox" id="notifications-toggle" checked>
-                                <span class="toggle-slider"></span>
+                            <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                                <input type="checkbox" id="notifications-toggle" checked style="opacity: 0; width: 0; height: 0;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-tertiary); transition: 0.3s; border-radius: 28px;"></span>
+                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
                             </label>
                         </div>
 
@@ -1534,13 +1740,26 @@
                                 <div class="list-item-title">Notification Sound</div>
                                 <div class="list-item-subtitle">Play sound on notification</div>
                             </div>
-                            <label class="toggle-switch-label">
-                                <input type="checkbox" id="notification-sound-toggle" checked>
-                                <span class="toggle-slider"></span>
+                            <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                                <input type="checkbox" id="notification-sound-toggle" checked style="opacity: 0; width: 0; height: 0;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-tertiary); transition: 0.3s; border-radius: 28px;"></span>
+                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
                             </label>
                         </div>
 
                         <h3 style="color: var(--text-secondary); margin: 25px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">System</h3>
+                        
+                        <div class="list-item" style="cursor: default;">
+                            <div class="list-item-main">
+                                <div class="list-item-title">Time Format</div>
+                                <div class="list-item-subtitle">Switch between 12/24 hour</div>
+                            </div>
+                             <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                                <input type="checkbox" id="time-format-toggle" style="opacity: 0; width: 0; height: 0;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-tertiary); transition: 0.3s; border-radius: 28px;"></span>
+                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
+                            </label>
+                        </div>
 
                         <div class="form-group" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
                             <label class="form-label">Ringtone Volume</label>
@@ -1557,9 +1776,10 @@
                                 <div class="list-item-title">Airplane Mode</div>
                                 <div class="list-item-subtitle">Disable all connections</div>
                             </div>
-                            <label class="toggle-switch-label">
-                                <input type="checkbox" id="airplane-toggle">
-                                <span class="toggle-slider"></span>
+                            <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                                <input type="checkbox" id="airplane-toggle" style="opacity: 0; width: 0; height: 0;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-tertiary); transition: 0.3s; border-radius: 28px;"></span>
+                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
                             </label>
                         </div>
 
@@ -1568,7 +1788,7 @@
                         <div class="list-item" style="cursor: default;">
                             <div class="list-item-main">
                                 <div class="list-item-title">Version</div>
-                                <div class="list-item-subtitle">Avian OS v2.6.0</div>
+                                <div class="list-item-subtitle">Avian OS v2.5.2</div>
                             </div>
                         </div>
 
@@ -1586,25 +1806,86 @@
                         <!-- Vehicle list will be rendered here -->
                     </div>
                 </div>
-
-                 <div class="app-view" id="lifeinvader-app">
+                
+                <div class="app-view" id="news-app">
                     <div class="app-header">
-                        <div class="app-title">LifeInvader</div>
+                        <div class="app-title">Weazel News</div>
                     </div>
-                    <div class="app-content">
-                        <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">Post anonymously to the city's feed. Your High-Sec anonymous name will be used.</p>
-                        <div class="form-group">
-                            <textarea class="form-textarea" id="lifeinvader-post" placeholder="What's on your mind?" style="min-height: 150px;"></textarea>
+                    <div class="app-content" id="news-content">
+                        <div class="list-item news-article-card">
+                            <img src="https://placehold.co/350x180/1a1a1a/ffffff?text=Weazel+News" class="embedded-image" alt="News Image">
+                            <div class="list-item-title" style="font-size: 18px;">Mayoral Election Heats Up</div>
+                            <div class="list-item-subtitle">Tensions rise as candidates make final pushes before election day. Debates focus on city budget and crime rates.</div>
+                            <div style="font-size: 11px; color: var(--text-secondary);">Published 2h ago by Anna Mitchell</div>
                         </div>
-                        <div style="text-align: right; color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;">
-                            <i class="fas fa-key"></i> Encryption Keys Left: <span id="lifeinvader-key-count">0</span>
+                        <div class="list-item news-article-card">
+                             <img src="https://placehold.co/350x180/1a1a1a/ffffff?text=Weazel+News" class="embedded-image" alt="News Image">
+                            <div class="list-item-title" style="font-size: 18px;">New Businesses Open in Vespucci</div>
+                            <div class="list-item-subtitle">A new wave of artisanal coffee shops and boutiques are revitalizing the Vespucci Beach boardwalk.</div>
+                             <div style="font-size: 11px; color: var(--text-secondary);">Published 1d ago by Tom Goldstein</div>
                         </div>
-                        <button class="btn btn-primary" id="post-lifeinvader">
-                            <i class="fas fa-paper-plane"></i> Post Anonymously
-                        </button>
                     </div>
                 </div>
                 
+                <div class="app-view" id="notes-app">
+                    <div class="app-header">
+                         <div style="position: absolute; left: 20px;">
+                            <button class="btn btn-secondary" id="notes-back" style="width: auto; padding: 8px 16px; margin: 0; display: none;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                        <div class="app-title">Notes</div>
+                         <div style="position: absolute; right: 20px;">
+                            <button class="btn btn-primary" id="new-note-btn" style="width: auto; padding: 8px 16px; margin: 0;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="app-content">
+                        <div id="notes-list-view">
+                            <!-- Notes list rendered here -->
+                        </div>
+                        <div id="note-editor-view" style="display: none; height: 100%; flex-direction: column;">
+                            <textarea id="note-editor-textarea" class="form-textarea" style="flex-grow: 1; border-radius: 0; border: none; background: transparent; padding: 0; font-size: 16px;" placeholder="Start writing..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="app-view" id="calculator-app">
+                    <div class="app-header">
+                        <div class="app-title">Calculator</div>
+                    </div>
+                    <div class="app-content" style="display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 30px;">
+                        <input type="text" id="calculator-display" value="0" readonly>
+                        <div id="calculator-buttons">
+                            <button class="calc-btn func" data-key="clear">AC</button>
+                            <button class="calc-btn func" data-key="sign">+/-</button>
+                            <button class="calc-btn func" data-key="percent">%</button>
+                            <button class="calc-btn op" data-operator="divide">÷</button>
+
+                            <button class="calc-btn" data-key="7">7</button>
+                            <button class="calc-btn" data-key="8">8</button>
+                            <button class="calc-btn" data-key="9">9</button>
+                            <button class="calc-btn op" data-operator="multiply">×</button>
+
+                            <button class="calc-btn" data-key="4">4</button>
+                            <button class="calc-btn" data-key="5">5</button>
+                            <button class="calc-btn" data-key="6">6</button>
+                            <button class="calc-btn op" data-operator="subtract">−</button>
+
+                            <button class="calc-btn" data-key="1">1</button>
+                            <button class="calc-btn" data-key="2">2</button>
+                            <button class="calc-btn" data-key="3">3</button>
+                            <button class="calc-btn op" data-operator="add">+</button>
+
+                            <button class="calc-btn" data-key="0">0</button>
+                            <button class="calc-btn func" data-key="sqrt">√</button>
+                            <button class="calc-btn" data-key="decimal">.</button>
+                            <button class="calc-btn op" data-key="calculate">=</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="app-view" id="contact-editor-app">
                     <div class="app-header">
                         <div class="app-title" id="contact-editor-title">New Contact</div>
@@ -1676,9 +1957,51 @@
                     <div class="form-group" style="margin: 20px 0;">
                         <textarea class="form-textarea" id="input-modal-textarea" placeholder="Describe your request..."></textarea>
                     </div>
+                     <div id="input-modal-photo-select" style="display: none; max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
+                        <div id="input-modal-photos-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
+                    </div>
                     <div class="modal-actions">
                         <button class="btn btn-secondary" id="input-modal-cancel">Cancel</button>
                         <button class="btn btn-primary" id="input-modal-confirm">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+             <div class="modal-overlay" id="vehicle-sell-modal">
+                <div class="modal">
+                    <div class="modal-title" id="vehicle-sell-title">Sell Vehicle</div>
+                    <div class="modal-message">Enter the buyer's ID and the sale price.</div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label">Buyer's Player ID</label>
+                        <input type="number" class="form-input" id="sell-player-id" placeholder="e.g., 42">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sale Amount</label>
+                        <input type="number" class="form-input" id="sell-amount" placeholder="$0">
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="sell-cancel-btn">Cancel</button>
+                        <button class="btn btn-primary" id="sell-confirm-btn">Confirm Sale</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="contact-share-modal">
+                <div class="modal">
+                    <div class="modal-title" id="contact-share-title">Share Contact</div>
+                    <div class="app-content" style="padding: 0; max-height: 400px; overflow-y: auto;">
+                        <h3 style="color: var(--text-secondary); margin: 15px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Share Nearby</h3>
+                        <div id="share-nearby-list">
+                            <!-- Nearby people will be rendered here -->
+                        </div>
+
+                        <h3 style="color: var(--text-secondary); margin: 20px 0 15px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Share with Contact</h3>
+                        <div id="share-contacts-list">
+                            <!-- Other contacts will be rendered here -->
+                        </div>
+                    </div>
+                    <div class="modal-actions" style="margin-top: 20px;">
+                        <button class="btn btn-secondary" id="share-cancel-btn" style="width: 100%;">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -1690,10 +2013,10 @@
                     <div id="caller-number" style="font-size: 18px; color: var(--text-secondary); margin-top: 8px;">555-0202</div>
                 </div>
                 <div style="display: flex; justify-content: space-around; width: 100%;">
-                    <button id="call-reject-btn" class="btn" style="background: var(--danger); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                    <button id="call-reject-btn" class="btn" style="background: var(--danger); width: 70px; height: 70px; font-size: 24px;">
                         <i class="fas fa-phone-slash"></i>
                     </button>
-                    <button id="call-accept-btn" class="btn" style="background: var(--success); width: 70px; height: 70px; border-radius: 50%; font-size: 24px;">
+                    <button id="call-accept-btn" class="btn" style="background: var(--success); width: 70px; height: 70px; font-size: 24px;">
                         <i class="fas fa-phone"></i>
                     </button>
                 </div>
@@ -1713,12 +2036,13 @@
             };
 
             const state = {
-                balance: {
-                    personal: 16250,
-                    business: 85000,
-                    escrow: 1200,
-                    cash: 450
-                },
+                 accounts: [
+                    { id: 'P-123456', name: 'Personal Account', balance: 16250, type: 'personal' },
+                    { id: 'B1-789012', name: 'Primary Business', balance: 85000, type: 'business_1' },
+                    { id: 'B2-345678', name: 'Secondary Business', balance: 22000, type: 'business_2' },
+                    { id: 'E-901234', name: 'Escrow', balance: 1200, type: 'escrow' }
+                ],
+                cash: 450,
                 bills: [
                     { id: 1, name: 'Los Santos Power & Water', amount: 150, due: '2 days' },
                     { id: 2, name: 'Badger Phone Service', amount: 85, due: '5 days' },
@@ -1726,6 +2050,10 @@
                 ],
                 primaryJob: 'Taxi Driver',
                 secondaryJob: 'Food Ferry',
+                employees: [
+                    { id: 2, name: 'Jane Doe', role: 'Driver' },
+                    { id: 8, name: 'Some Guy', role: 'Trainee' }
+                ],
                 activeJob: 'primary',
                 twitterProfile: {
                     handle: '@JohnDoe',
@@ -1739,13 +2067,12 @@
                         ]}
                     ]},
                     { id: 2, handle: '@ToastMcLovin', text: 'The highways are totally clear tonight! Perfect for a cruise. #LSStreets', time: '5m ago', likes: 2, retweets: 0, liked: false, replies: [] },
-                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive! https://i.imgur.com/83w0f9d.png', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] },
-                    { id: 4, handle: null, text: 'Saw something strange near the observatory tonight... be careful out there.', time: '3h ago', likes: 22, retweets: 8, liked: false, replies: [] }
+                    { id: 3, handle: '@JohnDoe', text: 'Just finished a taxi fare to Paleto. Long drive! https://i.ibb.co/sd9j9q3p/image-2025-10-08-205158487.png', time: '2h ago', likes: 5, retweets: 1, liked: false, replies: [] }
                 ],
                 allTwitterUsers: {
-                    '@JohnDoe': { followers: 125, photoUrl: 'https://i.imgur.com/1q3n4U7.png' },
-                    '@LSPD': { followers: 2500, photoUrl: '' },
-                    '@ToastMcLovin': { followers: 312, photoUrl: 'https://i.imgur.com/83w0f9d.png' }
+                    '@JohnDoe': { followers: 125, photoUrl: 'https://placehold.co/100x100/764ba2/ffffff?text=JD' },
+                    '@LSPD': { followers: 2500, photoUrl: 'https://placehold.co/100x100/0d8bd9/ffffff?text=LSPD' },
+                    '@ToastMcLovin': { followers: 312, photoUrl: 'https://placehold.co/100x100/ff9a56/ffffff?text=T' }
                 },
                 foodFerryLeaderboard: [
                     { rank: 1, name: 'Speedy Gonzales', orders: 152 },
@@ -1753,11 +2080,50 @@
                     { rank: 3, name: 'Jane Doe', orders: 98 },
                     { rank: 4, name: 'John Doe', orders: 34 }
                 ],
+                foodFerryOnDuty: false,
                 vehicles: [
                     { name: 'Stratum Zirconium', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Parked' },
                     { name: 'Banshee 900R', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Out' },
                     { name: 'Sultan RS', garage: 'Capitol Garage', plate: generateRandomPlate(), status: 'Parked' }
                 ],
+                 photos: [
+                    'https://i.ibb.co/Kpx2Zv2Y/image-2025-10-08-205415706.png',
+                    'https://i.ibb.co/DDhcpjDS/image-2025-10-08-205909631.png',
+                    'https://i.ibb.co/C5twvhdq/image-2025-10-08-210122714.png',
+                    'https://i.ibb.co/pBd0DW1J/image-2025-10-08-210311831.png',
+                    'https://i.ibb.co/zVPyCD5Q/image-2025-10-08-210624611.png',
+                ],
+                 recentCalls: [],
+                 notes: [
+                    { id: 1, text: "Meeting with the crew at 9 PM tonight. Don't be late.", timestamp: Date.now() - 86400000 },
+                    { id: 2, text: "Grocery list:\n- Pre-toasted Bread\n- Eggs\n- Cheese", timestamp: Date.now() }
+                ],
+                app_meta: {
+                    phone: { name: 'Phone', icon: 'fas fa-phone-alt', color: 'linear-gradient(135deg, #667eea, #764ba2)' },
+                    messages: { name: 'Messages', icon: 'fas fa-comment-dots', color: 'linear-gradient(135deg, #f093fb, #f5576c)' },
+                    bank: { name: 'Bank', icon: 'fas fa-university', color: 'linear-gradient(135deg, #4facfe, #00f2fe)' },
+                    camera: { name: 'Camera', icon: 'fas fa-camera', color: 'linear-gradient(135deg, #43e97b, #38f9d7)' },
+                    photos: { name: 'Photos', icon: 'fas fa-images', color: 'linear-gradient(135deg, #fccb90, #d57eeb)' },
+                    twitter: { name: 'Tweeter', icon: 'fab fa-twitter', color: 'linear-gradient(135deg, #1DA1F2, #0d8bd9)' },
+                    lifeinvader: { name: 'Lifeinvader', icon: 'fas fa-users', color: 'linear-gradient(135deg, #3b5998, #8b9dc3)' },
+                    ping: { name: 'Pingr', icon: 'fas fa-map-marker-alt', color: 'linear-gradient(135deg, #fa709a, #fee140)' },
+                    job: { name: 'Jobs', icon: 'fas fa-briefcase', color: 'linear-gradient(135deg, #30cfd0, #330867)' },
+                    food: { name: 'Food Ferry', icon: 'fas fa-utensils', color: 'linear-gradient(135deg, #ff9a56, #ff6a88)' },
+                    requestee: { name: 'Requestee', icon: 'fas fa-hands-helping', color: 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' },
+                    garage: { name: 'Garage', icon: 'fas fa-warehouse', color: 'linear-gradient(135deg, #868f96, #596164)' },
+                    news: { name: 'Weazel News', icon: 'fas fa-newspaper', color: 'linear-gradient(135deg, #ff5f6d, #ffc371)' },
+                    notes: { name: 'Notes', icon: 'fas fa-sticky-note', color: 'linear-gradient(135deg, #ffeb3b, #fbc02d)' },
+                    calculator: { name: 'Calculator', icon: 'fas fa-calculator', color: 'linear-gradient(135deg, #8bc34a, #4caf50)' },
+                    settings: { name: 'Settings', icon: 'fas fa-cog', color: 'linear-gradient(135deg, #6c757d, #5a6268)' },
+                    'call-tester': { name: 'Call Test', icon: 'fas fa-satellite-dish', color: 'linear-gradient(135deg, #f9d423, #ff4e50)' },
+                },
+                appLayout: {
+                    grid: [
+                        'camera', 'photos', 'twitter', 'lifeinvader', 'ping', 'job', 'food', 
+                        'requestee', 'garage', 'news', 'notes', 'calculator', 'call-tester'
+                    ],
+                    dock: ['phone', 'messages', 'bank', 'settings']
+                },
                 currentApp: null,
                 modalCallback: null,
                 callActive: false,
@@ -1768,29 +2134,42 @@
                 twitterNavStack: [],
                 twitterRootView: null,
                 replyingToTweetId: null,
+                contactToShare: null,
+                encryptionKeys: 5,
+                anonymousName: 'Anon',
                 myCard: {
                     name: 'John Doe',
                     number: '555-1234',
-                    photoUrl: 'https://i.imgur.com/1q3n4U7.png'
+                    photoUrl: 'https://placehold.co/100x100/764ba2/ffffff?text=JD'
                 },
                 contacts: [
-                    { id: 1, name: 'Adam Smith', number: '555-0101', photoUrl: 'https://i.imgur.com/83w0f9d.png' },
-                    { id: 2, name: 'Jane Doe', number: '555-0202', photoUrl: 'https://i.imgur.com/b1EPD1g.png' },
+                    { id: 1, name: 'Adam Smith', number: '555-0101', photoUrl: 'https://placehold.co/100x100/4caf50/ffffff?text=AS' },
+                    { id: 2, name: 'Jane Doe', number: '555-0202', photoUrl: 'https://placehold.co/100x100/f093fb/ffffff?text=JD' },
                     { id: 3, name: 'Mechanic Mike', number: '555-0303', photoUrl: '' },
                     { id: 4, name: 'Emergency Services', number: '911', photoUrl: '' }
                 ],
                 conversations: {
-                    '555-0101': [ { type: 'sent', text: 'Are we still meeting today?', time: '2:30 PM' }, { type: 'received', text: 'See you at the meeting', time: '2:45 PM' } ],
-                    '555-0202': [ { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM' }, { type: 'sent', text: 'Sure, what time?', time: '10:26 AM' }, { type: 'received', text: 'Just got the car back, thanks! Here is a pic of it cleaned up: https://i.imgur.com/1q3n4U7.png', time: '11:42 AM' } ],
-                    '555-0303': [ { type: 'received', text: 'Need any repairs?', time: '9:15 AM' }, { type: 'sent', text: 'Can you fix my engine?', time: '9:16 AM' }, { type: 'received', text: 'Sure, I\'m free now', time: '9:17 AM' } ],
-                    '555-9999': [ { type: 'received', text: 'You won $1,000,000!', time: 'Yesterday' } ]
+                    '555-0101': [ 
+                        { type: 'sent', text: 'Are we still meeting today?', time: '2:30 PM', timestamp: Date.now() - 200000 }, 
+                        { type: 'received', text: 'See you at the meeting', time: '2:45 PM', timestamp: Date.now() - 100000 } 
+                    ],
+                    '555-0202': [ 
+                        { type: 'received', text: 'Hey, can you pick up my car?', time: '10:25 AM', timestamp: Date.now() - 500000 }, 
+                        { type: 'sent', text: 'Sure, what time?', time: '10:26 AM', timestamp: Date.now() - 400000 }, 
+                        { type: 'received', text: 'Just got the car back, thanks! Here is a pic of it cleaned up: https://placehold.co/400x400/1a1a1a/ffffff?text=Cleaned+Car', time: '11:42 AM', timestamp: Date.now() - 300000 } 
+                    ],
+                    '555-0303': [ 
+                        { type: 'received', text: 'Need any repairs?', time: '9:15 AM', timestamp: Date.now() - 800000 }, 
+                        { type: 'sent', text: 'Can you fix my engine?', time: '9:16 AM', timestamp: Date.now() - 700000 }, 
+                        { type: 'received', text: 'Sure, I\'m free now', time: '9:17 AM', timestamp: Date.now() - 600000 } 
+                    ],
+                    '555-9999': [ { type: 'received', text: 'You won $1,000,000!', time: 'Yesterday', timestamp: Date.now() - 86400000 } ]
                 },
                 nearbyPlayers: [
                     { id: 1, name: 'Adam Smith' },
                     { id: 2, name: 'Jane Doe' },
                     { id: 8, name: 'Some Guy' }
                 ],
-                encryptionKeys: 5, // User's encryption keys
                 settings: {
                     theme: 'dark',
                     wallpaper: null,
@@ -1798,7 +2177,10 @@
                     notificationSound: true,
                     volume: 70,
                     airplaneMode: false,
-                    anonymousName: 'Anonymous'
+                    timeFormat24: true, // true for 24h, false for 12h
+                    sentBubbleColor: '#00d9ff',
+                    receivedBubbleColor: '#1a1a1a',
+                    conversationBg: null
                 }
             };
             
@@ -1809,7 +2191,7 @@
             const linkify = (text) => {
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 return text.replace(urlRegex, (url) => {
-                    if (/\.(jpg|jpeg|png|gif)$/i.test(url)) {
+                    if (/\.(jpg|jpeg|png|gif)$/i.test(url) || url.startsWith('https://placehold.co')) {
                         return `<img src="${url}" class="embedded-image" alt="User Image">`;
                     } else {
                         return `<a href="${url}" target="_blank" style="color: var(--accent);">${url}</a>`;
@@ -1817,30 +2199,50 @@
                 });
             };
 
-            const setAvatar = (element, contact, handle, isAnonymous = false) => {
-                if (isAnonymous) {
-                    element.style.backgroundImage = '';
-                    element.innerHTML = '<i class="fas fa-user-secret"></i>';
-                    return;
-                }
-
+            const setAvatar = (element, contact, handle) => {
                 let photoUrl = contact ? contact.photoUrl : null;
                 let name = contact ? contact.name : (handle || '#');
 
                 if (!photoUrl && handle && state.allTwitterUsers[handle]) {
                     photoUrl = state.allTwitterUsers[handle].photoUrl;
                 }
+                
+                if (contact && contact.isAnon) { // Special handling for anon posts
+                     photoUrl = 'https://placehold.co/100x100/c12f2f/ffffff?text=?';
+                     name = state.anonymousName;
+                }
 
                 if (photoUrl) {
                     element.style.backgroundImage = `url(${photoUrl})`;
                     element.textContent = '';
-                    element.innerHTML = '';
                 } else {
                     element.style.backgroundImage = '';
                     element.textContent = name.charAt(0) === '@' ? name.charAt(1).toUpperCase() : name.charAt(0).toUpperCase();
-                     element.innerHTML = '';
                 }
             };
+            
+            const renderPhotos = () => {
+                const grid = document.getElementById('photos-grid');
+                grid.innerHTML = state.photos.map(url => `
+                    <div class="photo-thumbnail" style="background-image: url(${url})" data-url="${url}"></div>
+                `).join('');
+                document.querySelectorAll('.photo-thumbnail').forEach(thumb => {
+                    thumb.addEventListener('click', () => {
+                        document.getElementById('photo-viewer-img').src = thumb.dataset.url;
+                        document.getElementById('photo-viewer').style.display = 'flex';
+                    });
+                });
+            };
+            document.getElementById('photo-viewer-close').addEventListener('click', () => {
+                document.getElementById('photo-viewer').style.display = 'none';
+            });
+            document.getElementById('take-picture-btn').addEventListener('click', () => {
+                 const newPhoto = `https://placehold.co/400x400/1a1a1a/ffffff?text=New+Photo`;
+                 state.photos.unshift(newPhoto);
+                 sendNUI('newPhotoTaken', { url: newPhoto });
+                 notify('Photo saved!');
+                 renderPhotos();
+            });
 
             const renderMyContactCard = () => {
                 const container = document.getElementById('my-contact-card-container');
@@ -1867,11 +2269,10 @@
                 document.getElementById('edit-my-card-btn').addEventListener('click', e => { e.stopPropagation(); openContactEditor('my-card'); });
                 document.getElementById('share-my-card-btn').addEventListener('click', e => {
                     e.stopPropagation();
-                    sendNUI('shareContact', state.myCard);
-                    notify(`Shared your contact card.`);
+                    openShareModal(state.myCard);
                 });
             };
-
+            
             const renderContacts = () => {
                 renderMyContactCard();
                 const list = document.getElementById('contacts-list');
@@ -1905,12 +2306,49 @@
                 attachContactListeners();
             };
             
+            const attachContactListeners = () => {
+                document.querySelectorAll('.contact-item .contact-info').forEach(card => card.addEventListener('click', () => card.closest('.contact-item').classList.toggle('expanded')));
+                document.querySelectorAll('.contact-action-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.stopPropagation();
+                        const number = e.target.closest('.list-item').dataset.number;
+                        const contact = getContactByNumber(number);
+                        if (btn.classList.contains('contact-share')) { openShareModal(contact); }
+                        if (btn.classList.contains('contact-call')) { 
+                            addCallToRecents({ name: contact ? contact.name : null, number: number, type: 'outgoing' });
+                            sendNUI('makeCall', { number, name: contact ? contact.name : number }); 
+                            showDynamicIsland(number); 
+                        }
+                        if (btn.classList.contains('contact-message')) { openApp('messages'); openConversation(contact.name, number); }
+                        if (btn.classList.contains('contact-edit')) openContactEditor(number);
+                        if (btn.classList.contains('contact-delete')) {
+                            showModal('Delete Contact', `Delete ${contact.name}?`, () => {
+                                state.contacts = state.contacts.filter(c => c.number !== number);
+                                renderContacts();
+                                sendNUI('deleteContact', { number });
+                                notify(`${contact.name} deleted`);
+                                hideModal();
+                            });
+                        }
+                    });
+                });
+            };
+
             const renderMessageThreads = () => {
                 const container = document.getElementById('messages-list-view');
                 container.querySelectorAll('.message-thread').forEach(el => el.remove());
-                Object.keys(state.conversations).forEach(number => {
-                    const thread = state.conversations[number];
-                    if (thread.length === 0) return;
+
+                // Create an array of conversations and sort it
+                const sortedConversations = Object.entries(state.conversations)
+                    .filter(([number, thread]) => thread.length > 0)
+                    .sort(([numA, threadA], [numB, threadB]) => {
+                        const lastMessageA = threadA[threadA.length - 1];
+                        const lastMessageB = threadB[threadB.length - 1];
+                        // Fallback for older messages without a timestamp
+                        return (lastMessageB.timestamp || 0) - (lastMessageA.timestamp || 0);
+                    });
+
+                sortedConversations.forEach(([number, thread]) => {
                     const lastMessage = thread[thread.length - 1];
                     const contact = getContactByNumber(number);
                     const name = contact ? contact.name : number;
@@ -1931,7 +2369,7 @@
                 });
                 attachMessageThreadListeners();
             };
-
+            
             const renderGarage = () => {
                 const list = document.getElementById('garage-list');
                 if (!state.vehicles || state.vehicles.length === 0) {
@@ -1941,49 +2379,105 @@
                 list.innerHTML = state.vehicles.map(vehicle => {
                     const statusColor = vehicle.status === 'Parked' ? 'var(--success)' : 'var(--warning)';
                     return `
-                    <div class="list-item vehicle-item" data-plate="${vehicle.plate}">
-                        <div class="list-item-main">
-                            <div class="list-item-title">${vehicle.name}</div>
-                            <div class="list-item-subtitle" style="margin-top: 8px;"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> ${vehicle.garage}</div>
+                    <div class="list-item" style="flex-direction: column; align-items: stretch; cursor: default;">
+                         <div style="display: flex; align-items: center; width: 100%;" class="vehicle-item" data-plate="${vehicle.plate}">
+                            <div class="list-item-main">
+                                <div class="list-item-title">${vehicle.name}</div>
+                                <div class="list-item-subtitle" style="margin-top: 8px;"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> ${vehicle.garage}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="list-item-value" style="font-size: 14px; background: #000; padding: 5px 10px; border-radius: 5px; border: 1px solid #fff; font-family: 'Courier New', monospace; letter-spacing: 1px;">${vehicle.plate}</div>
+                                <div style="font-size: 12px; color: ${statusColor}; font-weight: 600; margin-top: 8px;">${vehicle.status}</div>
+                            </div>
                         </div>
-                        <div style="text-align: right;">
-                            <div class="list-item-value" style="font-size: 14px; background: #000; padding: 5px 10px; border-radius: 5px; border: 1px solid #fff; font-family: 'Courier New', monospace; letter-spacing: 1px;">${vehicle.plate}</div>
-                            <div style="font-size: 12px; color: ${statusColor}; font-weight: 600; margin-top: 8px;">${vehicle.status}</div>
+                        <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid var(--bg-tertiary); padding-top: 15px;">
+                            <button class="btn btn-secondary track-vehicle-btn" style="flex: 1; margin: 0; padding: 10px; font-size: 14px;"><i class="fas fa-map-marked-alt"></i> Track</button>
+                            <button class="btn btn-warning sell-vehicle-btn" data-plate="${vehicle.plate}" style="flex: 1; margin: 0; padding: 10px; font-size: 14px;"><i class="fas fa-dollar-sign"></i> Sell</button>
                         </div>
                     </div>
-                `}).join('');
+                `
+                }).join('');
 
-                list.querySelectorAll('.vehicle-item').forEach(item => {
+                list.querySelectorAll('.track-vehicle-btn').forEach(item => {
                     item.addEventListener('click', () => {
-                        const plate = item.dataset.plate;
+                        const plate = item.closest('.list-item').querySelector('.vehicle-item').dataset.plate;
                         sendNUI('trackVehicle', { plate });
                         notify(`Tracking vehicle with plate ${plate}...`);
+                    });
+                });
+
+                list.querySelectorAll('.sell-vehicle-btn').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const plate = item.dataset.plate;
+                        openSellModal(plate);
                     });
                 });
             };
 
             const phoneWrapper = document.getElementById('phone-wrapper');
             const homeScreen = document.getElementById('home-screen');
-            const apps = document.querySelectorAll('.app, .dock-app');
             const gesture = document.getElementById('gesture');
             const modal = document.getElementById('modal');
             const dynamicIsland = document.getElementById('dynamic-island');
             const islandEndCall = document.getElementById('island-end-call');
+            let appsGridSortable, dockSortable;
 
+            const renderHomeScreenApps = () => {
+                const appsGrid = document.getElementById('apps-grid');
+                const dock = document.getElementById('dock');
+                appsGrid.innerHTML = '';
+                dock.innerHTML = '';
+
+                state.appLayout.grid.forEach(appName => {
+                    const meta = state.app_meta[appName];
+                    if (!meta) return;
+                    const appEl = document.createElement('div');
+                    appEl.className = `app`;
+                    appEl.dataset.app = appName;
+                    appEl.innerHTML = `
+                        <div class="app-icon" style="background: ${meta.color};"><i class="${meta.icon}"></i></div>
+                        <div class="app-name">${meta.name}</div>
+                    `;
+                    appsGrid.appendChild(appEl);
+                });
+
+                state.appLayout.dock.forEach(appName => {
+                    const meta = state.app_meta[appName];
+                    if (!meta) return;
+                    const dockAppEl = document.createElement('div');
+                    dockAppEl.className = 'dock-app';
+                    dockAppEl.dataset.app = appName;
+                    dockAppEl.style.background = meta.color;
+                    dockAppEl.innerHTML = `<i class="${meta.icon}"></i>`;
+                    dock.appendChild(dockAppEl);
+                });
+
+                // Re-attach click listeners after re-rendering
+                document.querySelectorAll('.app, .dock-app').forEach(app => app.addEventListener('click', (e) => {
+                    if (homeScreen.classList.contains('edit-mode')) {
+                        e.preventDefault();
+                        return;
+                    }
+                    openApp(app.dataset.app)
+                }));
+            };
+            
             const updateTime = () => {
                 const now = new Date();
-                document.getElementById('time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const timeFormat24 = state.settings.timeFormat24;
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                if (!timeFormat24) {
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // the hour '0' should be '12'
+                    document.getElementById('time').textContent = `${hours}:${minutes} ${ampm}`;
+                } else {
+                    document.getElementById('time').textContent = `${String(hours).padStart(2, '0')}:${minutes}`;
+                }
             };
-            updateTime();
-            setInterval(updateTime, 60000);
 
-            const updateKeyCounts = () => {
-                const lifeinvaderCount = document.getElementById('lifeinvader-key-count');
-                if (lifeinvaderCount) lifeinvaderCount.textContent = state.encryptionKeys;
-
-                const tweetCount = document.getElementById('tweet-key-count');
-                if (tweetCount) tweetCount.textContent = state.encryptionKeys;
-            };
+            setInterval(updateTime, 1000);
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -2028,12 +2522,17 @@
             });
 
             const openApp = (appName, data = {}) => {
+                if (appName === 'call-tester') {
+                    mockIncomingCall();
+                    return; // Don't open a view for this app
+                }
+
+                 if (homeScreen.classList.contains('edit-mode')) return;
                 if (state.currentApp) {
                     const currentView = document.getElementById(`${state.currentApp}-app`) || document.getElementById(state.currentApp);
                     if (currentView) currentView.classList.remove('active');
                 }
                 homeScreen.classList.add('hidden');
-                updateKeyCounts();
                 const targetView = document.getElementById(`${appName}-app`);
                 if (targetView) {
                     targetView.classList.add('active');
@@ -2041,10 +2540,26 @@
                     if(appName === 'twitter') {
                          renderTwitterFeed();
                          renderMyTwitterProfile();
-                    } else if(appName === 'bank') {
+                     document.getElementById('tweet-keys-count').textContent = `Keys: ${state.encryptionKeys}`;
+                } else if(appName === 'lifeinvader') {
+                    document.getElementById('lifeinvader-keys-count').textContent = `Keys: ${state.encryptionKeys}`;
+                } else if(appName === 'bank') {
+                    renderBankAccounts();
+                    updateBankBalance();
                         renderBills();
                     } else if(appName === 'garage') {
                         renderGarage();
+                    } else if(appName === 'photos') {
+                        renderPhotos();
+                    } else if (appName === 'notes') {
+                        renderNotesList();
+                    } else if (appName === 'phone') {
+                        renderRecents();
+                    } else if(appName === 'job-manage') {
+                        renderEmployeeList();
+                    } else if (appName === 'settings') {
+                        document.getElementById('settings-anon-name').value = state.anonymousName;
+                        document.getElementById('settings-keys-display').textContent = state.encryptionKeys;
                     }
                 }
             };
@@ -2071,6 +2586,10 @@
             };
 
             const closeApp = () => {
+                if (homeScreen.classList.contains('edit-mode')) {
+                    toggleEditMode(false);
+                    return;
+                }
                 if (state.currentApp === 'twitter-thread-view') {
                     goBackTwitterThread();
                     return;
@@ -2104,13 +2623,114 @@
             };
             
             const closePhone = () => {
+                if (homeScreen.classList.contains('edit-mode')) {
+                    toggleEditMode(false);
+                    return;
+                }
                 phoneWrapper.style.display = 'none';
                 document.body.style.display = 'none';
                 sendNUI('phoneClosed');
             };
+            
+            const toggleEditMode = (enable) => {
+                homeScreen.classList.toggle('edit-mode', enable);
+                const editLayoutBtn = document.getElementById('edit-layout-btn');
+                
+                if (enable) {
+                    editLayoutBtn.innerHTML = '<i class="fas fa-check"></i> Done';
+                    editLayoutBtn.classList.remove('btn-primary');
+                    editLayoutBtn.classList.add('btn-secondary');
+                    
+                    const onSortEnd = () => {
+                        // After any sort, re-style all elements to match their new containers
+                        document.querySelectorAll('#apps-grid .dock-app').forEach(appElem => {
+                            const appName = appElem.dataset.app;
+                            const meta = state.app_meta[appName];
+                            if (!meta) return;
+                            appElem.className = 'app';
+                            appElem.style.background = '';
+                            appElem.innerHTML = `
+                                <div class="app-icon" style="background: ${meta.color};"><i class="${meta.icon}"></i></div>
+                                <div class="app-name">${meta.name}</div>
+                            `;
+                        });
 
-            apps.forEach(app => app.addEventListener('click', () => openApp(app.dataset.app)));
-            gesture.addEventListener('click', () => state.currentApp ? closeApp() : closePhone());
+                        document.querySelectorAll('#dock .app').forEach(appElem => {
+                            const appName = appElem.dataset.app;
+                            const meta = state.app_meta[appName];
+                            if (!meta) return;
+                            appElem.className = 'dock-app';
+                            appElem.style.background = meta.color;
+                            appElem.innerHTML = `<i class="${meta.icon}"></i>`;
+                        });
+                    };
+
+                    appsGridSortable = new Sortable(document.getElementById('apps-grid'), {
+                        group: 'apps',
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        onEnd: onSortEnd,
+                    });
+                    
+                    dockSortable = new Sortable(document.getElementById('dock'), {
+                        group: 'apps',
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                         onAdd: function (evt) {
+                            const dock = document.getElementById('dock');
+                            if (dock.children.length > 4) {
+                                // Find the original element that was in the dock before this new one was added.
+                                const itemToMove = Array.from(dock.children).find(child => child !== evt.item);
+                                if (itemToMove) {
+                                    document.getElementById('apps-grid').appendChild(itemToMove);
+                                }
+                            }
+                        },
+                        onEnd: onSortEnd,
+                    });
+                    
+                } else {
+                    editLayoutBtn.innerHTML = '<i class="fas fa-th"></i> Edit Layout';
+                    editLayoutBtn.classList.add('btn-primary');
+                    editLayoutBtn.classList.remove('btn-secondary');
+
+                    state.appLayout.grid = [...document.querySelectorAll('#apps-grid .app')].map(app => app.dataset.app);
+                    state.appLayout.dock = [...document.querySelectorAll('#dock .dock-app')].map(app => app.dataset.app);
+                    
+                    if (appsGridSortable) appsGridSortable.destroy();
+                    if (dockSortable) dockSortable.destroy();
+                    appsGridSortable = null;
+                    dockSortable = null;
+                    
+                    renderHomeScreenApps();
+
+                    sendNUI('saveAppLayout', {
+                        grid: state.appLayout.grid,
+                        dock: state.appLayout.dock,
+                    });
+                    notify('Layout Saved!');
+                }
+            };
+            
+            document.getElementById('edit-layout-btn').addEventListener('click', () => {
+                const isEditing = homeScreen.classList.contains('edit-mode');
+                if (state.currentApp === 'settings' && !isEditing) {
+                    closeApp();
+                }
+                toggleEditMode(!isEditing);
+            });
+            
+            gesture.addEventListener('click', () => {
+                 if (homeScreen.classList.contains('edit-mode')) {
+                    toggleEditMode(false);
+                } else if (state.currentApp) {
+                    closeApp();
+                } else {
+                    closePhone();
+                }
+            });
 
             const phoneInput = document.getElementById('phone-input');
             document.querySelectorAll('.dial-btn[data-num]').forEach(btn => {
@@ -2119,9 +2739,16 @@
             document.getElementById('clear-btn').addEventListener('click', () => phoneInput.value = phoneInput.value.slice(0, -1));
             document.getElementById('call-btn').addEventListener('click', () => {
                 if (phoneInput.value) {
-                    showModal('Make Call', `Call ${phoneInput.value}?`, () => {
-                        sendNUI('makeCall', { number: phoneInput.value });
-                        showDynamicIsland(phoneInput.value);
+                    const number = phoneInput.value;
+                    showModal('Make Call', `Call ${number}?`, () => {
+                        const contact = getContactByNumber(number);
+                        addCallToRecents({
+                            name: contact ? contact.name : null,
+                            number: number,
+                            type: 'outgoing'
+                        });
+                        sendNUI('makeCall', { number });
+                        showDynamicIsland(number);
                         phoneInput.value = '';
                         hideModal();
                     });
@@ -2213,30 +2840,6 @@
                 document.querySelector('#phone-app .tab-btn[data-tab="contacts"]').click();
             });
 
-            const attachContactListeners = () => {
-                document.querySelectorAll('.contact-item .contact-info').forEach(card => card.addEventListener('click', () => card.closest('.contact-item').classList.toggle('expanded')));
-                document.querySelectorAll('.contact-action-btn').forEach(btn => {
-                    btn.addEventListener('click', e => {
-                        e.stopPropagation();
-                        const number = e.target.closest('.list-item').dataset.number;
-                        const contact = getContactByNumber(number);
-                        if (btn.classList.contains('contact-share')) { sendNUI('shareContact', contact); notify(`Shared ${contact.name}'s card.`); }
-                        if (btn.classList.contains('contact-call')) { sendNUI('makeCall', { number, name: contact ? contact.name : number }); showDynamicIsland(number); }
-                        if (btn.classList.contains('contact-message')) { openApp('messages'); openConversation(contact.name, number); }
-                        if (btn.classList.contains('contact-edit')) openContactEditor(number);
-                        if (btn.classList.contains('contact-delete')) {
-                            showModal('Delete Contact', `Delete ${contact.name}?`, () => {
-                                state.contacts = state.contacts.filter(c => c.number !== number);
-                                renderContacts();
-                                sendNUI('deleteContact', { number });
-                                notify(`${contact.name} deleted`);
-                                hideModal();
-                            });
-                        }
-                    });
-                });
-            };
-            
             document.getElementById('contact-search').addEventListener('input', e => {
                 const search = e.target.value.toLowerCase();
                 document.querySelectorAll('#contacts-list .contact-item').forEach(item => {
@@ -2281,7 +2884,8 @@
                     state.conversations[state.currentConversation].push({
                         type: 'sent',
                         text: text,
-                        time: time
+                        time: time,
+                        timestamp: Date.now()
                     });
                     
                     const contact = getContactByNumber(state.currentConversation);
@@ -2298,9 +2902,88 @@
                 const search = e.target.value.toLowerCase();
                 document.querySelectorAll('.message-thread').forEach(thread => thread.style.display = thread.dataset.contact.toLowerCase().includes(search) ? 'flex' : 'none');
             });
-            document.getElementById('call-from-message').addEventListener('click', () => { if (state.currentConversation) { sendNUI('makeCall', { number: state.currentConversation }); showDynamicIsland(state.currentConversation); } });
-            document.querySelectorAll('.recent-call button').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); const number = e.target.closest('.recent-call').dataset.number; sendNUI('makeCall', { number }); showDynamicIsland(number); }));
+            document.getElementById('call-from-message').addEventListener('click', () => { 
+                if (state.currentConversation) { 
+                    const contact = getContactByNumber(state.currentConversation);
+                    addCallToRecents({ name: contact ? contact.name : null, number: state.currentConversation, type: 'outgoing' });
+                    sendNUI('makeCall', { number: state.currentConversation }); 
+                    showDynamicIsland(state.currentConversation); 
+                } 
+            });
             
+             const addCallToRecents = (callData) => {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const callEntry = {
+                    name: callData.name,
+                    number: callData.number,
+                    type: callData.type,
+                    time: time,
+                    timestamp: Date.now()
+                };
+                state.recentCalls.unshift(callEntry); // Add to the beginning of the array
+                if (state.recentCalls.length > 30) { // Limit history size
+                    state.recentCalls.pop();
+                }
+                renderRecents();
+            };
+
+            const renderRecents = () => {
+                const recentsList = document.getElementById('recents-list');
+                recentsList.innerHTML = '';
+                if (!state.recentCalls || state.recentCalls.length === 0) {
+                    recentsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No recent calls.</p>';
+                    return;
+                }
+
+                state.recentCalls.forEach(call => {
+                    let iconClass, iconColor;
+                    switch(call.type) {
+                        case 'missed':
+                            iconClass = 'fa-phone-slash';
+                            iconColor = 'var(--danger)';
+                            break;
+                        case 'outgoing':
+                            iconClass = 'fa-arrow-up';
+                            iconColor = 'var(--accent)';
+                            break;
+                        case 'incoming':
+                        default:
+                            iconClass = 'fa-arrow-down';
+                            iconColor = 'var(--success)';
+                            break;
+                    }
+
+                    const item = document.createElement('div');
+                    item.className = 'list-item recent-call';
+                    item.dataset.number = call.number;
+                    item.innerHTML = `
+                        <div class="list-item-main">
+                            <div class="list-item-title">
+                                <i class="fas ${iconClass}" style="color: ${iconColor}; font-size: 12px; margin-right: 8px;"></i>
+                                ${call.name || call.number}
+                            </div>
+                            <div class="list-item-subtitle" style="padding-left: 24px;">${call.type.charAt(0).toUpperCase() + call.type.slice(1)} • ${call.time}</div>
+                        </div>
+                        <button class="btn btn-secondary call-back-btn" style="width: 40px; height: 40px; padding: 0; margin: 0;">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                    `;
+                    recentsList.appendChild(item);
+                });
+
+                document.querySelectorAll('.call-back-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.stopPropagation();
+                        const number = e.target.closest('.recent-call').dataset.number;
+                        const contact = getContactByNumber(number);
+                        addCallToRecents({ name: contact ? contact.name : null, number: number, type: 'outgoing' });
+                        sendNUI('makeCall', { number });
+                        showDynamicIsland(number);
+                    });
+                });
+            };
+
             const tweetListContainer = document.getElementById('tweet-list');
             const myTweetListContainer = document.getElementById('my-tweet-list');
             const newTweetBtn = document.getElementById('new-tweet-btn');
@@ -2316,64 +2999,76 @@
                     if (tweet.id === id) return tweet;
                     if (tweet.replies && tweet.replies.length > 0) {
                         const foundInReply = findTweetById(id, tweet.replies);
-                        if (foundInReply) return foundInReply;
+                        if (foundInReply) {
+                           return foundInReply;
+                        }
                     }
                 }
                 return null;
             };
 
             const createTweetHTML = (tweet) => {
-                const isAnonymous = tweet.handle === null;
-                const displayName = isAnonymous ? state.settings.anonymousName : tweet.handle;
-                
-                let tweetContentHTML;
-                 if (tweet.retweetOf) {
+                 const originalPoster = tweet.retweetOf ? tweet.retweetOf : tweet;
+                 const pfpHTML = `<div class="list-item-avatar" style="width: 40px; height: 40px; font-size: 16px;"></div>`;
+                 let tweetContentHTML;
+
+                if (tweet.retweetOf) {
                      tweetContentHTML = `
                         <div style="width: 100%; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">
-                            <i class="fas fa-retweet"></i> <span class="tweet-handle" data-handle="${tweet.handle}" style="cursor: pointer;">${displayName}</span> retweeted
+                            <i class="fas fa-retweet"></i> <span class="tweet-handle" data-handle="${tweet.handle}" style="cursor: pointer;">${tweet.handle}</span> retweeted
                         </div>
                         <div style="width: 100%; border: 1px solid var(--bg-tertiary); border-radius: 10px; padding: 10px;">
-                            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                                <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle || state.settings.anonymousName}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; width: 100%; margin-bottom: 8px;">
+                                <div class="list-item-avatar retweet-avatar" style="width: 24px; height: 24px; font-size: 10px;"></div>
+                                <span class="tweet-handle" data-handle="${tweet.retweetOf.handle}" style="font-weight: 600; cursor: pointer;">${tweet.retweetOf.handle}</span>
                             </div>
                             <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${linkify(tweet.retweetOf.text)}</p>
                         </div>
                     `;
                 } else {
                      tweetContentHTML = `
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                           <div style="display: flex; align-items: center; gap: 10px;">
-                                <div class="list-item-avatar" style="width: 32px; height: 32px; font-size: 14px;"></div>
-                                <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: ${isAnonymous ? 'default' : 'pointer'};">${displayName}</span>
-                           </div>
+                        <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                            <span class="tweet-handle" data-handle="${tweet.handle}" style="font-weight: 600; cursor: pointer;">${tweet.handle}</span>
                             <span style="color: var(--text-secondary); font-size: 12px;">${tweet.time}</span>
                         </div>
-                        <p style="color: var(--text-primary); margin: 0; line-height: 1.5; padding-left: 42px;">${linkify(tweet.text)}</p>
+                        <p style="color: var(--text-primary); margin: 0; line-height: 1.5;">${linkify(tweet.text)}</p>
                     `;
                 }
-
-
-                const tweetItem = document.createElement('div');
-                tweetItem.className = 'list-item tweet-item';
-                tweetItem.style.flexDirection = 'column';
-                tweetItem.style.alignItems = 'flex-start';
-                tweetItem.dataset.tweetId = tweet.id;
                 
-                tweetItem.innerHTML = `
-                    ${tweetContentHTML}
-                    <div class="tweet-actions" style="padding-left: 42px;">
-                        <span class="tweet-action-btn tweet-reply-btn" data-handle="${tweet.retweetOf ? tweet.retweetOf.handle : displayName}"><i class="fas fa-reply"></i></span>
-                        ${!tweet.retweetOf ? `<span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>` : ''}
-                        <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
-                    </div>
-                `;
+                const item = document.createElement('div');
+                item.className = 'list-item tweet-item';
+                item.dataset.tweetId = tweet.id;
                 
-                if (!tweet.retweetOf) {
-                    const avatar = tweetItem.querySelector('.list-item-avatar');
-                    setAvatar(avatar, null, tweet.handle, isAnonymous);
+                let mainPfpElement, retweetPfpElement;
+                const isAnon = tweet.handle === state.anonymousName;
+
+                if (tweet.retweetOf) {
+                    item.innerHTML = `
+                        <div class="tweet-content" style="width: 100%;">
+                            ${tweetContentHTML}
+                            <div class="tweet-actions">
+                                <span class="tweet-action-btn tweet-reply-btn" data-handle="${originalPoster.handle}"><i class="fas fa-reply"></i></span>
+                                <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
+                            </div>
+                        </div>`;
+                    retweetPfpElement = item.querySelector('.retweet-avatar');
+                    if (retweetPfpElement) setAvatar(retweetPfpElement, null, tweet.retweetOf.handle);
+                } else {
+                    item.innerHTML = `
+                        ${pfpHTML}
+                        <div class="tweet-content">
+                            ${tweetContentHTML}
+                            <div class="tweet-actions">
+                                <span class="tweet-action-btn tweet-reply-btn" data-handle="${originalPoster.handle}"><i class="fas fa-reply"></i></span>
+                                <span class="tweet-action-btn tweet-retweet-btn"><i class="fas fa-retweet"></i> ${tweet.retweets}</span>
+                                <span class="tweet-action-btn tweet-like-btn"><i class="fas fa-heart ${tweet.liked ? 'liked' : ''}"></i> ${tweet.likes}</span>
+                            </div>
+                        </div>`;
+                    mainPfpElement = item.querySelector('.list-item-avatar');
+                    if(mainPfpElement) setAvatar(mainPfpElement, {isAnon: isAnon}, originalPoster.handle);
                 }
-
-                return tweetItem.outerHTML;
+                
+                return item.outerHTML;
             }
 
             const renderTweets = (container, tweets) => {
@@ -2438,9 +3133,12 @@
             };
 
             const openTwitterProfile = (handle) => {
-                if (!handle) return; // Can't open profile for anonymous users
                 if(handle === state.twitterProfile.handle) {
                     document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
+                    return;
+                }
+                 if(handle === state.anonymousName) {
+                    notify("This user is anonymous.");
                     return;
                 }
                 const user = state.allTwitterUsers[handle];
@@ -2501,12 +3199,7 @@
                     document.querySelector('#twitter-app .tab-btn[data-tab="twitter-feed"]').click();
 
                     tweetComposeContainer.style.display = 'block';
-                    const replyHandle = replyBtn.dataset.handle;
-                    if (replyHandle !== state.settings.anonymousName) {
-                        tweetText.value = `${replyHandle} `;
-                    } else {
-                        tweetText.value = '';
-                    }
+                    tweetText.value = `${replyBtn.dataset.handle} `;
                     tweetText.focus();
                     return;
                 }
@@ -2531,22 +3224,19 @@
                     const tweetId = parseInt(retweetBtn.closest('[data-tweet-id]').dataset.tweetId);
                     const originalTweet = findTweetById(tweetId);
                     if (originalTweet && !originalTweet.retweetOf) {
-                        if (state.tweets.some(t => t.retweetOf && t.retweetOf.id === originalTweet.id && t.handle === state.twitterProfile.handle)) {
+                        if (state.tweets.some(t => t.retweetOf && t.retweetOf.handle === originalTweet.handle && t.handle === state.twitterProfile.handle)) {
                             notify("You've already retweeted this.");
                             return;
                         }
                         originalTweet.retweets++;
-                        const isAnonymous = document.getElementById('tweet-anonymous-toggle').checked;
                         const newRetweet = {
-                            id: Date.now(),
-                            handle: isAnonymous ? null : state.twitterProfile.handle,
-                            time: 'Just now',
-                            likes: 0, liked: false, replies: [],
-                            retweetOf: { id: originalTweet.id, handle: originalTweet.handle, text: originalTweet.text }
+                            id: Date.now(), handle: state.twitterProfile.handle, time: 'Just now', likes: 0, liked: false, replies: [],
+                            retweetOf: { handle: originalTweet.handle, text: originalTweet.text }
                         };
                         state.tweets.push(newRetweet);
-                        sendNUI('retweet', { originalTweetId: tweetId, anonymous: isAnonymous });
+                        sendNUI('retweet', { originalTweetId: tweetId });
                         notify('Retweeted!');
+                        retweetBtn.innerHTML = `<i class="fas fa-retweet"></i> ${originalTweet.retweets}`;
                         renderTwitterFeed();
                         renderMyTwitterProfile();
                     }
@@ -2585,6 +3275,7 @@
                     state.replyingToTweetId = null;
                     tweetText.value = '';
                     tweetComposeContainer.style.display = 'block';
+                    document.getElementById('tweet-keys-count').textContent = `Keys: ${state.encryptionKeys}`;
                     tweetText.focus();
                 }
             });
@@ -2593,16 +3284,23 @@
                 const text = tweetText.value.trim();
                 if (!text) return;
 
-                const isAnonymous = document.getElementById('tweet-anonymous-toggle').checked;
+                const isAnon = document.getElementById('tweet-anon-toggle').checked;
+                let handle = state.twitterProfile.handle;
 
-                if (isAnonymous && state.encryptionKeys <= 0) {
-                    notify('You have no encryption keys left to tweet anonymously.');
-                    return;
+                if (isAnon) {
+                    if (state.encryptionKeys <= 0) {
+                        notify("You have no encryption keys left.");
+                        return;
+                    }
+                    state.encryptionKeys--;
+                    handle = state.anonymousName;
+                    document.getElementById('tweet-keys-count').textContent = `Keys: ${state.encryptionKeys}`;
+                    document.getElementById('settings-keys-display').textContent = state.encryptionKeys;
                 }
 
                 const newTweet = {
                     id: Date.now(),
-                    handle: isAnonymous ? null : state.twitterProfile.handle,
+                    handle: handle,
                     text: text,
                     time: 'Just now',
                     likes: 0,
@@ -2615,34 +3313,20 @@
                     const parentTweet = findTweetById(state.replyingToTweetId);
                     if (parentTweet) {
                         parentTweet.replies.push(newTweet);
-                        sendNUI('postReply', { text: newTweet.text, parentId: state.replyingToTweetId, anonymous: isAnonymous });
+                        sendNUI('postReply', { text: newTweet.text, parentId: state.replyingToTweetId, anonymous: isAnon });
                     }
                     state.replyingToTweetId = null;
                 } else {
                     state.tweets.push(newTweet);
-                    sendNUI('postTweet', { text: newTweet.text, anonymous: isAnonymous });
-                }
-
-                if (isAnonymous) {
-                    state.encryptionKeys--;
-                    updateKeyCounts();
+                    sendNUI('postTweet', { text: newTweet.text, anonymous: isAnon });
                 }
 
                 renderTwitterFeed();
-                if (!isAnonymous) renderMyTwitterProfile();
-                
+                renderMyTwitterProfile();
                 tweetText.value = '';
                 tweetCount.textContent = '0/280';
                 tweetComposeContainer.style.display = 'none';
-                document.getElementById('tweet-anonymous-toggle').checked = false;
-                document.getElementById('tweet-key-info').style.display = 'none';
                 notify('Tweet sent!');
-            });
-            
-            const tweetAnonymousToggle = document.getElementById('tweet-anonymous-toggle');
-            const tweetKeyInfo = document.getElementById('tweet-key-info');
-            tweetAnonymousToggle.addEventListener('change', () => {
-                tweetKeyInfo.style.display = tweetAnonymousToggle.checked ? 'flex' : 'none';
             });
 
             const openTwitterSettings = () => {
@@ -2718,6 +3402,35 @@
                 document.querySelector('#twitter-app .tab-btn[data-tab="twitter-profile"]').click();
             });
 
+            // --- Lifeinvader App ---
+            document.getElementById('post-lifeinvader').addEventListener('click', () => {
+                const text = document.getElementById('lifeinvader-text').value.trim();
+                if (!text) return;
+
+                const isAnon = document.getElementById('lifeinvader-anon-toggle').checked;
+
+                if (isAnon) {
+                    if (state.encryptionKeys <= 0) {
+                        notify("You have no encryption keys left.");
+                        return;
+                    }
+                    state.encryptionKeys--;
+                    document.getElementById('lifeinvader-keys-count').textContent = `Keys: ${state.encryptionKeys}`;
+                    document.getElementById('settings-keys-display').textContent = state.encryptionKeys;
+                }
+
+                sendNUI('postLifeinvader', { text: text, anonymous: isAnon });
+                
+                document.getElementById('lifeinvader-text').value = '';
+                document.getElementById('lifeinvader-count').textContent = '0/500';
+                notify('Posted to Lifeinvader!');
+            });
+
+            document.getElementById('lifeinvader-text').addEventListener('input', e => {
+                 document.getElementById('lifeinvader-count').textContent = `${e.target.value.length}/500`;
+            });
+
+
             const primaryJobWidget = document.getElementById('primary-job-widget');
             const secondaryJobWidget = document.getElementById('secondary-job-widget');
 
@@ -2733,60 +3446,65 @@
             primaryJobWidget.addEventListener('click', () => { if(state.primaryJob) { state.activeJob = 'primary'; renderJobs(); notify('Primary job is now active.'); }});
             secondaryJobWidget.addEventListener('click', () => { if(state.secondaryJob) { state.activeJob = 'secondary'; renderJobs(); notify('Secondary job is now active.'); }});
 
-            const jobActionSelect = document.getElementById('job-action-select');
-            const jobActionForm = document.getElementById('job-action-form');
-            const jobActionTargetGroup = document.getElementById('job-action-target-group');
-            const jobActionTargetSelect = document.getElementById('job-action-target-select');
-            const jobActionAmountGroup = document.getElementById('job-action-amount-group');
-            const jobActionAmountInput = document.getElementById('job-action-amount-input');
-            const jobActionReasonGroup = document.getElementById('job-action-reason-group');
-            const jobActionReasonLabel = document.getElementById('job-action-reason-label');
-            const jobActionReasonInput = document.getElementById('job-action-reason-input');
-
-            const populateNearbyPlayers = () => {
-                jobActionTargetSelect.innerHTML = '<option value="">Select nearby player...</option>';
-                state.nearbyPlayers.forEach(p => jobActionTargetSelect.innerHTML += `<option value="${p.id}">${p.name} (ID: ${p.id})</option>`);
-            };
-
-            jobActionSelect.addEventListener('change', () => {
-                const action = jobActionSelect.value;
-                jobActionForm.style.display = action ? 'block' : 'none';
-                if (!action) return;
-                populateNearbyPlayers();
-                jobActionTargetGroup.style.display = ['bill', 'hire', 'fire', 'promote', 'demote'].includes(action) ? 'block' : 'none';
-                jobActionAmountGroup.style.display = action === 'bill' ? 'block' : 'none';
-                jobActionReasonGroup.style.display = action !== '' ? 'block' : 'none';
-                jobActionReasonLabel.textContent = action === 'bill' ? 'Service Description' : 'Reason (Optional)';
-            });
+            document.getElementById('job-billing-btn').addEventListener('click', () => openApp('job-billing'));
+            document.getElementById('job-hire-btn').addEventListener('click', () => openApp('job-hire'));
+            document.getElementById('job-manage-btn').addEventListener('click', () => openApp('job-manage'));
             
-            document.getElementById('job-action-execute-btn').addEventListener('click', () => {
-                const action = jobActionSelect.value, targetId = jobActionTargetSelect.value, amount = jobActionAmountInput.value;
-                if (!action) return;
-                if (jobActionTargetGroup.style.display === 'block' && !targetId) return notify('Please select a target player.');
-                if (action === 'bill' && (!amount || amount <= 0)) return notify('Please enter a valid amount.');
-                sendNUI('jobAction', { action, targetId, amount, reason: jobActionReasonInput.value, activeJobType: state.activeJob });
-                notify(`Job action '${action}' sent.`);
-                jobActionSelect.value = '';
-                jobActionForm.style.display = 'none';
+            document.querySelectorAll('.job-back-btn').forEach(btn => btn.addEventListener('click', () => {
+                closeApp();
+                openApp('job');
+            }));
+            
+            const renderEmployeeList = () => {
+                const container = document.getElementById('employee-list');
+                container.innerHTML = state.employees.map(emp => `
+                    <div class="list-item" style="flex-wrap: wrap;">
+                        <div class="list-item-main">
+                            <div class="list-item-title">${emp.name} (ID: ${emp.id})</div>
+                            <div class="list-item-subtitle">${emp.role}</div>
+                        </div>
+                        <div class="employee-actions">
+                            <button class="btn btn-secondary" title="Promote"><i class="fas fa-arrow-up"></i></button>
+                            <button class="btn btn-secondary" title="Demote"><i class="fas fa-arrow-down"></i></button>
+                            <button class="btn btn-danger" title="Fire"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            };
+            
+            document.getElementById('send-bill-btn').addEventListener('click', () => {
+                const recipientId = document.getElementById('billing-recipient-id').value;
+                const amount = document.getElementById('billing-amount').value;
+                const description = document.getElementById('billing-description').value;
+                if(recipientId && amount > 0 && description) {
+                    sendNUI('sendJobBill', { recipientId, amount, description });
+                    notify('Bill sent!');
+                    closeApp();
+                    openApp('job');
+                } else {
+                    notify('Please fill out all fields.');
+                }
+            });
+
+            document.getElementById('send-hire-offer-btn').addEventListener('click', () => {
+                const playerId = document.getElementById('hire-player-id').value;
+                const role = document.getElementById('hire-role-select').value;
+                 if(playerId) {
+                    sendNUI('sendHireOffer', { playerId, role });
+                    notify('Hire offer sent!');
+                    closeApp();
+                    openApp('job');
+                } else {
+                    notify('Please enter a Player ID.');
+                }
             });
             
             document.getElementById('quit-job-primary').addEventListener('click', () => showModal('Quit Job', 'Quit primary job?', () => { sendNUI('quitJob', { jobType: 'primary' }); state.primaryJob = null; renderJobs(); hideModal(); }));
             document.getElementById('quit-job-secondary').addEventListener('click', () => showModal('Quit Job', 'Quit secondary job?', () => { sendNUI('quitJob', { jobType: 'secondary' }); state.secondaryJob = null; renderJobs(); hideModal(); }));
-
-            const anonymousNameInput = document.getElementById('anonymous-name-input');
-            anonymousNameInput.value = state.settings.anonymousName;
-            anonymousNameInput.addEventListener('change', () => {
-                const newName = anonymousNameInput.value.trim();
-                if (newName) {
-                    state.settings.anonymousName = newName;
-                    sendNUI('updateSettings', { anonymousName: newName });
-                    notify(`Anonymous name set to: ${newName}`);
-                } else {
-                    anonymousNameInput.value = state.settings.anonymousName;
-                }
-            });
-
+            
+            // --- Settings App ---
             const themeSelect = document.getElementById('theme-select');
+            const timeFormatToggle = document.getElementById('time-format-toggle');
             const notificationsToggle = document.getElementById('notifications-toggle');
             const notificationSoundToggle = document.getElementById('notification-sound-toggle');
             const airplaneToggle = document.getElementById('airplane-toggle');
@@ -2794,6 +3512,9 @@
             const volumeDisplay = document.getElementById('volume-display');
             const wallpaperUrl = document.getElementById('wallpaper-url');
             const wallpaperElement = document.getElementById('wallpaper');
+            const sentBubbleColorPicker = document.getElementById('sent-bubble-color-picker');
+            const receivedBubbleColorPicker = document.getElementById('received-bubble-color-picker');
+            const conversationBgUrl = document.getElementById('conversation-bg-url');
 
             const applyTheme = (theme) => {
                 if (theme === 'light') {
@@ -2810,6 +3531,13 @@
                     document.documentElement.style.setProperty('--text-secondary', '#a0a0a0');
                 }
             };
+            
+            const applyMessageCustomization = () => {
+                document.documentElement.style.setProperty('--message-sent-bg', state.settings.sentBubbleColor);
+                document.documentElement.style.setProperty('--message-received-bg', state.settings.receivedBubbleColor);
+                const bgImage = state.settings.conversationBg ? `url(${state.settings.conversationBg})` : 'none';
+                document.documentElement.style.setProperty('--conversation-bg-image', bgImage);
+            };
 
             themeSelect.addEventListener('change', () => {
                 state.settings.theme = themeSelect.value;
@@ -2818,27 +3546,60 @@
                 notify(`${state.settings.theme === 'light' ? 'Light' : 'Dark'} mode enabled`);
             });
 
-            [notificationsToggle, notificationSoundToggle, airplaneToggle].forEach(toggle => {
-                toggle.addEventListener('change', () => {
-                     const key = toggle.id.replace('-toggle', '').replace(/-(\w)/g, (match, p1) => p1.toUpperCase());
-                     state.settings[key] = toggle.checked;
-                     sendNUI('updateSettings', { [key]: toggle.checked });
-                });
+            document.getElementById('settings-anon-name').addEventListener('input', (e) => {
+                state.anonymousName = e.target.value.trim() || 'Anon';
+                sendNUI('updateSettings', { anonymousName: state.anonymousName });
+            });
+
+            const updateToggleUI = (toggle) => {
+                const slider = toggle.nextElementSibling;
+                const knob = slider.nextElementSibling;
+                if (toggle.checked) {
+                    slider.style.backgroundColor = 'var(--accent)';
+                    knob.style.transform = 'translateX(22px)';
+                } else {
+                    slider.style.backgroundColor = 'var(--bg-tertiary)';
+                    knob.style.transform = 'translateX(0)';
+                }
+            };
+
+            timeFormatToggle.addEventListener('change', () => {
+                state.settings.timeFormat24 = !timeFormatToggle.checked;
+                updateToggleUI(timeFormatToggle);
+                updateTime();
+                sendNUI('updateSettings', { timeFormat24: state.settings.timeFormat24 });
+            });
+
+            notificationsToggle.addEventListener('change', () => {
+                state.settings.notifications = notificationsToggle.checked;
+                updateToggleUI(notificationsToggle);
+                sendNUI('updateSettings', { notifications: state.settings.notifications });
+            });
+
+            notificationSoundToggle.addEventListener('change', () => {
+                state.settings.notificationSound = notificationSoundToggle.checked;
+                updateToggleUI(notificationSoundToggle);
+                sendNUI('updateSettings', { notificationSound: state.settings.notificationSound });
+            });
+
+            airplaneToggle.addEventListener('change', () => {
+                state.settings.airplaneMode = airplaneToggle.checked;
+                updateToggleUI(airplaneToggle);
+                sendNUI('updateSettings', { airplaneMode: state.settings.airplaneMode });
+                if (state.settings.airplaneMode) notify('Airplane mode enabled');
             });
 
             volumeSlider.addEventListener('input', () => {
                 state.settings.volume = parseInt(volumeSlider.value);
                 volumeDisplay.textContent = `${state.settings.volume}%`;
-                sendNUI('updateSettings', { volume: state.settings.volume });
             });
+            volumeSlider.addEventListener('change', () => sendNUI('updateSettings', { volume: state.settings.volume }));
 
             document.getElementById('apply-wallpaper').addEventListener('click', () => {
                 const url = wallpaperUrl.value.trim();
                 if (url) {
                     state.settings.wallpaper = url;
                     wallpaperElement.style.backgroundImage = `url(${url})`;
-                    wallpaperElement.style.backgroundSize = 'cover';
-                    wallpaperElement.style.backgroundPosition = 'center';
                     sendNUI('updateSettings', { wallpaper: url });
                     notify('Wallpaper applied!');
                 }
@@ -2851,14 +3612,301 @@
                 sendNUI('updateSettings', { wallpaper: null });
                 notify('Wallpaper reset!');
             });
+            
+            sentBubbleColorPicker.addEventListener('input', (e) => {
+                state.settings.sentBubbleColor = e.target.value;
+                applyMessageCustomization();
+                sendNUI('updateSettings', { sentBubbleColor: e.target.value });
+            });
+            receivedBubbleColorPicker.addEventListener('input', (e) => {
+                state.settings.receivedBubbleColor = e.target.value;
+                applyMessageCustomization();
+                sendNUI('updateSettings', { receivedBubbleColor: e.target.value });
+            });
+            document.getElementById('apply-conversation-bg').addEventListener('click', () => {
+                const url = conversationBgUrl.value.trim();
+                state.settings.conversationBg = url ? url : null;
+                applyMessageCustomization();
+                sendNUI('updateSettings', { conversationBg: url });
+                notify('Messages background updated!');
+            });
+            document.getElementById('reset-conversation-bg').addEventListener('click', () => {
+                conversationBgUrl.value = '';
+                state.settings.conversationBg = null;
+                applyMessageCustomization();
+                sendNUI('updateSettings', { conversationBg: null });
+            });
+
+            const loadSettings = () => {
+                // Time format (toggle is for 12h, so checked if format is NOT 24h)
+                timeFormatToggle.checked = !state.settings.timeFormat24;
+                updateToggleUI(timeFormatToggle);
+                // Other toggles
+                notificationsToggle.checked = state.settings.notifications;
+                updateToggleUI(notificationsToggle);
+                notificationSoundToggle.checked = state.settings.notificationSound;
+                updateToggleUI(notificationSoundToggle);
+                airplaneToggle.checked = state.settings.airplaneMode;
+                updateToggleUI(airplaneToggle);
+                // Message colors
+                sentBubbleColorPicker.value = state.settings.sentBubbleColor;
+                receivedBubbleColorPicker.value = state.settings.receivedBubbleColor;
+                applyMessageCustomization();
+            };
+
+            // --- Notes App ---
+            let currentNoteId = null;
+            const notesListView = document.getElementById('notes-list-view');
+            const noteEditorView = document.getElementById('note-editor-view');
+            const noteEditorTextarea = document.getElementById('note-editor-textarea');
+            const newNoteBtn = document.getElementById('new-note-btn');
+            const notesBackBtn = document.getElementById('notes-back');
+
+            const renderNotesList = () => {
+                notesListView.innerHTML = state.notes.sort((a,b) => b.timestamp - a.timestamp).map(note => `
+                    <div class="list-item note-item" data-note-id="${note.id}">
+                        <div class="list-item-main">
+                            <div class="list-item-title">${note.text.split('\n')[0].substring(0, 30)}</div>
+                            <div class="list-item-subtitle">${new Date(note.timestamp).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.note-item').forEach(item => {
+                    item.addEventListener('click', () => openNoteEditor(parseInt(item.dataset.noteId)));
+                });
+            };
+            
+            const openNoteEditor = (noteId = null) => {
+                currentNoteId = noteId;
+                if (noteId) {
+                    const note = state.notes.find(n => n.id === noteId);
+                    noteEditorTextarea.value = note.text;
+                } else {
+                    noteEditorTextarea.value = '';
+                }
+                notesListView.style.display = 'none';
+                newNoteBtn.style.display = 'none';
+                noteEditorView.style.display = 'flex';
+                notesBackBtn.style.display = 'block';
+                noteEditorTextarea.focus();
+            };
+
+            const saveAndExitNoteEditor = () => {
+                const text = noteEditorTextarea.value.trim();
+                if (currentNoteId !== null) { // Editing existing note
+                    if (text) {
+                        const note = state.notes.find(n => n.id === currentNoteId);
+                        note.text = text;
+                        note.timestamp = Date.now();
+                    } else { // Delete if empty
+                        state.notes = state.notes.filter(n => n.id !== currentNoteId);
+                    }
+                } else if (text) { // Creating new note
+                    const newNote = { id: Date.now(), text, timestamp: Date.now() };
+                    state.notes.push(newNote);
+                }
+                currentNoteId = null;
+
+                notesListView.style.display = 'block';
+                newNoteBtn.style.display = 'block';
+                noteEditorView.style.display = 'none';
+                notesBackBtn.style.display = 'none';
+                renderNotesList();
+                // NUI call to save notes would go here
+            };
+
+            newNoteBtn.addEventListener('click', () => openNoteEditor());
+            notesBackBtn.addEventListener('click', saveAndExitNoteEditor);
+
+
+            // --- Calculator App (with FULL LOGIC) ---
+            const calculator = {
+                displayValue: '0',
+                firstOperand: null,
+                waitingForSecondOperand: false,
+                operator: null,
+            };
+
+            function updateCalculatorDisplay() {
+                const display = document.getElementById('calculator-display');
+                display.value = calculator.displayValue;
+            }
+
+            document.getElementById('calculator-buttons').addEventListener('click', (event) => {
+                const { target } = event;
+                if (!target.matches('button')) return;
+
+                const { key, operator } = target.dataset;
+
+                if (operator) {
+                    handleOperator(operator);
+                    updateCalculatorDisplay();
+                    return;
+                }
+
+                switch (key) {
+                    case 'calculate':
+                        handleOperator('=');
+                        break;
+                    case 'decimal':
+                        inputDecimal();
+                        break;
+                    case 'clear':
+                        resetCalculator();
+                        break;
+                    case 'sign':
+                        toggleSign();
+                        break;
+                    case 'percent':
+                        inputPercent();
+                        break;
+                    case 'sqrt':
+                        inputSqrt();
+                        break;
+                    default:
+                        if (/\d/.test(key)) {
+                            inputDigit(key);
+                        }
+                }
+                updateCalculatorDisplay();
+            });
+
+            function inputDigit(digit) {
+                const { displayValue, waitingForSecondOperand } = calculator;
+                if (waitingForSecondOperand === true) {
+                    calculator.displayValue = digit;
+                    calculator.waitingForSecondOperand = false;
+                } else {
+                    calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
+                }
+            }
+
+            function inputDecimal() {
+                if (calculator.waitingForSecondOperand) {
+                    calculator.displayValue = '0.';
+                    calculator.waitingForSecondOperand = false;
+                    return;
+                }
+                if (!calculator.displayValue.includes('.')) {
+                    calculator.displayValue += '.';
+                }
+            }
+            
+            function inputSqrt() {
+                const { displayValue } = calculator;
+                const value = parseFloat(displayValue);
+                if (value < 0) {
+                    calculator.displayValue = 'Error';
+                } else {
+                    calculator.displayValue = `${parseFloat(Math.sqrt(value).toPrecision(15))}`;
+                }
+            }
+
+            function toggleSign() {
+                calculator.displayValue = (parseFloat(calculator.displayValue) * -1).toString();
+            }
+            
+            function inputPercent() {
+                calculator.displayValue = (parseFloat(calculator.displayValue) / 100).toString();
+            }
+
+            function handleOperator(nextOperator) {
+                const { firstOperand, displayValue, operator } = calculator;
+                const inputValue = parseFloat(displayValue);
+
+                if (nextOperator === '=' && operator === null) {
+                    return;
+                }
+
+                if (operator && calculator.waitingForSecondOperand) {
+                    calculator.operator = nextOperator;
+                    return;
+                }
+
+                if (firstOperand == null && !isNaN(inputValue)) {
+                    calculator.firstOperand = inputValue;
+                } else if (operator) {
+                    const result = performCalculation[operator](firstOperand, inputValue);
+                    
+                    if (result === 'Error') {
+                        calculator.displayValue = 'Error';
+                    } else {
+                         calculator.displayValue = `${parseFloat(result.toPrecision(15))}`;
+                    }
+                    calculator.firstOperand = result === 'Error' ? null : result;
+                }
+                
+                calculator.waitingForSecondOperand = true;
+                calculator.operator = nextOperator === '=' ? null : nextOperator;
+            }
+
+            const performCalculation = {
+                'divide': (first, second) => second === 0 ? 'Error' : first / second,
+                'multiply': (first, second) => first * second,
+                'add': (first, second) => first + second,
+                'subtract': (first, second) => first - second,
+            };
+            
+             function resetCalculator() {
+                calculator.displayValue = '0';
+                calculator.firstOperand = null;
+                calculator.waitingForSecondOperand = false;
+                calculator.operator = null;
+            }
 			
             const bankAccountSelect = document.getElementById('bank-account-select');
-            const updateBankBalance = () => document.querySelector('#bank-app .widget-balance').textContent = (state.balance[bankAccountSelect.value] || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            
+            const renderBankAccounts = () => {
+                bankAccountSelect.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+            };
+
+            const updateBankBalance = () => {
+                const selectedAccountId = bankAccountSelect.value;
+                const account = state.accounts.find(acc => acc.id === selectedAccountId);
+                if (!account) return;
+                
+                document.querySelector('#bank-app #bank-widget-header').textContent = account.name;
+                document.querySelector('#bank-app .widget-balance').textContent = account.balance.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                document.querySelector('#bank-app #bank-widget-id').textContent = `ID: ${account.id}`;
+            };
             bankAccountSelect.addEventListener('change', updateBankBalance);
+            
             document.getElementById('transfer-btn').addEventListener('click', () => {
-                const id = document.getElementById('transfer-id').value, amount = parseInt(document.getElementById('transfer-amount').value);
-                if (id && amount > 0) showModal('Transfer Money', `Send $${amount} to ID ${id}?`, () => { sendNUI('transferMoney', { recipient: id, amount, fromAccount: bankAccountSelect.value }); hideModal(); });
-                else notify('Please enter a valid ID and amount.');
+                const recipientId = document.getElementById('transfer-id').value.trim();
+                const amount = parseInt(document.getElementById('transfer-amount').value);
+                const fromAccountId = bankAccountSelect.value;
+
+                if (recipientId && amount > 0) {
+                    const fromAccount = state.accounts.find(acc => acc.id === fromAccountId);
+                    if (!fromAccount || fromAccount.balance < amount) {
+                        return notify('Insufficient funds.');
+                    }
+
+                    const toAccount = state.accounts.find(acc => acc.id === recipientId);
+
+                    if (toAccount) { // It's an internal transfer
+                        if(fromAccount.id === toAccount.id) return notify("Cannot transfer to the same account.");
+                        showModal('Internal Transfer', `Transfer $${amount.toLocaleString()} from ${fromAccount.name} to ${toAccount.name}?`, () => {
+                            fromAccount.balance -= amount;
+                            toAccount.balance += amount;
+                            sendNUI('internalTransfer', { from: fromAccount.id, to: toAccount.id, amount });
+                            notify('Transfer successful!');
+                            updateBankBalance();
+                            hideModal();
+                        });
+                    } else { // It's an external transfer to a player
+                        showModal('Transfer Money', `Send $${amount.toLocaleString()} to ID ${recipientId}?`, () => { 
+                            fromAccount.balance -= amount;
+                            sendNUI('transferMoney', { recipient: recipientId, amount, fromAccount: fromAccount.id }); 
+                            notify('Money sent!');
+                            updateBankBalance();
+                            hideModal(); 
+                        });
+                    }
+                } else {
+                    notify('Please enter a valid ID and amount.');
+                }
             });
 
             const renderBills = () => {
@@ -2874,11 +3922,11 @@
                                 <div class="list-item-title">${bill.name}</div>
                                 <div class="list-item-subtitle">Due in ${bill.due}</div>
                             </div>
-                            <div class="list-item-value" style="color: var(--warning);">$${bill.amount.toLocaleString()}</div>
+                            <div class="list-item-value" style="color: var(--warning);">$${bill.amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                         </div>
                         <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid var(--bg-tertiary); padding-top: 15px;">
                             <select class="form-select bill-pay-account" style="flex: 2; margin: 0; padding: 10px;">
-                                ${Object.keys(state.balance).filter(k=>k!=='cash').map(acc => `<option value="${acc}">${acc.charAt(0).toUpperCase() + acc.slice(1)} ($${state.balance[acc].toLocaleString()})</option>`).join('')}
+                                ${state.accounts.map(acc => `<option value="${acc.id}">${acc.name} ($${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })})</option>`).join('')}
                             </select>
                             <button class="btn btn-primary pay-bill-btn" data-bill-id="${bill.id}" style="flex: 1; margin: 0; padding: 10px; font-size: 14px;">Pay Bill</button>
                         </div>
@@ -2889,13 +3937,14 @@
                     btn.addEventListener('click', () => {
                         const billId = parseInt(btn.dataset.billId);
                         const bill = state.bills.find(b => b.id === billId);
-                        const selectedAccount = btn.closest('.list-item').querySelector('.bill-pay-account').value;
+                        const selectedAccountId = btn.closest('.list-item').querySelector('.bill-pay-account').value;
+                        const fromAccount = state.accounts.find(acc => acc.id === selectedAccountId);
                         
-                        if (bill && selectedAccount && state.balance[selectedAccount] >= bill.amount) {
-                             showModal('Pay Bill', `Pay $${bill.amount} for ${bill.name} from your ${selectedAccount} account?`, () => {
-                                state.balance[selectedAccount] -= bill.amount;
+                        if (bill && fromAccount && fromAccount.balance >= bill.amount) {
+                             showModal('Pay Bill', `Pay $${bill.amount} for ${bill.name} from your ${fromAccount.name} account?`, () => {
+                                fromAccount.balance -= bill.amount;
                                 state.bills = state.bills.filter(b => b.id !== billId);
-                                sendNUI('payBill', { billId, fromAccount: selectedAccount });
+                                sendNUI('payBill', { billId, fromAccount: fromAccount.id });
                                 notify('Bill paid successfully!');
                                 updateBankBalance();
                                 renderBills();
@@ -2940,6 +3989,27 @@
                     { confirmText: 'Close', showCancel: false }
                 );
             });
+            
+            const foodDutyStatus = document.getElementById('food-duty-status');
+            const foodToggleBtn = document.getElementById('food-toggle-orders');
+            
+            const updateFoodDutyStatus = () => {
+                if (state.foodFerryOnDuty) {
+                    foodDutyStatus.textContent = 'You are currently accepting orders.';
+                    foodDutyStatus.className = 'on-duty';
+                    foodToggleBtn.querySelector('span').textContent = 'STOP ACCEPTING ORDERS';
+                } else {
+                    foodDutyStatus.textContent = 'You are not accepting orders.';
+                    foodDutyStatus.className = 'off-duty';
+                    foodToggleBtn.querySelector('span').textContent = 'TOGGLE ORDERS';
+                }
+            };
+            
+            foodToggleBtn.addEventListener('click', () => {
+                state.foodFerryOnDuty = !state.foodFerryOnDuty;
+                updateFoodDutyStatus();
+                sendNUI('toggleFoodDuty', { onDuty: state.foodFerryOnDuty });
+            });
 
 
             const showModal = (title, message, callback, options = {}) => {
@@ -2974,15 +4044,45 @@
 			const inputModal = document.getElementById('input-modal');
             let currentRequestService = null;
 
-            const showInputModal = (title, placeholder, service) => {
+            const showInputModal = (title, placeholder, service, showPhotos = false) => {
                 document.getElementById('input-modal-title').textContent = title;
                 const textarea = document.getElementById('input-modal-textarea');
+                const photoSelectContainer = document.getElementById('input-modal-photo-select');
+                const photoGrid = document.getElementById('input-modal-photos-grid');
+                
                 textarea.placeholder = placeholder;
                 textarea.value = '';
+                
+                if (showPhotos) {
+                    photoSelectContainer.style.display = 'block';
+                    textarea.style.display = 'none';
+                    photoGrid.innerHTML = state.photos.map(url => 
+                        `<div class="photo-thumbnail" style="background-image: url(${url})" data-url="${url}"></div>`
+                    ).join('');
+
+                    photoGrid.querySelectorAll('.photo-thumbnail').forEach(thumb => {
+                        thumb.addEventListener('click', () => {
+                             if (currentRequestService === 'attach-message-image') {
+                                const messageInput = document.getElementById('message-input');
+                                messageInput.value = (messageInput.value + ' ' + thumb.dataset.url).trim();
+                            } else if (currentRequestService === 'attach-tweet-image') {
+                                const tweetText = document.getElementById('tweet-text');
+                                tweetText.value = (tweetText.value + ' ' + thumb.dataset.url).trim();
+                                tweetText.dispatchEvent(new Event('input'));
+                            }
+                            hideInputModal();
+                        });
+                    });
+
+                } else {
+                    photoSelectContainer.style.display = 'none';
+                    textarea.style.display = 'block';
+                }
+
                 inputModal.classList.add('active');
                 currentRequestService = service;
             };
-
+            
             const hideInputModal = () => {
                 inputModal.classList.remove('active');
                 currentRequestService = null;
@@ -2992,25 +4092,6 @@
 
             document.getElementById('input-modal-confirm').addEventListener('click', () => {
                 const textInput = document.getElementById('input-modal-textarea').value.trim();
-                
-                if (currentRequestService === 'attach-message-image') {
-                    if (textInput) {
-                        const messageInput = document.getElementById('message-input');
-                        messageInput.value = (messageInput.value + ' ' + textInput).trim();
-                    }
-                    hideInputModal();
-                    return;
-                }
-
-                if (currentRequestService === 'attach-tweet-image') {
-                    if (textInput) {
-                        const tweetText = document.getElementById('tweet-text');
-                        tweetText.value = (tweetText.value + ' ' + textInput).trim();
-                        tweetText.dispatchEvent(new Event('input'));
-                    }
-                    hideInputModal();
-                    return;
-                }
                 
                 if (currentRequestService) {
                     if (textInput) {
@@ -3023,33 +4104,12 @@
                 }
             });
 
-            document.getElementById('post-lifeinvader').addEventListener('click', () => {
-                const postContent = document.getElementById('lifeinvader-post').value.trim();
-                if(postContent) {
-                    if (state.encryptionKeys <= 0) {
-                        notify('You have no encryption keys left to post anonymously.');
-                        return;
-                    }
-                    state.encryptionKeys--;
-                    updateKeyCounts();
-                    sendNUI('postToLifeInvader', {
-                        username: state.settings.anonymousName,
-                        content: postContent
-                    });
-                    notify('Posted to LifeInvader anonymously.');
-                    document.getElementById('lifeinvader-post').value = '';
-                    closeApp();
-                } else {
-                    notify('Post cannot be empty.');
-                }
-            });
-
             document.getElementById('attach-image').addEventListener('click', () => {
-                showInputModal('Attach Image URL', 'https://.../image.png', 'attach-message-image');
+                showInputModal('Attach Photo', '', 'attach-message-image', true);
             });
             
             document.getElementById('attach-tweet-image').addEventListener('click', () => {
-                showInputModal('Attach Image URL', 'https://.../image.png', 'attach-tweet-image');
+                showInputModal('Attach Photo', '', 'attach-tweet-image', true);
             });
 
             const setupRequesteeListeners = () => {
@@ -3072,18 +4132,167 @@
                 });
             };
 
+            const mockIncomingCall = () => {
+                const randomContact = state.contacts[Math.floor(Math.random() * state.contacts.length)];
+                const callerView = document.getElementById('incoming-call-view');
+                
+                document.getElementById('caller-name').textContent = randomContact.name;
+                document.getElementById('caller-number').textContent = randomContact.number;
+                setAvatar(document.getElementById('caller-avatar'), randomContact);
+
+                callerView.style.display = 'flex';
+
+                document.getElementById('call-reject-btn').onclick = () => { 
+                    callerView.style.display = 'none'; 
+                    addCallToRecents({ name: randomContact.name, number: randomContact.number, type: 'missed' });
+                    sendNUI('rejectCall'); 
+                };
+                document.getElementById('call-accept-btn').onclick = () => { 
+                    callerView.style.display = 'none'; 
+                    addCallToRecents({ name: randomContact.name, number: randomContact.number, type: 'incoming' });
+                    showDynamicIsland(randomContact.number); 
+                    sendNUI('acceptCall'); 
+                };
+            };
+
             window.addEventListener('message', e => { if (e.data.type === 'phone:show') { phoneWrapper.style.display = 'block'; document.body.style.display = 'flex'; } });
-            const callerView = document.getElementById('incoming-call-view');
-            document.getElementById('call-reject-btn').addEventListener('click', () => { callerView.style.display = 'none'; sendNUI('rejectCall'); });
-            document.getElementById('call-accept-btn').addEventListener('click', () => { const num = callerView.querySelector('#caller-number').textContent; callerView.style.display = 'none'; showDynamicIsland(num); sendNUI('acceptCall'); });
-            document.addEventListener('keyup', e => { if (e.key === 'Escape') { if (modal.classList.contains('active')) hideModal(); else if (inputModal.classList.contains('active')) hideInputModal(); else if (state.currentApp) closeApp(); else closePhone(); }});
             
+            document.addEventListener('keyup', e => { if (e.key === 'Escape') { if (modal.classList.contains('active')) hideModal(); else if (inputModal.classList.contains('active')) hideInputModal(); else if (homeScreen.classList.contains('edit-mode')) toggleEditMode(false); else if (state.currentApp) closeApp(); else closePhone(); }});
+            
+            // --- Sell Vehicle Modal Logic ---
+            const vehicleSellModal = document.getElementById('vehicle-sell-modal');
+            const sellConfirmBtn = document.getElementById('sell-confirm-btn');
+            const sellCancelBtn = document.getElementById('sell-cancel-btn');
+            const sellPlayerIdInput = document.getElementById('sell-player-id');
+            const sellAmountInput = document.getElementById('sell-amount');
+
+            const openSellModal = (plate) => {
+                vehicleSellModal.dataset.plate = plate;
+                sellPlayerIdInput.value = '';
+                sellAmountInput.value = '';
+                vehicleSellModal.classList.add('active');
+            }
+
+            const closeSellModal = () => {
+                vehicleSellModal.classList.remove('active');
+            }
+
+            sellCancelBtn.addEventListener('click', closeSellModal);
+            sellConfirmBtn.addEventListener('click', () => {
+                const plate = vehicleSellModal.dataset.plate;
+                const targetPlayerId = sellPlayerIdInput.value;
+                const amount = parseInt(sellAmountInput.value);
+
+                if (!targetPlayerId || !amount || amount <= 0) {
+                    notify('Please enter a valid Player ID and amount.');
+                    return;
+                }
+
+                showModal('Confirm Sale', `Are you sure you want to sell vehicle ${plate} to Player ID ${targetPlayerId} for $${amount}?`, () => {
+                    sendNUI('sellVehicle', { plate, targetPlayerId, amount });
+                    notify(`Sale offer for ${plate} sent.`);
+                    hideModal();
+                    closeSellModal();
+                });
+            });
+
+            // --- Contact Share Modal Logic ---
+            const shareModal = document.getElementById('contact-share-modal');
+            
+            const openShareModal = (contact) => {
+                state.contactToShare = contact;
+                document.getElementById('contact-share-title').textContent = `Share ${contact.name}`;
+
+                const nearbyList = document.getElementById('share-nearby-list');
+                const contactsList = document.getElementById('share-contacts-list');
+
+                // Populate nearby players
+                if (state.nearbyPlayers && state.nearbyPlayers.length > 0) {
+                    nearbyList.innerHTML = state.nearbyPlayers.map(player => `
+                        <div class="list-item share-nearby-item" data-player-id="${player.id}">
+                            <div class="list-item-main">
+                                <div class="list-item-title">${player.name}</div>
+                                <div class="list-item-subtitle">Nearby Player (ID: ${player.id})</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    nearbyList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 10px;">No one nearby.</p>';
+                }
+
+                // Populate other contacts
+                const otherContacts = state.contacts.filter(c => c.number !== contact.number);
+                if (otherContacts.length > 0) {
+                    contactsList.innerHTML = otherContacts.map(c => `
+                        <div class="list-item share-contact-item" data-number="${c.number}">
+                            <div class="list-item-avatar"></div>
+                            <div class="list-item-main" style="margin-left: 15px;">
+                                <div class="list-item-title">${c.name}</div>
+                                <div class="list-item-subtitle">${c.number}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    contactsList.querySelectorAll('.list-item-avatar').forEach((avatar, index) => {
+                        setAvatar(avatar, otherContacts[index]);
+                    });
+                } else {
+                    contactsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 10px;">No other contacts to share with.</p>';
+                }
+
+                shareModal.classList.add('active');
+            };
+
+            const closeShareModal = () => {
+                shareModal.classList.remove('active');
+                state.contactToShare = null;
+            };
+
+            document.getElementById('share-cancel-btn').addEventListener('click', closeShareModal);
+
+            shareModal.addEventListener('click', (e) => {
+                const nearbyItem = e.target.closest('.share-nearby-item');
+                if (nearbyItem) {
+                    const targetPlayerId = nearbyItem.dataset.playerId;
+                    sendNUI('shareContactWithPlayer', { contact: state.contactToShare, targetPlayerId });
+                    notify(`Shared ${state.contactToShare.name}'s card with Player ID ${targetPlayerId}.`);
+                    closeShareModal();
+                    return;
+                }
+
+                const contactItem = e.target.closest('.share-contact-item');
+                if (contactItem) {
+                    const targetContact = getContactByNumber(contactItem.dataset.number);
+                    const targetNumber = contactItem.dataset.number;
+                    const contactCardText = `Contact Card:\nName: ${state.contactToShare.name}\nNumber: ${state.contactToShare.number}${state.contactToShare.photoUrl ? `\nPhoto: ${state.contactToShare.photoUrl}` : ''}`;
+                    
+                    sendNUI('sendMessage', { number: targetNumber, message: contactCardText });
+                    if (!state.conversations[targetNumber]) {
+                        state.conversations[targetNumber] = [];
+                    }
+                    const now = new Date();
+                    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    state.conversations[targetNumber].push({ type: 'sent', text: contactCardText, time: time });
+
+                    notify(`Shared ${state.contactToShare.name}'s card with ${targetContact.name}.`);
+                    closeShareModal();
+                    renderMessageThreads();
+                }
+            });
+
+
+            // --- Initial Renders ---
+            renderHomeScreenApps();
             renderContacts();
             renderMessageThreads();
             renderJobs();
+            renderRecents();
+            renderBankAccounts();
             updateBankBalance();
             setupRequesteeListeners();
-            updateKeyCounts();
+            updateFoodDutyStatus();
+            loadSettings();
+            updateTime();
+            updateCalculatorDisplay(); // Initial display set
 
             phoneWrapper.style.display = 'block';
             document.body.style.display = 'flex';
@@ -3091,3 +4300,5 @@
     </script>
 </body>
 </html>
+
+
