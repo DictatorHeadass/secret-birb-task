@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bastion Business Tablet</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,15 +17,12 @@
         }
 
         :root {
-            --bg-primary: #111827; /* Darker blue-gray */
-            --bg-secondary: #1F2937; /* Dark blue-gray */
-            --bg-tertiary: #374151; /* Lighter blue-gray */
-            --accent: #38BDF8; /* Sky blue */
-            --accent-dim: rgba(56, 189, 248, 0.1);
-            --text-primary: #F9FAFB; /* Off-white */
-            --text-secondary: #9CA3AF; /* Gray */
-            --danger: #F43F5E; /* Rose */
-            --success: #34D399; /* Emerald */
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --accent: #38BDF8;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
         }
 
         body {
@@ -30,9 +30,9 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: rgba(10, 10, 10, 0.5); /* Dimmed background */
+            background-color: rgba(10, 10, 10, 0.5);
             backdrop-filter: blur(8px);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
 
@@ -45,7 +45,6 @@
             border-radius: 24px;
             padding: 12px;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            position: relative;
         }
 
         #tablet-screen {
@@ -54,7 +53,6 @@
             background: var(--bg-primary);
             border-radius: 16px;
             overflow: hidden;
-            position: relative;
             display: flex;
             flex-direction: column;
         }
@@ -69,14 +67,12 @@
             color: var(--text-primary);
             font-size: 14px;
             font-weight: 500;
-            z-index: 100;
             flex-shrink: 0;
             background: rgba(0,0,0,0.2);
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .status-left { display: flex; gap: 12px; align-items: center; }
-        .status-right { display: flex; gap: 12px; align-items: center; }
+        .status-left, .status-right { display: flex; gap: 12px; align-items: center; }
         .status-icon { font-size: 13px; }
         
         #main-content {
@@ -85,32 +81,24 @@
             overflow-y: auto;
         }
 
-        #main-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        #main-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        #main-content::-webkit-scrollbar-thumb {
-            background: var(--bg-tertiary);
-            border-radius: 6px;
-        }
+        #main-content::-webkit-scrollbar { width: 6px; }
+        #main-content::-webkit-scrollbar-track { background: transparent; }
+        #main-content::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 6px; }
+
+        .page { display: none; }
+        .page.active { display: block; }
 
         .header {
             color: var(--text-primary);
             margin-bottom: 25px;
             border-bottom: 1px solid var(--bg-tertiary);
             padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .header h1 {
-            font-size: 2.25rem;
-            font-weight: 800;
-        }
-        .header p {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
+        .header h1 { font-size: 2.25rem; font-weight: 800; }
+        .header p { font-size: 1rem; color: var(--text-secondary); margin-top: 4px; }
         
         #business-grid {
             display: grid;
@@ -129,45 +117,15 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .business-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
+        .business-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .business-image { height: 150px; background-color: var(--bg-tertiary); background-size: cover; background-position: center; }
+        .business-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .business-content h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .business-content p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; flex: 1; margin-bottom: 20px; }
 
-        .business-image {
-            height: 150px;
-            background-color: var(--bg-tertiary);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
-        .business-content {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .business-content h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-        
-        .business-content p {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            flex: 1;
-            margin-bottom: 20px;
-        }
-
-        .apply-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
@@ -176,80 +134,37 @@
             text-align: center;
             text-decoration: none;
             transition: all 0.2s ease;
-            background: var(--accent);
-            color: var(--bg-primary);
-            box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2);
-        }
-
-        .apply-btn:hover {
-            background: #60cffc;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(56, 189, 248, 0.3);
         }
         
-        .apply-btn i {
-            margin-right: 8px;
-        }
-        
-        /* --- Popup Styles --- */
-        .popup-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(10, 10, 10, 0.7);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
+        .btn-primary { background: var(--accent); color: var(--bg-primary); box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2); width: 100%; }
+        .btn-primary:hover { background: #60cffc; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(56, 189, 248, 0.3); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-secondary:hover { background: #4b5563; }
+        .btn i { margin-right: 8px; }
 
-        .popup-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .popup-content {
+        /* Application & Admin Form Styles */
+        .form-container { max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px; }
+        .form-group .input-field, .form-group .textarea-field {
+            width: 100%;
             background: var(--bg-secondary);
-            padding: 30px 40px;
-            border-radius: 16px;
-            color: var(--text-primary);
             border: 1px solid var(--bg-tertiary);
-            text-align: center;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transform: scale(0.95);
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        .popup-overlay.visible .popup-content {
-            transform: scale(1);
-        }
-
-        .popup-content h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
-
-        .popup-close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 2.2rem;
-            line-height: 1;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-
-        .popup-close-btn:hover {
+            border-radius: 8px;
+            padding: 12px 15px;
             color: var(--text-primary);
-            transform: rotate(90deg);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .form-group .input-field:focus, .form-group .textarea-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+        }
+        .form-group .textarea-field { resize: vertical; min-height: 120px; }
+
+        #admin-btn { font-size: 12px; padding: 6px 10px; }
 
     </style>
 </head>
@@ -267,64 +182,150 @@
             </div>
 
             <main id="main-content">
-                <div class="header">
-                    <h1>City Businesses</h1>
-                    <p>Find your next career. Browse open opportunities and apply today.</p>
+                <!-- PAGE 1: Job Listings -->
+                <div id="job-listings-page" class="page active">
+                    <div class="header">
+                        <div>
+                            <h1>City Businesses</h1>
+                            <p>Find your next career. Browse open opportunities and apply today.</p>
+                        </div>
+                        <button id="admin-btn" class="btn btn-secondary"><i class="fas fa-user-shield"></i> Admin</button>
+                    </div>
+                    <div id="business-grid"></div>
                 </div>
-                <div id="business-grid">
+
+                <!-- PAGE 2: Application Form -->
+                <div id="application-page" class="page">
+                    <div class="header">
+                        <div>
+                            <h1 id="application-title">Application</h1>
+                            <p>Please fill out the form below with accurate information.</p>
+                        </div>
+                        <button id="back-to-jobs-btn" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
+                    </div>
+                    <div class="form-container">
+                        <form id="job-application-form">
+                            <div class="form-group">
+                                <label for="applicant-name">Full Name</label>
+                                <input type="text" id="applicant-name" class="input-field" placeholder="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicant-dob">Date of Birth</label>
+                                <input type="date" id="applicant-dob" class="input-field" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicant-phone">Phone Number</label>
+                                <input type="tel" id="applicant-phone" class="input-field" placeholder="555-123-4567" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicant-ic-experience">Do you have any prior experience in this field? (In-Character)</label>
+                                <textarea id="applicant-ic-experience" class="textarea-field" placeholder="Describe your character's past jobs, skills, or relevant life experiences..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicant-ooc-experience">Have you had any similar roles or experiences before? (Out-of-Character)</label>
+                                <textarea id="applicant-ooc-experience" class="textarea-field" placeholder="Briefly tell us about any real-life or other roleplay experience that might be relevant..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicant-reason">Why does your character want to work here?</label>
+                                <textarea id="applicant-reason" class="textarea-field" placeholder="From your character's perspective, explain their motivations for seeking this specific job..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Application</button>
+                        </form>
+                    </div>
                 </div>
+                
+                <!-- PAGE 3: Admin Panel -->
+                <div id="admin-page" class="page">
+                     <div class="header">
+                        <div>
+                            <h1>Admin Panel</h1>
+                            <p>Add a new business listing.</p>
+                        </div>
+                        <button id="back-from-admin-btn" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
+                    </div>
+                     <div class="form-container">
+                        <form id="add-business-form">
+                            <div class="form-group">
+                                <label for="business-name">Business Name</label>
+                                <input type="text" id="business-name" class="input-field" placeholder="e.g., Los Santos Customs" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="business-image">Image URL</label>
+                                <input type="url" id="business-image" class="input-field" placeholder="https://example.com/image.png" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="business-desc">Description</label>
+                                <textarea id="business-desc" class="textarea-field" placeholder="A short description of the business..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Add Business</button>
+                        </form>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
     
-    <!-- Application Popup -->
-    <div id="application-popup" class="popup-overlay">
-        <div class="popup-content">
-            <button class="popup-close-btn">&times;</button>
-            <h1>Teddy time</h1>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // List of businesses in the city 
-            // copy paste to add or remove businesses here.
-            const businesses = [
+            // --- DATA ---
+            let businesses = [
                 {
                     name: 'Los Santos Police Dept.',
                     imageUrl: 'https://i.ibb.co/Mksz65KR/image-2025-10-06-170852509.png',
-                    description: 'To protect and to serve or something type shit.',
+                    description: 'To protect and to serve the citizens of Los Santos. Seeking dedicated officers.',
                 },
                 {
                     name: 'Mount Zonah Medical',
                     imageUrl: 'https://i.ibb.co/spR4HnnL/image-2025-10-06-170637421.png',
-                    description: 'Saving lives sometimes.',
+                    description: 'Saving lives and providing top-tier medical care. Now hiring doctors and paramedics.',
                 },
                 {
                     name: 'San Andreas Law Courts',
                     imageUrl: 'https://i.ibb.co/tTT8Q83b/image-2025-10-06-171532793.png',
-                    description: 'Your honor, you werent even there bro.',
+                    description: 'Upholding justice in the state of San Andreas. Openings for lawyers and paralegals.',
                 }
             ];
 
+            // --- ELEMENTS ---
             const businessGrid = document.getElementById('business-grid');
+            const timeEl = document.getElementById('time');
+            
+            const pages = document.querySelectorAll('.page');
+            const jobListingsPage = document.getElementById('job-listings-page');
+            const applicationPage = document.getElementById('application-page');
+            const adminPage = document.getElementById('admin-page');
+            
+            const applicationTitle = document.getElementById('application-title');
+            const jobApplicationForm = document.getElementById('job-application-form');
+            const addBusinessForm = document.getElementById('add-business-form');
+
+            const adminBtn = document.getElementById('admin-btn');
+            const backToJobsBtn = document.getElementById('back-to-jobs-btn');
+            const backFromAdminBtn = document.getElementById('back-from-admin-btn');
 
             // --- FUNCTIONS ---
+            function switchPage(targetPageId) {
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                    if (page.id === targetPageId) {
+                        page.classList.add('active');
+                    }
+                });
+            }
 
             function renderBusinesses() {
                 if (!businessGrid) return;
-                businessGrid.innerHTML = ''; // Clear existing businesses
-
+                businessGrid.innerHTML = '';
                 businesses.forEach(business => {
                     const card = document.createElement('div');
                     card.className = 'business-card';
-
                     card.innerHTML = `
                         <div class="business-image" style="background-image: url('${business.imageUrl}');"></div>
                         <div class="business-content">
                             <h2>${business.name}</h2>
                             <p>${business.description}</p>
-                            <button class="apply-btn">
+                            <button class="btn btn-primary apply-btn" data-business-name="${business.name}">
                                 <i class="fas fa-file-signature"></i> Apply Now
                             </button>
                         </div>
@@ -334,7 +335,6 @@
             }
 
             function updateTime() {
-                const timeEl = document.getElementById('time');
                 if (!timeEl) return;
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -342,53 +342,97 @@
                 timeEl.textContent = `${hours}:${minutes}`;
             }
 
-
-            renderBusinesses(); // Initial render of business cards
-            updateTime(); // Initial time set
-            setInterval(updateTime, 1000 * 60); // Update time every minute
+            // --- EVENT LISTENERS ---
             
-            const popup = document.getElementById('application-popup');
-            const closePopupBtn = document.querySelector('.popup-close-btn');
-
-            function showPopup() {
-                if (popup) popup.classList.add('visible');
-            }
-
-            function hidePopup() {
-                if (popup) popup.classList.remove('visible');
-            }
-
+            // Navigate to Application Page
             if (businessGrid) {
                 businessGrid.addEventListener('click', (event) => {
-                    if (event.target.closest('.apply-btn')) {
-                        showPopup();
+                    const applyBtn = event.target.closest('.apply-btn');
+                    if (applyBtn) {
+                        const businessName = applyBtn.dataset.businessName;
+                        applicationTitle.textContent = `Apply for ${businessName}`;
+                        switchPage('application-page');
                     }
                 });
             }
 
-            if (closePopupBtn) {
-                closePopupBtn.addEventListener('click', hidePopup);
+            // Navigate to Admin Page
+            if (adminBtn) {
+                adminBtn.addEventListener('click', () => switchPage('admin-page'));
             }
 
-            if (popup) {
-                popup.addEventListener('click', (event) => {
-                    if (event.target === popup) {
-                        hidePopup();
-                    }
+            // Go Back to Job Listings
+            if (backToJobsBtn) {
+                backToJobsBtn.addEventListener('click', () => {
+                    jobApplicationForm.reset();
+                    switchPage('job-listings-page');
+                });
+            }
+             if (backFromAdminBtn) {
+                backFromAdminBtn.addEventListener('click', () => switchPage('job-listings-page'));
+            }
+
+            // Handle Application Submission
+            if (jobApplicationForm) {
+                jobApplicationForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    // In a real environment, you'd send this data to your server/scripting backend
+                    const applicationData = {
+                        business: applicationTitle.textContent.replace('Apply for ',''),
+                        name: document.getElementById('applicant-name').value,
+                        dob: document.getElementById('applicant-dob').value,
+                        phone: document.getElementById('applicant-phone').value,
+                        icExperience: document.getElementById('applicant-ic-experience').value,
+                        oocExperience: document.getElementById('applicant-ooc-experience').value,
+                        reason: document.getElementById('applicant-reason').value
+                    };
+
+                    console.log("--- New Job Application ---");
+                    console.log(applicationData);
+                    
+                    // This is a placeholder. You should replace this with your own notification system.
+                    alert('Application Submitted! (Check F8 console for data)');
+                    
+                    jobApplicationForm.reset();
+                    switchPage('job-listings-page');
                 });
             }
             
+            // Handle Add Business Submission
+            if(addBusinessForm) {
+                addBusinessForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const newBusiness = {
+                        name: document.getElementById('business-name').value,
+                        imageUrl: document.getElementById('business-image').value,
+                        description: document.getElementById('business-desc').value
+                    };
+                    businesses.push(newBusiness);
+                    renderBusinesses();
+                    addBusinessForm.reset();
+                    switchPage('job-listings-page');
+                    alert('New business added!');
+                });
+            }
+
+            // Close tablet with Escape key
             document.addEventListener('keyup', (e) => {
                 if (e.key === 'Escape') {
-                    if (popup.classList.contains('visible')) {
-                        hidePopup();
-                    } else {
-                        console.log('Tablet closed');
-                        document.body.style.display = 'none'; // This will hide the tablet
-                    }
+                    // In a real FiveM environment, you would trigger a NUI callback here
+                    // For example: fetch(`https://your_script_name/hideTablet`, { method: 'POST' });
+                    console.log('Tablet closed');
+                    document.body.style.display = 'none'; // This will hide the tablet
                 }
             });
+
+
+            // --- INITIALIZATION ---
+            renderBusinesses();
+            updateTime();
+            setInterval(updateTime, 1000 * 60);
         });
     </script>
 </body>
 </html>
+
