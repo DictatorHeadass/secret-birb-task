@@ -57,7 +57,6 @@
             flex-direction: column;
         }
 
-        /* Status Bar */
         #status-bar {
             height: 40px;
             padding: 0 25px;
@@ -136,17 +135,23 @@
             transition: all 0.2s ease;
         }
         
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
         .btn-primary { background: var(--accent); color: var(--bg-primary); box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2); width: 100%; }
-        .btn-primary:hover { background: #60cffc; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(56, 189, 248, 0.3); }
+        .btn-primary:hover:not(:disabled) { background: #60cffc; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(56, 189, 248, 0.3); }
         .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
         .btn-secondary:hover { background: #4b5563; }
         .btn i { margin-right: 8px; }
 
-        /* Application & Admin Form Styles */
         .form-container { max-width: 800px; margin: 0 auto; }
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 25px; }
         .form-group label { display: block; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px; }
-        .form-group .input-field, .form-group .textarea-field {
+        .input-field, .textarea-field {
             width: 100%;
             background: var(--bg-secondary);
             border: 1px solid var(--bg-tertiary);
@@ -157,28 +162,20 @@
             font-family: 'Inter', sans-serif;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .form-group .input-field:focus, .form-group .textarea-field:focus {
+        .input-field:focus, .textarea-field:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
         }
-        .form-group .textarea-field { resize: vertical; min-height: 120px; }
-
-        #admin-btn { font-size: 12px; padding: 6px 10px; }
-
+        .textarea-field { resize: vertical; min-height: 120px; }
     </style>
 </head>
 <body>
     <div id="tablet-wrapper">
         <div id="tablet-screen">
             <div id="status-bar">
-                <div class="status-left">
-                    <span id="time">16:51</span>
-                </div>
-                <div class="status-right">
-                    <i class="fas fa-wifi status-icon"></i>
-                    <span><i class="fas fa-battery-full status-icon"></i> 100%</span>
-                </div>
+                <div class="status-left"><span id="time">16:51</span></div>
+                <div class="status-right"><i class="fas fa-wifi status-icon"></i><span><i class="fas fa-battery-full status-icon"></i> 100%</span></div>
             </div>
 
             <main id="main-content">
@@ -189,7 +186,6 @@
                             <h1>City Businesses</h1>
                             <p>Find your next career. Browse open opportunities and apply today.</p>
                         </div>
-                        <button id="admin-btn" class="btn btn-secondary"><i class="fas fa-user-shield"></i> Admin</button>
                     </div>
                     <div id="business-grid"></div>
                 </div>
@@ -204,234 +200,181 @@
                         <button id="back-to-jobs-btn" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
                     </div>
                     <div class="form-container">
-                        <form id="job-application-form">
-                            <div class="form-group">
-                                <label for="applicant-name">Full Name</label>
-                                <input type="text" id="applicant-name" class="input-field" placeholder="John Doe" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="applicant-dob">Date of Birth</label>
-                                <input type="date" id="applicant-dob" class="input-field" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="applicant-phone">Phone Number</label>
-                                <input type="tel" id="applicant-phone" class="input-field" placeholder="555-123-4567" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="applicant-ic-experience">Do you have any prior experience in this field? (In-Character)</label>
-                                <textarea id="applicant-ic-experience" class="textarea-field" placeholder="Describe your character's past jobs, skills, or relevant life experiences..." required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="applicant-ooc-experience">Have you had any similar roles or experiences before? (Out-of-Character)</label>
-                                <textarea id="applicant-ooc-experience" class="textarea-field" placeholder="Briefly tell us about any real-life or other roleplay experience that might be relevant..." required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="applicant-reason">Why does your character want to work here?</label>
-                                <textarea id="applicant-reason" class="textarea-field" placeholder="From your character's perspective, explain their motivations for seeking this specific job..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Application</button>
-                        </form>
+                        <form id="job-application-form"></form>
                     </div>
                 </div>
-                
-                <!-- PAGE 3: Admin Panel -->
-                <div id="admin-page" class="page">
-                     <div class="header">
-                        <div>
-                            <h1>Admin Panel</h1>
-                            <p>Add a new business listing.</p>
-                        </div>
-                        <button id="back-from-admin-btn" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
-                    </div>
-                     <div class="form-container">
-                        <form id="add-business-form">
-                            <div class="form-group">
-                                <label for="business-name">Business Name</label>
-                                <input type="text" id="business-name" class="input-field" placeholder="e.g., Los Santos Customs" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="business-image">Image URL</label>
-                                <input type="url" id="business-image" class="input-field" placeholder="https://example.com/image.png" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="business-desc">Description</label>
-                                <textarea id="business-desc" class="textarea-field" placeholder="A short description of the business..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Add Business</button>
-                        </form>
-                    </div>
-                </div>
-
             </main>
         </div>
     </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DATA ---
-            let businesses = [
-                {
-                    name: 'Los Santos Police Dept.',
-                    imageUrl: 'https://i.ibb.co/Mksz65KR/image-2025-10-06-170852509.png',
-                    description: 'To protect and to serve the citizens of Los Santos. Seeking dedicated officers.',
-                },
-                {
-                    name: 'Mount Zonah Medical',
-                    imageUrl: 'https://i.ibb.co/spR4HnnL/image-2025-10-06-170637421.png',
-                    description: 'Saving lives and providing top-tier medical care. Now hiring doctors and paramedics.',
-                },
-                {
-                    name: 'San Andreas Law Courts',
-                    imageUrl: 'https://i.ibb.co/tTT8Q83b/image-2025-10-06-171532793.png',
-                    description: 'Upholding justice in the state of San Andreas. Openings for lawyers and paralegals.',
+    document.addEventListener('DOMContentLoaded', () => {
+        const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL_HERE';
+        const settingsKeyPrefix = 'bastionJobConfig_';
+        let currentApplyingJobId = null;
+
+        const defaultApplicationSettings = {
+            applicationsEnabled: true,
+            questions: [
+                { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe' },
+                { id: 'reason', label: 'Why do you want to work here?', type: 'textarea', placeholder: 'Explain your motivations...' }
+            ]
+        };
+
+        const businesses = [
+            { name: 'Los Santos Police Dept.', jobId: 'LSPD', imageUrl: 'https://i.ibb.co/Mksz65KR/image-2025-10-06-170852509.png', description: 'To protect and to serve the citizens of Los Santos. Seeking dedicated officers.' },
+            { name: 'Mount Zonah Medical', jobId: 'EMS', imageUrl: 'https://i.ibb.co/spR4HnnL/image-2025-10-06-170637421.png', description: 'Saving lives and providing top-tier medical care. Now hiring doctors and paramedics.' },
+            { name: 'San Andreas Law Courts', jobId: 'DOJ', imageUrl: 'https://i.ibb.co/tTT8Q83b/image-2025-10-06-171532793.png', description: 'Upholding justice in the state of San Andreas. Openings for lawyers and paralegals.' }
+        ];
+
+        const businessGrid = document.getElementById('business-grid');
+        const timeEl = document.getElementById('time');
+        const pages = document.querySelectorAll('.page');
+        const applicationTitle = document.getElementById('application-title');
+        const jobApplicationForm = document.getElementById('job-application-form');
+        const backToJobsBtn = document.getElementById('back-to-jobs-btn');
+        
+        function getBusinessSettings(jobId) {
+            const savedSettings = localStorage.getItem(`${settingsKeyPrefix}${jobId}`);
+            if (savedSettings) {
+                try {
+                    return JSON.parse(savedSettings);
+                } catch (e) {
+                    console.error(`Failed to parse settings for ${jobId}`, e);
+                    return defaultApplicationSettings;
                 }
-            ];
-
-            // --- ELEMENTS ---
-            const businessGrid = document.getElementById('business-grid');
-            const timeEl = document.getElementById('time');
-            
-            const pages = document.querySelectorAll('.page');
-            const jobListingsPage = document.getElementById('job-listings-page');
-            const applicationPage = document.getElementById('application-page');
-            const adminPage = document.getElementById('admin-page');
-            
-            const applicationTitle = document.getElementById('application-title');
-            const jobApplicationForm = document.getElementById('job-application-form');
-            const addBusinessForm = document.getElementById('add-business-form');
-
-            const adminBtn = document.getElementById('admin-btn');
-            const backToJobsBtn = document.getElementById('back-to-jobs-btn');
-            const backFromAdminBtn = document.getElementById('back-from-admin-btn');
-
-            // --- FUNCTIONS ---
-            function switchPage(targetPageId) {
-                pages.forEach(page => {
-                    page.classList.remove('active');
-                    if (page.id === targetPageId) {
-                        page.classList.add('active');
-                    }
-                });
             }
+            return defaultApplicationSettings;
+        }
 
-            function renderBusinesses() {
-                if (!businessGrid) return;
-                businessGrid.innerHTML = '';
-                businesses.forEach(business => {
-                    const card = document.createElement('div');
-                    card.className = 'business-card';
-                    card.innerHTML = `
-                        <div class="business-image" style="background-image: url('${business.imageUrl}');"></div>
-                        <div class="business-content">
-                            <h2>${business.name}</h2>
-                            <p>${business.description}</p>
-                            <button class="btn btn-primary apply-btn" data-business-name="${business.name}">
-                                <i class="fas fa-file-signature"></i> Apply Now
-                            </button>
-                        </div>
-                    `;
-                    businessGrid.appendChild(card);
-                });
-            }
+        function switchPage(targetPageId) {
+            pages.forEach(page => page.classList.toggle('active', page.id === targetPageId));
+        }
 
-            function updateTime() {
-                if (!timeEl) return;
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                timeEl.textContent = `${hours}:${minutes}`;
-            }
+        function renderBusinesses() {
+            if (!businessGrid) return;
+            businessGrid.innerHTML = '';
+            businesses.forEach(business => {
+                const settings = getBusinessSettings(business.jobId);
+                const areAppsEnabled = settings.applicationsEnabled;
 
-            // --- EVENT LISTENERS ---
-            
-            // Navigate to Application Page
-            if (businessGrid) {
-                businessGrid.addEventListener('click', (event) => {
-                    const applyBtn = event.target.closest('.apply-btn');
-                    if (applyBtn) {
-                        const businessName = applyBtn.dataset.businessName;
-                        applicationTitle.textContent = `Apply for ${businessName}`;
-                        switchPage('application-page');
-                    }
-                });
-            }
-
-            // Navigate to Admin Page
-            if (adminBtn) {
-                adminBtn.addEventListener('click', () => switchPage('admin-page'));
-            }
-
-            // Go Back to Job Listings
-            if (backToJobsBtn) {
-                backToJobsBtn.addEventListener('click', () => {
-                    jobApplicationForm.reset();
-                    switchPage('job-listings-page');
-                });
-            }
-             if (backFromAdminBtn) {
-                backFromAdminBtn.addEventListener('click', () => switchPage('job-listings-page'));
-            }
-
-            // Handle Application Submission
-            if (jobApplicationForm) {
-                jobApplicationForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    // In a real environment, you'd send this data to your server/scripting backend
-                    const applicationData = {
-                        business: applicationTitle.textContent.replace('Apply for ',''),
-                        name: document.getElementById('applicant-name').value,
-                        dob: document.getElementById('applicant-dob').value,
-                        phone: document.getElementById('applicant-phone').value,
-                        icExperience: document.getElementById('applicant-ic-experience').value,
-                        oocExperience: document.getElementById('applicant-ooc-experience').value,
-                        reason: document.getElementById('applicant-reason').value
-                    };
-
-                    console.log("--- New Job Application ---");
-                    console.log(applicationData);
-                    
-                    // This is a placeholder. You should replace this with your own notification system.
-                    alert('Application Submitted! (Check F8 console for data)');
-                    
-                    jobApplicationForm.reset();
-                    switchPage('job-listings-page');
-                });
-            }
-            
-            // Handle Add Business Submission
-            if(addBusinessForm) {
-                addBusinessForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const newBusiness = {
-                        name: document.getElementById('business-name').value,
-                        imageUrl: document.getElementById('business-image').value,
-                        description: document.getElementById('business-desc').value
-                    };
-                    businesses.push(newBusiness);
-                    renderBusinesses();
-                    addBusinessForm.reset();
-                    switchPage('job-listings-page');
-                    alert('New business added!');
-                });
-            }
-
-            // Close tablet with Escape key
-            document.addEventListener('keyup', (e) => {
-                if (e.key === 'Escape') {
-                    // In a real FiveM environment, you would trigger a NUI callback here
-                    // For example: fetch(`https://your_script_name/hideTablet`, { method: 'POST' });
-                    console.log('Tablet closed');
-                    document.body.style.display = 'none'; // This will hide the tablet
-                }
+                const card = document.createElement('div');
+                card.className = 'business-card';
+                card.innerHTML = `
+                    <div class="business-image" style="background-image: url('${business.imageUrl}');"></div>
+                    <div class="business-content">
+                        <h2>${business.name}</h2>
+                        <p>${business.description}</p>
+                        <button class="btn btn-primary apply-btn" data-job-id="${business.jobId}" data-business-name="${business.name}" ${!areAppsEnabled ? 'disabled' : ''}>
+                            <i class="fas fa-file-signature"></i> ${areAppsEnabled ? 'Apply Now' : 'Applications Closed'}
+                        </button>
+                    </div>`;
+                businessGrid.appendChild(card);
             });
+        }
+        
+        function renderApplicationForm(jobId) {
+            const settings = getBusinessSettings(jobId);
+            jobApplicationForm.innerHTML = '';
+            settings.questions.forEach(q => {
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                let fieldHtml;
+                if (q.type === 'textarea') {
+                    fieldHtml = `<textarea id="app-q-${q.id}" class="textarea-field" placeholder="${q.placeholder}" required></textarea>`;
+                } else {
+                    fieldHtml = `<input type="${q.type}" id="app-q-${q.id}" class="input-field" placeholder="${q.placeholder}" required>`;
+                }
+                formGroup.innerHTML = `<label for="app-q-${q.id}">${q.label}</label>${fieldHtml}`;
+                jobApplicationForm.appendChild(formGroup);
+            });
+            jobApplicationForm.innerHTML += `<button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Application</button>`;
+        }
 
+        function updateTime() {
+            if (!timeEl) return;
+            const now = new Date();
+            timeEl.textContent = now.toTimeString().substring(0, 5);
+        }
 
-            // --- INITIALIZATION ---
-            renderBusinesses();
-            updateTime();
-            setInterval(updateTime, 1000 * 60);
+        businessGrid.addEventListener('click', (event) => {
+            const applyBtn = event.target.closest('.apply-btn:not(:disabled)');
+            if (applyBtn) {
+                currentApplyingJobId = applyBtn.dataset.jobId;
+                applicationTitle.textContent = `Apply for ${applyBtn.dataset.businessName}`;
+                renderApplicationForm(currentApplyingJobId);
+                switchPage('application-page');
+            }
         });
+
+        backToJobsBtn.addEventListener('click', () => switchPage('job-listings-page'));
+        
+        jobApplicationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (webhookUrl === 'YOUR_DISCORD_WEBHOOK_URL_HERE') {
+                alert('Error: The Discord webhook URL has not been set by the developer.');
+                return;
+            }
+            
+            const submitButton = jobApplicationForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Submitting...`;
+            
+            const currentSettings = getBusinessSettings(currentApplyingJobId);
+            const fields = currentSettings.questions
+                .filter(q => q.type !== 'textarea')
+                .map(q => ({ name: q.label, value: document.getElementById(`app-q-${q.id}`).value || 'N/A', inline: true }));
+
+            const longFields = currentSettings.questions
+                .filter(q => q.type === 'textarea')
+                .map(q => ({ name: q.label, value: `\`\`\`${document.getElementById(`app-q-${q.id}`).value || 'N/A'}\`\`\`` }));
+
+            const discordPayload = {
+                embeds: [{
+                    title: `New Application for: ${applicationTitle.textContent.replace('Apply for ','')}`,
+                    color: 3686392,
+                    fields: [...fields, ...longFields],
+                    footer: { text: "Business Tablet Application" },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discordPayload),
+                });
+                if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
+                alert('Application Submitted Successfully!');
+                jobApplicationForm.reset();
+                switchPage('job-listings-page');
+            } catch (error) {
+                console.error('Error submitting application to Discord:', error);
+                alert('Failed to submit application. Please check the console (F8) and try again later.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = `<i class="fas fa-paper-plane"></i> Submit Application`;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'Escape') {
+                console.log('Tablet closed');
+                document.body.style.display = 'none';
+            }
+        });
+        
+        window.addEventListener('storage', (event) => {
+            if (event.key && event.key.startsWith(settingsKeyPrefix)) {
+                renderBusinesses();
+            }
+        });
+
+        renderBusinesses();
+        updateTime();
+        setInterval(updateTime, 1000 * 60);
+    });
     </script>
 </body>
 </html>
