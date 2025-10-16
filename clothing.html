@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Customization</title>
+    <!-- Using Google Fonts for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-primary: #42baff; 
+            --bg-primary: rgba(30, 32, 37, 0.95);
+            --bg-secondary: rgba(20, 21, 24, 0.8);
+            --bg-hover: rgba(50, 52, 57, 0.8);
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a3a8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --font-family: 'Inter', sans-serif;
+            --color-green: #57f287;
+            --color-purple: #b184f5;
+            --color-red: #ed4245;
+            --color-yellow: #f1c40f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-primary);
+            background-color: transparent;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            padding: 0 5vw; 
+        }
+
+        .container {
+            display: none; 
+            width: 420px; 
+            background-color: var(--bg-primary);
+            border-radius: 24px; 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease-out;
+            height: auto;
+            max-height: 90vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .panel-header {
+            color: var(--text-primary);
+            padding: 20px 25px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .panel-subheader {
+            padding: 5px 25px 15px 25px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background-color: transparent;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px; 
+        }
+        .content-area::-webkit-scrollbar { width: 6px; }
+        .content-area::-webkit-scrollbar-track { background: transparent; }
+        .content-area::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            font-size: 0.9rem;
+            border-radius: 12px; 
+            margin-bottom: 8px; 
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.15s;
+        }
+        .list-item:last-child { margin-bottom: 0; }
+        .list-item.selected { 
+            background-color: var(--accent-primary); 
+            transform: scale(1.02);
+        }
+        .list-item:not(.selected):hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .item-label-group { display: flex; align-items: center; gap: 12px; }
+        .item-icon { width: 20px; height: 20px; }
+        .item-label { font-weight: 500; font-size: 1rem; }
+        .item-label.clothing { color: var(--accent-primary); }
+        .label-green { color: var(--color-green); }
+        .icon-green { fill: var(--color-green); }
+        .label-purple { color: var(--color-purple); }
+        .icon-purple { fill: var(--color-purple); }
+        .label-red { color: #ff8c8c; }
+        .icon-red { fill: #ff8c8c; }
+        .label-yellow { color: var(--color-yellow); }
+        .icon-yellow { fill: var(--color-yellow); }
+
+        .list-item.selected .item-label,
+        .list-item.selected .stepper-value,
+        .list-item.selected .item-icon {
+            color: white;
+            fill: white;
+        }
+
+        .stepper { display: flex; align-items: center; gap: 15px; font-weight: 500; }
+        .stepper-btn { 
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.2);
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            transition: background-color 0.15s;
+        }
+        .selected .stepper-btn { background: rgba(255,255,255,0.2); color: white; }
+        .stepper-btn:hover { background-color: var(--accent-primary); color: white; }
+        .stepper-value { min-width: 60px; text-align: center; }
+        
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        .camera-controls, .action-buttons { display: flex; gap: 10px; }
+        .footer-btn {
+            background-color: var(--bg-hover);
+            border: none;
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .footer-btn:hover { color: white; background-color: var(--accent-primary); }
+        .footer-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        #btn-confirm { background-color: var(--color-green); color: white; }
+        #btn-discard { background-color: var(--color-red); color: white; }
+        
+        .finish-editing { color: var(--accent-primary); text-align: center; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="container">
+        <div class="panel-header" id="panel-header"></div>
+        <div class="panel-subheader" id="panel-subheader"></div>
+        <div class="content-area" id="content-area"></div>
+        <footer class="footer" id="footer" style="display: none;">
+            <div class="camera-controls">
+                <button class="footer-btn" id="btn-rotate-left" title="Rotate Left"><svg viewBox="0 0 24 24"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg></button>
+                <button class="footer-btn" id="btn-zoom-out" title="Zoom Out"><svg viewBox="0 0 24 24"><path d="M19,13H5V11H19V13Z"/></svg></button>
+                <button class="footer-btn" id="btn-zoom-in" title="Zoom In"><svg viewBox="0 0 24 24"><path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/></svg></button>
+                <button class="footer-btn" id="btn-rotate-right" title="Rotate Right"><svg viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg></button>
+            </div>
+            <div class="action-buttons">
+                <button class="footer-btn" id="btn-discard" title="Discard Changes"><svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg></button>
+                <button class="footer-btn" id="btn-confirm" title="Confirm"><svg viewBox="0 0 24 24"><path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z"/></svg></button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('container');
+            const header = document.getElementById('panel-header');
+            const subheader = document.getElementById('panel-subheader');
+            const contentArea = document.getElementById('content-area');
+            const footer = document.getElementById('footer');
+            
+            let currentPage = 'main';
+            let selectedIndex = 0;
+            let price = 0;
+            let context = 'character-creator';
+            
+            const configs = {
+                appearance: { 
+                    name: "Appearance", 
+                    items: {
+                        sex: { name: "Sex", value: 0, max: 1 },
+                        face: { name: "Parent", value: 6, max: 45 },
+                        faceVariant: { name: "Parent Variant", value: 2, max: 45 },
+                        parentBlend: { name: "Parent Blend", value: 100, max: 100 },
+                        skin: { name: "Skin", value: 0, max: 45 },
+                        eyeColor: { name: "Eye color", value: 31, max: 31 },
+                        blemishes: { name: "Blemishes", value: 0, max: 23 },
+                        blemishesThickness: { name: "Blemishes thickness", value: 0, max: 10 },
+                        complexion: { name: "Complexion", value: 0, max: 11 },
+                        complexionThickness: { name: "Complexion thickness", value: 0, max: 10 },
+                        wrinkles: { name: "Wrinkles", value: 0, max: 14 },
+                        wrinkleThickness: { name: "Wrinkle thickness", value: 0, max: 10 },
+                        sun: { name: "Sun", value: 0, max: 10 },
+                        sunThickness: { name: "Sun thickness", value: 0, max: 10 },
+                        freckles: { name: "Freckles", value: 0, max: 17 },
+                        frecklesThickness: { name: "Freckles thickness", value: 0, max: 10 },
+                        chestHair: { name: "Chest hair", value: 0, max: 16 },
+                        chestHairThickness: { name: "Chest hair thickness", value: 0, max: 10 },
+                        chestHairColor: { name: "Chest hair color", value: 0, max: 63 },
+                        noseWidth: { name: "Nose Width", value: 5, max: 10 },
+                        noseHeight: { name: "Nose Height", value: 5, max: 10 },
+                        noseLength: { name: "Nose Length", value: 5, max: 10 },
+                        noseBridge: { name: "Nose Bridge", value: 5, max: 10 },
+                        noseTip: { name: "Nose Tip", value: 5, max: 10 },
+                        noseShift: { name: "Nose Shift", value: 5, max: 10 },
+                        eyebrowHeight: { name: "Eyebrow Height", value: 5, max: 10 },
+                        eyebrowDepth: { name: "Eyebrow Depth", value: 5, max: 10 },
+                        cheekboneHeight: { name: "Cheekbone Height", value: 5, max: 10 },
+                        cheekboneWidth: { name: "Cheekbone Width", value: 5, max: 10 },
+                        cheeksWidth: { name: "Cheeks Width", value: 5, max: 10 },
+                        jawWidth: { name: "Jaw Width", value: 5, max: 10 },
+                        jawHeight: { name: "Jaw Height", value: 5, max: 10 },
+                        chinLength: { name: "Chin Length", value: 5, max: 10 },
+                        chinPosition: { name: "Chin Position", value: 5, max: 10 },
+                        chinWidth: { name: "Chin Width", value: 5, max: 10 },
+                        chinShape: { name: "Chin Shape", value: 5, max: 10 },
+                    }
+                },
+                hair: { 
+                    name: "Hair & Makeup", 
+                    items: { 
+                        hair: { name: "Hair", value: 77, max: 82 },
+                        hairVariant: { name: "Hair Variant", value: 0, max: 0 },
+                        hairColor: { name: "Hair color", value: 0, max: 63 },
+                        hairColorVariant: { name: "Hair color Variant", value: 0, max: 63 },
+                        eyebrowType: { name: "Eyebrow type", value: 0, max: 33 },
+                        eyebrowSize: { name: "Eyebrow size", value: 10, max: 10 },
+                        eyebrowColor: { name: "Eyebrow color", value: 1, max: 63 },
+                        eyebrowColorVariant: { name: "Eyebrow color Variant", value: 0, max: 63 },
+                        beardType: { name: "Beard type", value: 0, max: 28 },
+                        beardSize: { name: "Beard size", value: 0, max: 10 },
+                        beardColor: { name: "Beard color", value: 0, max: 63 },
+                        beardColorVariant: { name: "Beard color Variant", value: 0, max: 63 },
+                        lipstickType: { name: "Lipstick type", value: 0, max: 9 },
+                        lipstickThickness: { name: "Lipstick thickness", value: 0, max: 10 },
+                        lipstickColor: { name: "Lipstick color", value: 0, max: 63 },
+                        lipstickColorVariant: { name: "Lipstick color Variant", value: 0, max: 63 },
+                        makeupType: { name: "Makeup type", value: 0, max: 94 },
+                        makeupThickness: { name: "Makeup thickness", value: 0, max: 10 },
+                        makeupColor: { name: "Makeup color", value: 0, max: 63 },
+                        makeupColorVariant: { name: "Makeup color Variant", value: 0, max: 63 },
+                        blush: { name: "Blush", value: 0, max: 32 },
+                        blushThickness: { name: "Blush thickness", value: 0, max: 10 },
+                        blushColor: { name: "Blush color", value: 0, max: 63 },
+                    }
+                },
+                clothing: { 
+                    name: "Clothing", 
+                    items: {
+                        tshirt: { name: "T-Shirt", value: 15, max: 215, variant: true, maxVariant: 0 },
+                        torso: { name: "Torso", value: 1, max: 588, variant: true, maxVariant: 3 },
+                        arms: { name: "Arms", value: 0, max: 214, variant: true, maxVariant: 10 },
+                        pants: { name: "Pants", value: 0, max: 221, variant: true, maxVariant: 3 },
+                        shoes: { name: "Shoes", value: 1, max: 159, variant: true, maxVariant: 6 },
+                        vest: { name: "Vest", value: 0, max: 61, variant: true, maxVariant: 0 },
+                        bag: { name: "Bag", value: 0, max: 110, variant: true, maxVariant: 0 },
+                        decals: { name: "Decals", value: 0, max: 257, variant: true, maxVariant: 0 },
+                    }
+                },
+                 accessories: { 
+                    name: "Accessories", 
+                    items: {
+                        mask: { name: "Mask", value: 0, max: 246, variant: true, maxVariant: 3 },
+                        helmet: { name: "Helmet", value: -1, max: 246, variant: true, maxVariant: 7 },
+                        glasses: { name: "Glasses", value: 0, max: 58, variant: true, maxVariant: 26 },
+                        chain: { name: "Chain", value: 0, max: 200, variant: true, maxVariant: 0 },
+                    }
+                }
+            };
+
+            async function sendNuiMessage(eventName, data = {}) {
+                const resourceName = 'your_resource_name'; 
+                try {
+                    await fetch(`https://${resourceName}/${eventName}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                        body: JSON.stringify(data),
+                    });
+                } catch (e) { console.log(`NUI Message Sent: ${eventName}`, data); }
+            }
+
+            const updateSelection = () => {
+                const items = contentArea.querySelectorAll('.list-item');
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === selectedIndex);
+                    if (index === selectedIndex) {
+                        item.scrollIntoView({ block: 'nearest' });
+                    }
+                });
+            };
+
+            const renderMainMenu = () => {
+                header.textContent = 'Customize Character';
+                subheader.textContent = 'Customize your character\'s appearance.';
+                footer.style.display = 'none';
+
+                let menuItems = '';
+                if (context === 'clothing-store') {
+                    menuItems = `
+                        <div class="list-item" data-action="clothing"><div class="item-label-group"><svg class="item-icon icon-green" viewBox="0 0 24 24"><path d="M20.5,4.5A2.48,2.48,0,0,0,18.06,2h-12A2.48,2.48,0,0,0,3.5,4.5L5.14,19.2A2.49,2.49,0,0,0,7.62,21.5h8.76a2.49,2.49,0,0,0,2.48-2.3L20.5,4.5ZM12,11.75a2.25,2.25,0,0,1-2.25-2.25,1,1,0,0,1,2,0, .25.25,0,0,0,.5,0,1,1,0,0,1,2,0A2.25,2.25,0,0,1,12,11.75Z"/></svg><span class="item-label label-green">Clothing</span></div></div>
+                        <div class="list-item" data-action="accessories"><div class="item-label-group"><svg class="item-icon icon-purple" viewBox="0 0 24 24"><path d="M20.21,8.31,18.42,4.42a2,2,0,0,0-1.8-1.12H7.38a2,2,0,0,0-1.8,1.12L3.79,8.31A2,2,0,0,0,3,9.59V19a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2V9.59A2,2,0,0,0,20.21,8.31ZM12,17.5a4.5,4.5,0,1,1,4.5-4.5A4.5,4.5,0,0,1,12,17.5Zm0-7a2.5,2.5,0,1,0,2.5,2.5A2.5,2.5,0,0,0,12,10.5Z"/></svg><span class="item-label label-purple">Accessories</span></div></div>
+                        <div class="list-item" data-action="purchase"><div class="item-label-group"><svg class="item-icon icon-red" viewBox="0 0 24 24"><path d="M21.08,7a2,2,0,0,0-1.7-1H6.58L6,3.74A1,1,0,0,0,5,3H3A1,1,0,0,0,3,5H4.24L7,15.26A1,1,0,0,0,8,16H18a1,1,0,0,0,.95-.68L21.76,9a2,2,0,0,0-.68-2ZM17.27,14H8.73L7.32,8H19.42Z M7,22a2,2,0,1,0-2-2A2,2,0,0,0,7,22Zm11,0a2,2,0,1,0-2-2A2,2,0,0,0,18,22Z"/></svg><span class="item-label label-red">Purchase Outfit ($${price})</span></div></div>
+                        <div class="list-item" data-action="outfits"><div class="item-label-group"><svg class="item-icon icon-yellow" viewBox="0 0 24 24"><path d="M22,9.67A1,1,0,0,0,21.14,9l-5.69-.83L12.9,3a1,1,0,0,0-1.8,0L8.55,8.16,2.86,9a1,1,0,0,0-.54,1.75l4.13,4L5.59,21a1,1,0,0,0,1.45,1.05L12,19.35l5,2.63a1,1,0,0,0,1.45-1.05l-1-5.71,4.13-4A1,1,0,0,0,22,9.67Z"/></svg><span class="item-label label-yellow">View Outfits</span></div></div>
+                    `;
+                } else if (context === 'barber-shop') {
+                     menuItems = `
+                        <div class="list-item" data-action="appearance"><div class="item-label-group"><svg class="item-icon icon-green" viewBox="0 0 24 24"><path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,1.7,5.55,1,1,0,0,0,1.41.13l.13-.13A8,8,0,0,1,19.87,17.5l.13.13a1,1,0,0,0,1.41-.13A9.89,9.89,0,0,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,0,1-8-8,8,8,0,0,1,8-8,8,8,0,0,1,8,8A8,8,0,0,1,12,20ZM7,12a1,1,0,0,0,1,1h8a1,1,0,0,0,0-2H8A1,1,0,0,0,7,12Z"/></svg><span class="item-label label-green">Appearance</span></div></div>
+                        <div class="list-item" data-action="hair"><div class="item-label-group"><svg class="item-icon icon-purple" viewBox="0 0 24 24"><path d="M9.8,22a1,1,0,0,1-.6-.2l-2-2A6,6,0,0,1,4.3,9.5l4-6.9a1,1,0,0,1,1.7,1l-4,7a4,4,0,0,0,2,5.2l2,2a1,1,0,0,1,0,1.4A.9.9,0,0,1,9.8,22Z M18.5,12.5a1,1,0,0,1-.8-.4l-4-7a1,1,0,0,1,1.7-1l4,6.9A4,4,0,0,0,22,5.8a1,1,0,0,1,2,0,6,6,0,0,1-2.9,5.3l-2,2a1,1,0,0,1-.6.2Z"/></svg><span class="item-label label-purple">Hair & Makeup</span></div></div>
+                        <div class="list-item" data-action="purchase"><div class="item-label-group"><svg class="item-icon icon-red" viewBox="0 0 24 24"><path d="M21.08,7a2,2,0,0,0-1.7-1H6.58L6,3.74A1,1,0,0,0,5,3H3A1,1,0,0,0,3,5H4.24L7,15.26A1,1,0,0,0,8,16H18a1,1,0,0,0,.95-.68L21.76,9a2,2,0,0,0-.68-2ZM17.27,14H8.73L7.32,8H19.42Z M7,22a2,2,0,1,0-2-2A2,2,0,0,0,7,22Zm11,0a2,2,0,1,0-2-2A2,2,0,0,0,18,22Z"/></svg><span class="item-label label-red">Purchase Set ($${price})</span></div></div>
+                    `;
+                } else { // character-creator
+                     menuItems = `
+                        <div class="list-item" data-action="appearance"><div class="item-label-group"><svg class="item-icon icon-green" viewBox="0 0 24 24"><path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,1.7,5.55,1,1,0,0,0,1.41.13l.13-.13A8,8,0,0,1,19.87,17.5l.13.13a1,1,0,0,0,1.41-.13A9.89,9.89,0,0,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,0,1-8-8,8,8,0,0,1,8-8,8,8,0,0,1,8,8A8,8,0,0,1,12,20ZM7,12a1,1,0,0,0,1,1h8a1,1,0,0,0,0-2H8A1,1,0,0,0,7,12Z"/></svg><span class="item-label label-green">Appearance</span></div></div>
+                        <div class="list-item" data-action="hair"><div class="item-label-group"><svg class="item-icon icon-purple" viewBox="0 0 24 24"><path d="M9.8,22a1,1,0,0,1-.6-.2l-2-2A6,6,0,0,1,4.3,9.5l4-6.9a1,1,0,0,1,1.7,1l-4,7a4,4,0,0,0,2,5.2l2,2a1,1,0,0,1,0,1.4A.9.9,0,0,1,9.8,22Z M18.5,12.5a1,1,0,0,1-.8-.4l-4-7a1,1,0,0,1,1.7-1l4,6.9A4,4,0,0,0,22,5.8a1,1,0,0,1,2,0,6,6,0,0,1-2.9,5.3l-2,2a1,1,0,0,1-.6.2Z"/></svg><span class="item-label label-purple">Hair & Makeup</span></div></div>
+                        <div class="list-item" data-action="clothing"><div class="item-label-group"><svg class="item-icon icon-yellow" viewBox="0 0 24 24"><path d="M20.5,4.5A2.48,2.48,0,0,0,18.06,2h-12A2.48,2.48,0,0,0,3.5,4.5L5.14,19.2A2.49,2.49,0,0,0,7.62,21.5h8.76a2.49,2.49,0,0,0,2.48-2.3L20.5,4.5ZM12,11.75a2.25,2.25,0,0,1-2.25-2.25,1,1,0,0,1,2,0, .25.25,0,0,0,.5,0,1,1,0,0,1,2,0A2.25,2.25,0,0,1,12,11.75Z"/></svg><span class="item-label label-yellow">Clothing</span></div></div>
+                        <div class="list-item" data-action="accessories"><div class="item-label-group"><svg class="item-icon icon-purple" viewBox="0 0 24 24"><path d="M20.21,8.31,18.42,4.42a2,2,0,0,0-1.8-1.12H7.38a2,2,0,0,0-1.8,1.12L3.79,8.31A2,2,0,0,0,3,9.59V19a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2V9.59A2,2,0,0,0,20.21,8.31ZM12,17.5a4.5,4.5,0,1,1,4.5-4.5A4.5,4.5,0,0,1,12,17.5Zm0-7a2.5,2.5,0,1,0,2.5,2.5A2.5,2.5,0,0,0,12,10.5Z"/></svg><span class="item-label label-purple">Accessories</span></div></div>
+                    `;
+                }
+
+                contentArea.innerHTML = menuItems + `
+                    <div class="list-item" data-action="confirm"><div class="item-label-group"><svg class="item-icon icon-green" viewBox="0 0 24 24"><path d="M10,17,5,12l1.41-1.41L10,14.17l7.59-7.59L19,8Z M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Z"/></svg><span class="item-label label-green">Confirm</span></div></div>
+                    <div class="list-item" data-action="discard"><div class="item-label-group"><svg class="item-icon icon-red" viewBox="0 0 24 24"><path d="M13.41,12l4.3-4.29a1,1,0,1,0-1.42-1.42L12,10.59,7.71,6.29A1,1,0,0,0,6.29,7.71L10.59,12l-4.3,4.29a1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0L12,13.41l4.29,4.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42Z M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Z"/></svg><span class="item-label label-red">Discard Changes</span></div></div>
+                `;
+                
+                selectedIndex = 0;
+                updateSelection();
+            };
+            
+            const renderOutfitsMenu = () => {
+                 header.textContent = 'Outfits';
+                 subheader.textContent = 'Save or select a previously saved outfit.';
+                 footer.style.display = 'none';
+                 contentArea.innerHTML = `
+                    <div class="list-item" data-action="save-outfit"><span class="item-label label-green">+ Save New Outfit</span></div>
+                    <div class="list-item"><span class="item-label">You do not have any outfits.</span></div>
+                    <div class="list-item" data-action="back-main"><span class="finish-editing">[Back]</span></div>
+                 `;
+                 selectedIndex = 0;
+                 updateSelection();
+            };
+            
+            const renderEditor = (pageKey) => {
+                const configData = configs[pageKey];
+                header.textContent = `Change ${configData.name}`;
+                subheader.textContent = 'Use arrow keys to navigate and change values.';
+                footer.style.display = 'flex';
+
+                let content = '';
+                for (const key in configData.items) {
+                    const item = configData.items[key];
+                    content += `
+                        <div class="list-item" data-key="${key}">
+                            <span class="item-label">${item.name}</span>
+                            <div class="stepper">
+                                <button class="stepper-btn" data-op="-1">♦</button>
+                                <span class="stepper-value" id="${key}-value">${item.value} / ${item.max}</span>
+                                <button class="stepper-btn" data-op="1">♦</button>
+                            </div>
+                        </div>
+                    `;
+                    if (item.variant) {
+                        item.variantValue = item.variantValue || 0;
+                        content += `
+                            <div class="list-item" data-key="${key}" data-variant="true">
+                                <span class="item-label">${item.name} Variant</span>
+                                <div class="stepper">
+                                    <button class="stepper-btn" data-op="-1">♦</button>
+                                    <span class="stepper-value" id="${key}-variant-value">${item.variantValue} / ${item.maxVariant}</span>
+                                    <button class="stepper-btn" data-op="1">♦</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                content += `<div class="list-item" data-action="back-main"><span class="finish-editing">[Finish Editing]</span></div>`;
+                contentArea.innerHTML = content;
+                selectedIndex = 0;
+                updateSelection();
+            };
+
+            const switchPage = (page) => {
+                currentPage = page;
+                if (page === 'main') renderMainMenu();
+                else if (page === 'outfits') renderOutfitsMenu();
+                else if (configs[page]) renderEditor(page);
+            };
+            
+            const handleStepperChange = (key, isVariant, op) => {
+                 const item = configs[currentPage]?.items[key];
+                 if (!item) return;
+
+                const prop = isVariant ? 'variantValue' : 'value';
+                const maxProp = isVariant ? 'maxVariant' : 'max';
+
+                let currentValue = item[prop];
+                currentValue += op;
+                
+                const maxValue = item[maxProp];
+                const minValue = (key === 'helmet' && !isVariant) ? -1 : 0;
+
+                if (currentValue < minValue) currentValue = maxValue;
+                if (currentValue > maxValue) currentValue = minValue;
+                
+                item[prop] = currentValue;
+                
+                document.getElementById(`${key}${isVariant ? '-variant' : ''}-value`).textContent = `${currentValue} / ${maxValue}`;
+                sendNuiMessage('previewItem', { page: currentPage, category: key, type: prop, value: currentValue });
+            };
+
+            document.addEventListener('keydown', (e) => {
+                const items = contentArea.querySelectorAll('.list-item');
+                if (items.length === 0) return;
+
+                switch (e.key) {
+                    case 'ArrowUp': e.preventDefault(); selectedIndex = (selectedIndex - 1 + items.length) % items.length; updateSelection(); break;
+                    case 'ArrowDown': e.preventDefault(); selectedIndex = (selectedIndex + 1) % items.length; updateSelection(); break;
+                    case 'Enter': e.preventDefault(); items[selectedIndex].click(); break;
+                    case 'ArrowLeft': case 'ArrowRight':
+                        if (currentPage !== 'main' && currentPage !== 'outfits') {
+                            e.preventDefault();
+                            const { key, variant } = items[selectedIndex].dataset;
+                            if (key) handleStepperChange(key, !!variant, e.key === 'ArrowLeft' ? -1 : 1);
+                        }
+                        break;
+                    case 'Backspace':
+                        e.preventDefault();
+                        if (currentPage !== 'main') switchPage('main');
+                        else sendNuiMessage('close');
+                        break;
+                    case 'Escape': e.preventDefault(); sendNuiMessage('close'); break;
+                }
+            });
+            
+            contentArea.addEventListener('click', e => {
+                const listItem = e.target.closest('.list-item');
+                if (!listItem) return;
+                
+                selectedIndex = [...contentArea.querySelectorAll('.list-item')].indexOf(listItem);
+                updateSelection();
+
+                const { action } = listItem.dataset;
+                if (action) {
+                    if (action === 'back-main') switchPage('main');
+                    else if (action === 'discard' || action === 'confirm' || action === 'purchase') {
+                        sendNuiMessage(action, { price, configs });
+                        if(action === 'discard') sendNuiMessage('close');
+                    }
+                    else switchPage(action);
+                    return;
+                }
+                
+                const stepperBtn = e.target.closest('.stepper-btn');
+                if(stepperBtn) {
+                    const { key, variant } = listItem.dataset;
+                    const op = parseInt(stepperBtn.dataset.op, 10);
+                    handleStepperChange(key, !!variant, op);
+                }
+            });
+            
+            document.getElementById('btn-confirm').addEventListener('click', () => {
+                sendNuiMessage('save', { allConfigs: configs });
+                switchPage('main');
+            });
+            document.getElementById('btn-discard').addEventListener('click', () => {
+                sendNuiMessage('revert');
+                switchPage('main');
+            });
+            document.getElementById('btn-rotate-left').addEventListener('click', () => sendNuiMessage('rotate', { dir: -1 }));
+            document.getElementById('btn-rotate-right').addEventListener('click', () => sendNuiMessage('rotate', { dir: 1 }));
+            document.getElementById('btn-zoom-in').addEventListener('click', () => sendNuiMessage('zoom', { dir: 1 }));
+            document.getElementById('btn-zoom-out').addEventListener('click', () => sendNuiMessage('zoom', { dir: -1 }));
+
+            window.addEventListener('message', (event) => {
+                const { action, data } = event.data;
+                if (action === 'open') {
+                    context = data.context || 'character-creator';
+                    price = data.price || 0;
+                    container.style.display = 'flex';
+                    switchPage('main');
+                } else if (action === 'close') {
+                     container.style.display = 'none';
+                }
+            });
+             
+            if (typeof GetParentResourceName === 'undefined') {
+                 window.postMessage({ action: 'open', data: { context: 'character-creator', price: 0 } }, '*');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
