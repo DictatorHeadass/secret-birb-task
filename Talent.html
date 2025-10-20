@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Bastion Talent Tree</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --color-bg: #1a1a1a;
+            --color-connector: #666;
+            --color-text: #F9FAFB;
+            --color-node-available: #f59e0b;
+            --node-size: 70px;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
+            background-color: var(--color-bg);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 35px 35px;
+            overflow: hidden; color: var(--color-text);
+        }
+
+        #ui-bar {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%); width: 90%; max-width: 700px;
+            height: 65px; background-color: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(5px); border: 1px solid #555;
+            border-radius: 12px; display: flex; align-items: center;
+            padding: 0 20px; z-index: 20;
+        }
+
+        #level-display, #skill-points-display { font-size: 20px; font-weight: bold; text-align: center; }
+        #level-display { margin-right: 15px; }
+        #skill-points-display { margin-left: 20px; color: var(--color-node-available); }
+        #level-display span, #skill-points-display span { font-size: 12px; color: #aaa; display: block; font-weight: normal; }
+
+        #xp-bar-container {
+            flex-grow: 1; height: 12px; background-color: #2d2d2d;
+            border-radius: 6px; overflow: hidden; border: 1px solid #444; position: relative;
+        }
+        #xp-text {
+            position: absolute; width: 100%; text-align: center;
+            top: -15px; font-size: 12px; color: #ccc; pointer-events: none;
+        }
+        #xp-bar {
+            width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #e85d04);
+            border-radius: 6px; transition: width 0.5s ease-out;
+        }
+        #close-button {
+            position: fixed; top: 15px; right: 20px;
+            width: 35px; height: 35px; font-size: 24px; line-height: 35px; text-align: center;
+            background-color: rgba(30, 30, 30, 0.8); border: 1px solid #555; color: white;
+            border-radius: 50%; cursor: pointer; z-index: 20;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        #close-button:hover { background-color: #e57373; transform: scale(1.1); }
+
+        #talent-tree-wrapper {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+        }
+        #talent-tree-wrapper.grabbing { cursor: grabbing; }
+
+        #talent-tree-container, #connector-svg { position: absolute; width: 100%; height: 100%; transform-origin: 0 0; }
+        #connector-svg { pointer-events: none; }
+
+        .talent-node {
+            position: absolute; width: var(--node-size); height: calc(var(--node-size) * 1.1547);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s ease-in-out; cursor: pointer;
+        }
+        .talent-node:hover { transform: scale(1.1); z-index: 10; }
+
+        .hexagon-container {
+            position: absolute; width: 100%; height: 100%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: box-shadow 0.2s ease-in-out, filter 0.3s ease-in-out;
+        }
+
+        .hexagon-skill-icon {
+            position: absolute;
+            top: 27.5%;
+            left: 27.5%;
+            width: 45%;
+            height: 45%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: filter 0.3s ease-in-out;
+        }
+        
+        .talent-node.state-locked .hexagon-container {
+            filter: grayscale(1) brightness(0.5);
+        }
+        .talent-node.state-locked .hexagon-skill-icon {
+            filter: grayscale(1) brightness(0.6);
+        }
+        .talent-node.state-available .hexagon-container {
+            box-shadow: 0 0 15px 2px var(--color-node-available);
+        }
+        .talent-node.state-available .hexagon-skill-icon {
+            filter: grayscale(0.5) brightness(0.8);
+        }
+        .talent-node.state-unlocked .hexagon-skill-icon {
+            filter: grayscale(0) brightness(1);
+        }
+
+        #tooltip {
+            position: fixed; display: none; padding: 12px; background: rgba(20, 20, 20, 0.9);
+            border: 1px solid #555; border-radius: 8px; pointer-events: none; z-index: 100;
+            width: 250px; backdrop-filter: blur(5px);
+        }
+        #tooltip h3 { margin: 0 0 8px 0; color: #eee; font-size: 16px; }
+        #tooltip p { margin: 0; font-size: 14px; color: #ccc; }
+        #tooltip .cost { margin-top: 8px; font-weight: bold; color: var(--color-node-available); }
+    </style>
+</head>
+<body>
+    <div id="close-button">&times;</div>
+    <div id="ui-bar">
+        <div id="level-display"></div>
+        <div id="xp-bar-container">
+            <div id="xp-text"></div>
+            <div id="xp-bar"></div>
+        </div>
+        <div id="skill-points-display"></div>
+    </div>
+    <div id="talent-tree-wrapper">
+        <svg id="connector-svg"></svg>
+        <div id="talent-tree-container"></div>
+    </div>
+    <div id="tooltip">
+        <h3>Placeholder Name</h3>
+        <p>Placeholder Description</p>
+        <div class="cost">Cost: 1 Point</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const playerData = { level: 15, currentXp: 1250, xpToNextLevel: 5000, skillPoints: 10 };
+
+            const groupHexagons = {
+                criminal: "skillimg/item_image_templateEquipment.png",
+                pd: "skillimg/item_image_templateUsableAlt.png",
+                ems: "skillimg/item_image_templateEquipment.png",
+                shared: "skillimg/item_image_templateUsable.png",
+                civ: "skillimg/item_image_templateSelect.png",
+                gang: "skillimg/item_image_templateStorage.png",
+                general: "skillimg/item_image_template3.png"
+            };
+
+            const talentData = {
+                "core": { id: "core", requires: null, name: "Core Node", description: "Placeholder here", icon: "skillimg/buff.png", cost: 0, group: "general" },
+                "main_crim": { id: "main_crim", requires: "core", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/perception.png", cost: 1, group: "criminal" },
+                "main_pd": { id: "main_pd", requires: "core", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/buff.png", cost: 1, group: "pd" },
+                "main_ems": { id: "main_ems", requires: "core", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/chemistnotebook.png", cost: 1, group: "ems" },
+                "main_civ": { id: "main_civ", requires: "core", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/berries.png", cost: 1, group: "civ" },
+                "main_gang": { id: "main_gang", requires: "core", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/berries.png", cost: 1, group: "gang" },
+                "main_gen": { id: "main_gen", requires: "core", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/berries.png", cost: 1, group: "general" },
+                "crim_1": { id: "crim_1", requires: "main_crim", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/perception.png", cost: 1, group: "criminal" },
+                "crim_2_branchA": { id: "crim_2_branchA", requires: "crim_1", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/perception.png", cost: 1, group: "criminal" },
+                "crim_2_branchB": { id: "crim_2_branchB", requires: "crim_1", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/perception.png", cost: 1, group: "criminal" },
+                "pd_1": { id: "pd_1", requires: "main_pd", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/buff.png", cost: 1, group: "pd" },
+                "pd_2": { id: "pd_2", requires: "pd_1", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/buff.png", cost: 1, group: "pd" },
+                "ems_1": { id: "ems_1", requires: "main_ems", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/chemistnotebook.png", cost: 1, group: "ems" },
+                "gang_1": { id: "gang_1", requires: "main_gang", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/berries.png", cost: 1, group: "gang" },
+                "gang_2a": { id: "gang_2a", requires: "gang_1", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/berries.png", cost: 1, group: "gang" },
+                "gang_2b": { id: "gang_2b", requires: "gang_1", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/berries.png", cost: 1, group: "gang" },
+                "shared_1": { id: "shared_1", requires: "pd_2", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/buff.png", cost: 1, group: "shared" },
+                "shared_2": { id: "shared_2", requires: "ems_1", name: "Placeholder here", description: "Placeholder here", icon: "skillimg/chemistnotebook.png", cost: 1, group: "shared" },
+            };
+
+            const state = {
+                talents: {},
+                panning: { active: false, startPos: { x: 0, y: 0 }, startOffset: { x: 0, y: 0 } },
+                view: { x: 0, y: 0, scale: 1 },
+            };
+
+            const container = document.getElementById('talent-tree-container');
+            const svg = document.getElementById('connector-svg');
+            const tooltip = document.getElementById('tooltip');
+            const wrapper = document.getElementById('talent-tree-wrapper');
+            const closeButton = document.getElementById('close-button');
+
+            function initializeTree() {
+                updateTopBarUI();
+                processTalentData();
+                updateTalentStates();
+                createNodes();
+                createConnectors();
+                centerView(true);
+                setupEventListeners();
+            }
+            
+            function setupEventListeners() {
+                closeButton.addEventListener('click', () => console.log('Close UI Clicked'));
+
+                wrapper.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    state.panning.active = true;
+                    wrapper.classList.add('grabbing');
+                    state.panning.startPos = { x: e.clientX, y: e.clientY };
+                    state.panning.startOffset = { x: state.view.x, y: state.view.y };
+                });
+
+                wrapper.addEventListener('mousemove', (e) => {
+                    if (!state.panning.active) return;
+                    const dx = e.clientX - state.panning.startPos.x;
+                    const dy = e.clientY - state.panning.startPos.y;
+                    state.view.x = state.panning.startOffset.x + dx;
+                    state.view.y = state.panning.startOffset.y + dy;
+                    updateContainerTransform();
+                });
+
+                const stopPanning = () => {
+                    state.panning.active = false;
+                    wrapper.classList.remove('grabbing');
+                };
+                wrapper.addEventListener('mouseup', stopPanning);
+                wrapper.addEventListener('mouseleave', stopPanning);
+
+                wrapper.addEventListener('wheel', handleZoom);
+                window.addEventListener('resize', () => centerView(true));
+            }
+
+            function handleZoom(e) {
+                e.preventDefault();
+                const zoomSpeed = 0.1;
+                const minZoom = 0.4;
+                const maxZoom = 2.0;
+                const rect = wrapper.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                const direction = e.deltaY < 0 ? 1 : -1;
+                const oldScale = state.view.scale;
+                const worldX = (mouseX - state.view.x) / oldScale;
+                const worldY = (mouseY - state.view.y) / oldScale;
+                state.view.scale = Math.max(minZoom, Math.min(maxZoom, oldScale + direction * zoomSpeed * oldScale));
+                state.view.x = mouseX - worldX * state.view.scale;
+                state.view.y = mouseY - worldY * state.view.scale;
+                updateContainerTransform();
+            }
+
+            function updateTopBarUI() {
+                document.getElementById('level-display').innerHTML = `${playerData.level} <span>LEVEL</span>`;
+                document.getElementById('skill-points-display').innerHTML = `${playerData.skillPoints} <span>POINTS</span>`;
+                const xpPercentage = (playerData.currentXp / playerData.xpToNextLevel) * 100;
+                document.getElementById('xp-bar').style.width = `${xpPercentage}%`;
+                document.getElementById('xp-text').textContent = `${playerData.currentXp.toLocaleString()} / ${playerData.xpToNextLevel.toLocaleString()} XP`;
+            }
+
+            function processTalentData() {
+                const hierarchy = {};
+                for (const id in talentData) {
+                    const data = talentData[id];
+                    state.talents[id] = { ...data, state: data.requires === null ? 'unlocked' : 'locked', el: null, pos: { x: 0, y: 0 }, children: [] };
+                    if (data.requires) {
+                        if (!hierarchy[data.requires]) hierarchy[data.requires] = [];
+                        hierarchy[data.requires].push(id);
+                    }
+                }
+                for(const parentId in hierarchy) {
+                    if(state.talents[parentId]) state.talents[parentId].children = hierarchy[parentId];
+                }
+                calculatePositions('core', { x: 0, y: 0 });
+            }
+
+            function calculatePositions(nodeId, parentPos, angleFromParent = -90) {
+                const node = state.talents[nodeId];
+                if (!node) return;
+                node.pos = parentPos;
+                const children = node.children;
+                const childCount = children.length;
+                if (childCount === 0) return;
+                const distance = 180;
+                if (nodeId === 'core') {
+                    const angleIncrement = 360 / childCount;
+                    children.forEach((childId, index) => {
+                        const angle = index * angleIncrement;
+                        const radians = angle * (Math.PI / 180);
+                        const childPos = {
+                            x: parentPos.x + distance * Math.cos(radians),
+                            y: parentPos.y + distance * Math.sin(radians)
+                        };
+                        calculatePositions(childId, childPos, angle);
+                    });
+                } else {
+                    const angleSpread = 90;
+                    const startAngle = angleFromParent - angleSpread / 2;
+                    const angleIncrement = childCount > 1 ? angleSpread / (childCount - 1) : 0;
+                    children.forEach((childId, index) => {
+                        const angle = startAngle + index * angleIncrement;
+                        const radians = angle * (Math.PI / 180);
+                        const childPos = {
+                            x: parentPos.x + distance * Math.cos(radians),
+                            y: parentPos.y + distance * Math.sin(radians)
+                        };
+                        calculatePositions(childId, childPos, angle);
+                    });
+                }
+            }
+
+            function updateTalentStates() {
+                Object.values(state.talents).forEach(talent => {
+                    if (talent.state === 'unlocked') {
+                        talent.children.forEach(childId => {
+                            const child = state.talents[childId];
+                            if (child && child.state === 'locked') child.state = 'available';
+                        });
+                    }
+                });
+            }
+
+            function createNodes() {
+                container.innerHTML = '';
+                const nodeSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--node-size'));
+                Object.values(state.talents).forEach(talent => {
+                    const node = document.createElement('div');
+                    node.id = talent.id;
+                    
+                    // UPDATED: Handle the 'core' node differently to match the screenshot
+                    if (talent.id === 'core') {
+                        node.className = `talent-node state-unlocked`;
+                        // For the core node, we just use the icon, not the full hexagon structure
+                        node.innerHTML = `<div class="hexagon-skill-icon" style="background-image: url('${talent.icon}'); position:absolute; width:80%; height:80%; top:10%; left:10%;"></div>`;
+                        // Adjust size for a non-hexagon shape
+                        node.style.height = 'var(--node-size)';
+                    } else {
+                        node.className = `talent-node state-${talent.state}`;
+                        const groupHexagon = groupHexagons[talent.group] || groupHexagons.general;
+                        node.innerHTML = `
+                            <div class="hexagon-container" style="background-image: url('${groupHexagon}')">
+                                <div class="hexagon-skill-icon" style="background-image: url('${talent.icon}')"></div>
+                            </div>`;
+                    }
+                    
+                    // Centralize position calculation
+                    const nodeHeight = talent.id === 'core' ? nodeSize : (nodeSize * 1.1547);
+                    node.style.left = `calc(50% + ${talent.pos.x}px - ${nodeSize / 2}px)`;
+                    node.style.top = `calc(50% + ${talent.pos.y}px - ${nodeHeight / 2}px)`;
+
+                    container.appendChild(node);
+                    talent.el = node;
+                    node.addEventListener('click', () => onTalentClick(talent));
+                    node.addEventListener('mouseenter', (e) => showTooltip(e, talent));
+                    node.addEventListener('mouseleave', hideTooltip);
+                });
+            }
+
+            function createConnectors() {
+                svg.innerHTML = '';
+                Object.values(state.talents).forEach(talent => {
+                    if (talent.requires && state.talents[talent.requires]) {
+                        const parent = state.talents[talent.requires];
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', `calc(50% + ${parent.pos.x}px)`);
+                        line.setAttribute('y1', `calc(50% + ${parent.pos.y}px)`);
+                        line.setAttribute('x2', `calc(50% + ${talent.pos.x}px)`);
+                        line.setAttribute('y2', `calc(50% + ${talent.pos.y}px)`);
+                        line.setAttribute('stroke', 'var(--color-connector)');
+                        line.setAttribute('stroke-width', '2');
+                        svg.appendChild(line);
+                    }
+                });
+            }
+            
+            function onTalentClick(talent) {
+                if (talent.state === 'available' && playerData.skillPoints >= talent.cost) {
+                    playerData.skillPoints -= talent.cost;
+                    talent.state = 'unlocked';
+                    updateTalentStates();
+                    refreshNodesUI();
+                    updateTopBarUI();
+                }
+            }
+            
+            function refreshNodesUI() {
+                Object.values(state.talents).forEach(talent => {
+                    if (talent.el && talent.id !== 'core') { // Core node doesn't need class updates
+                        talent.el.className = `talent-node state-${talent.state}`;
+                    }
+                });
+            }
+
+            function centerView(instant = false) {
+                const container = document.getElementById('talent-tree-container');
+                const svg = document.getElementById('connector-svg');
+                if (instant) {
+                    container.style.transition = 'none';
+                    svg.style.transition = 'none';
+                }
+                state.view.x = window.innerWidth / 2;
+                state.view.y = window.innerHeight / 2;
+                updateContainerTransform();
+                if (instant) { setTimeout(() => { container.style.transition = ''; svg.style.transition = ''; }, 50); }
+            }
+
+            function updateContainerTransform() {
+                const transform = `translate(${state.view.x}px, ${state.view.y}px) scale(${state.view.scale})`;
+                container.style.transform = transform;
+                svg.style.transform = transform;
+            }
+
+            function showTooltip(event, talent) {
+                tooltip.style.display = 'block';
+                tooltip.querySelector('h3').textContent = talent.name;
+                tooltip.querySelector('p').textContent = talent.description;
+                tooltip.querySelector('.cost').textContent = `Cost: ${talent.cost} Point(s)`;
+                let x = event.clientX + 15, y = event.clientY + 15;
+                if (x + tooltip.offsetWidth > window.innerWidth) x = event.clientX - tooltip.offsetWidth - 15;
+                if (y + tooltip.offsetHeight > window.innerHeight) y = event.clientY - tooltip.offsetHeight - 15;
+                tooltip.style.left = `${x}px`;
+                tooltip.style.top = `${y}px`;
+            }
+
+            function hideTooltip() { tooltip.style.display = 'none'; }
+            
+            initializeTree();
+        });
+    </script>
+
+</body>
+</html>
