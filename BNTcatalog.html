@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brooklynn's Needle & Thread</title>
+    <style>
+        :root {
+            --primary: #d4af37; /* Gold */
+            --dark: #121212;
+            --light: #f5f5f5;
+            --card-bg: #1e1e1e;
+            --text-muted: #aaaaaa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Georgia', serif;
+            font-weight: normal;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: 6rem 1rem;
+            /* Placeholder Background - Replace if desired */
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 4px solid var(--primary);
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #ccc;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #000;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Section Styling */
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        /* Images */
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: 1rem;
+            background-color: #000; /* Loading placeholder color */
+        }
+
+        /* Grid Layout for Items */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 5rem;
+        }
+
+        .category-card {
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 4px;
+            overflow: hidden; /* Keeps image corners tidy */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: #444;
+        }
+
+        .category-content {
+            padding: 1.5rem;
+        }
+
+        .category-card h3 {
+            color: var(--primary);
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        /* Item Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .price {
+            text-align: right;
+            color: var(--primary);
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Packages Section */
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .package-card {
+            background-color: #252525;
+            border: 1px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .package-content-box {
+            padding: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .package-card h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            color: #fff;
+        }
+
+        .package-contents {
+            margin: 1rem 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+        
+        .package-contents ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .package-price {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin-top: 1.5rem;
+            display: block;
+            border-top: 1px solid #444;
+            padding-top: 1rem;
+        }
+
+        .package-note {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: #888;
+        }
+
+        /* Contact Section */
+        .contact-box {
+            background-color: var(--primary);
+            color: #000;
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-top: 4rem;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .contact-box h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            color: #000;
+        }
+
+        .contact-number {
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Helper */
+        .sub-header {
+            font-weight: bold;
+            color: #fff;
+            margin-top: 15px;
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.2rem; }
+            .contact-number { font-size: 2rem; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Brooklynn's Needle & Thread</h1>
+        <p>Fashion To Suit Your Lifestyle</p>
+    </header>
+
+    <nav>
+        <a href="#catalogue">Catalogue</a>
+        <a href="#packages">Packages</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="container">
+        
+        <!-- Intro -->
+        <div style="text-align: center; margin-bottom: 4rem; color: #ccc; max-width: 800px; margin-left: auto; margin-right: auto;">
+            <p style="font-size: 1.1rem;">Please take a look at our latest collection. From daily essentials to tactical gear, we curate packages tailored to your specific needs.</p>
+        </div>
+
+        <!-- Catalogue Section -->
+        <h2 id="catalogue" class="section-title">The Catalogue</h2>
+        
+        <div class="category-grid">
+            
+            <!-- Paper Goods -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Paper+Goods" alt="Paper Goods" class="card-image">
+                <div class="category-content">
+                    <h3>Paper Goods</h3>
+                    <table>
+                        <tr><td>Flyers (5)</td><td class="price">$5.00</td></tr>
+                        <tr><td>Notes (5)</td><td class="price">$10.00</td></tr>
+                        <tr><td>Paper (5)</td><td class="price">$10.00</td></tr>
+                        <tr><td>Toilet Paper</td><td class="price">$5.00</td></tr>
+                        <tr><td>Rolling Paper (50)</td><td class="price">$100.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Accessories -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Accessories" alt="Accessories" class="card-image">
+                <div class="category-content">
+                    <h3>Accessories</h3>
+                    <table>
+                        <tr><td>Shoe Inserts</td><td class="price">$250.00</td></tr>
+                        <tr><td>Rabbit's Foot Charm</td><td class="price">$1,200.00</td></tr>
+                        <tr><td>Earbuds</td><td class="price">$1,500.00</td></tr>
+                        <tr><td>Blindfold</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Bowtie</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Friendship Bracelet</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Pristine Bowtie</td><td class="price">$5,400.00</td></tr>
+                        <tr><td>Utility Belt</td><td class="price">$8,000.00</td></tr>
+                        <tr><td>Emergency Trauma Bag</td><td class="price">$8,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Misc & Eyewear -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Misc+Equipment" alt="Misc" class="card-image">
+                <div class="category-content">
+                    <h3>Misc & Eyewear</h3>
+                    <span class="sub-header">Misc Gear</span>
+                    <table>
+                        <tr><td>Basic Bandages</td><td class="price">$20.00</td></tr>
+                        <tr><td>Washcloth</td><td class="price">$200.00</td></tr>
+                        <tr><td>Stitching Kits</td><td class="price">$400.00</td></tr>
+                        <tr><td>Tactical Bandages</td><td class="price">$400.00</td></tr>
+                        <tr><td>Fishing Nets</td><td class="price">$800.00</td></tr>
+                        <tr><td>Duffel Bag Strap</td><td class="price">$1,000.00</td></tr>
+                        <tr><td>Yoga Mat</td><td class="price">$2,400.00</td></tr>
+                        <tr><td>Flame Resistant Jumpsuit</td><td class="price">$5,000.00</td></tr>
+                    </table>
+                    <span class="sub-header">Eyewear</span>
+                    <table>
+                        <tr><td>Stylish Glasses</td><td class="price">$4,800.00</td></tr>
+                        <tr><td>Nerdy Glasses</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Deadeye Goggles</td><td class="price">$8,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hats -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Headwear" alt="Headwear" class="card-image">
+                <div class="category-content">
+                    <h3>Headwear</h3>
+                    <table>
+                        <tr><td>Police Cap</td><td class="price">$2,500.00</td></tr>
+                        <tr><td>Lucky Cap</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Workout Headband</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Chefs Hat</td><td class="price">$4,400.00</td></tr>
+                        <tr><td>Bicycle Helmet</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Expertise Beanie</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Hard Hat</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Reinforced Hard Hat</td><td class="price">$8,000.00</td></tr>
+                        <tr><td>Mining Hard Hat</td><td class="price">$8,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gloves -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Gloves" alt="Gloves" class="card-image">
+                <div class="category-content">
+                    <h3>Gloves</h3>
+                    <table>
+                        <tr><td>Latex Gloves</td><td class="price">$1,800.00</td></tr>
+                        <tr><td>Outdoorsman Gloves</td><td class="price">$2,400.00</td></tr>
+                        <tr><td>Fingerless Gloves</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Foraging Gloves</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Scavenging Gloves</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Seafaring Gloves</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Seamers Gloves</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Scrapping Handwraps</td><td class="price">$4,500.00</td></tr>
+                        <tr><td>Deadshot Gloves</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Hazmat Gloves</td><td class="price">$12,000.00</td></tr>
+                        <tr><td>Heavy Hazmat Gloves</td><td class="price">$30,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tops -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Tops" alt="Tops" class="card-image">
+                <div class="category-content">
+                    <h3>Tops</h3>
+                    <table>
+                        <tr><td>Worn Shirt</td><td class="price">$500.00</td></tr>
+                        <tr><td>Triathlon Jersey</td><td class="price">$2,000.00</td></tr>
+                        <tr><td>Athletic Jersey</td><td class="price">$2,400.00</td></tr>
+                        <tr><td>Stylish Shirt</td><td class="price">$3,200.00</td></tr>
+                        <tr><td>Muscle Hoodie</td><td class="price">$4,000.00</td></tr>
+                        <tr><td>Concealer Hoodie</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Thick Hoodie</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Urban Hoodie</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Fuzzy Sweater</td><td class="price">$10,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vests & Pants -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Vests+%26+Bottoms" alt="Vests and Bottoms" class="card-image">
+                <div class="category-content">
+                    <h3>Vests & Bottoms</h3>
+                    <span class="sub-header">Vests</span>
+                    <table>
+                        <tr><td>Light Vest</td><td class="price">$500.00</td></tr>
+                        <tr><td>Apron</td><td class="price">$4,400.00</td></tr>
+                        <tr><td>Kevlar Insert</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Kevlar Vest</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Seasoned Chef Apron</td><td class="price">$7,200.00</td></tr>
+                        <tr><td>Workman Vest</td><td class="price">$8,000.00</td></tr>
+                    </table>
+                    <span class="sub-header">Pants</span>
+                    <table>
+                        <tr><td>Jogging Pants</td><td class="price">$2,400.00</td></tr>
+                        <tr><td>Urban Pants</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Stylish Pants</td><td class="price">$3,200.00</td></tr>
+                        <tr><td>Baggy Pants</td><td class="price">$4,500.00</td></tr>
+                        <tr><td>Cycling Shorts</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Alluring Skirt</td><td class="price">$7,200.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footwear -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Footwear" alt="Footwear" class="card-image">
+                <div class="category-content">
+                    <h3>Footwear</h3>
+                    <table>
+                        <tr><td>Jogging Shoes</td><td class="price">$1,500.00</td></tr>
+                        <tr><td>Hunting Boots</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Lightfoot Shoes</td><td class="price">$4,500.00</td></tr>
+                        <tr><td>Cycling Shoes</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Distance Jogging Shoes</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Expensive Shoes</td><td class="price">$7,200.00</td></tr>
+                        <tr><td>Tactical Boots</td><td class="price">$10,000.00</td></tr>
+                        <tr><td>Riot Control Boots</td><td class="price">$15,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bags -->
+            <div class="category-card">
+                
+                <img src="https://placehold.co/600x400/222/d4af37?text=Bags" alt="Bags" class="card-image">
+                <div class="category-content">
+                    <h3>Bags</h3>
+                    <table>
+                        <tr><td>Foraging Basket</td><td class="price">$3,000.00</td></tr>
+                        <tr><td>Small Pouch</td><td class="price">$3,500.00</td></tr>
+                        <tr><td>Light Traveling Backpack</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Tailoring Backpack</td><td class="price">$5,000.00</td></tr>
+                        <tr><td>Cuisine Bag</td><td class="price">$7,200.00</td></tr>
+                        <tr><td>Techie Bag</td><td class="price">$7,200.00</td></tr>
+                        <tr><td>Traveling Backpack</td><td class="price">$7,200.00</td></tr>
+                        <tr><td>Narco Bag</td><td class="price">$8,000.00</td></tr>
+                        <tr><td>Scavenging Backpack</td><td class="price">$10,000.00</td></tr>
+                        <tr><td>Heavy Duty Backpack</td><td class="price">$15,000.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Packages Section -->
+        <h2 id="packages" class="section-title">Specialty Packages</h2>
+        <p style="text-align: center; color: #888; margin-bottom: 2rem;">All packages feature discounted pricing. Further discounts may be negotiated with material exchanges.</p>
+
+        <div class="package-grid">
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Chemist+Pack" alt="Chemist" class="card-image">
+                <div class="package-content-box">
+                    <h3>Chemist Collection</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Hazmat Gloves</li>
+                            <li>Flame-Resistant Jumpsuit</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">Standard: $16,000.00</span>
+                    <span class="package-price">Heavy (w/ Heavy Gloves): $32,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Culinary+Pack" alt="Culinary" class="card-image">
+                <div class="package-content-box">
+                    <h3>Culinary Collection</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Chef Hat & Cuisine Bag</li>
+                            <li>Choice of Apron</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">Full Set: $13,000.00</span>
+                    <span class="package-price">Seasoned Set: $16,000.00</span>
+                    <div style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
+                        <span class="package-note">Without Bag: $8,000 (Standard) / $14,000 (Seasoned)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Confidence+Pack" alt="Confidence" class="card-image">
+                <div class="package-content-box">
+                    <h3>Confidence Collection</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Bowtie & Expensive Shoes</li>
+                            <li>Stylish Glasses</li>
+                            <li>Stylish Pants & Shirt</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$18,500.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Fisherman+Pack" alt="Fisherman" class="card-image">
+                <div class="package-content-box">
+                    <h3>Fisherman Collection</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Seafaring Gloves</li>
+                            <li>Expertise Beanie</li>
+                            <li>10 Fishing Nets</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$30,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Fitness+Pack" alt="Fitness" class="card-image">
+                <div class="package-content-box">
+                    <h3>Fitness Collection</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Athlete Jersey & Jogging Pants</li>
+                            <li>Jogging Shoes</li>
+                            <li>Workout Headband & Yoga Mat</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$11,500.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Gardening+Pack" alt="Gardening" class="card-image">
+                <div class="package-content-box">
+                    <h3>Gardening</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Foraging Basket</li>
+                            <li>Foraging Gloves</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$5,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=IT+Fashion" alt="IT" class="card-image">
+                <div class="package-content-box">
+                    <h3>IT Fashion</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Nerdy Glasses</li>
+                            <li>Fingerless Gloves</li>
+                            <li>Techie Bag</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$10,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                
+                <img src="https://placehold.co/600x350/333/d4af37?text=Mechanic+Pack" alt="Mechanic" class="card-image">
+                <div class="package-content-box">
+                    <h3>The Mechanic</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Expertise Beanie</li>
+                            <li>Workman Vest OR Utility Belt</li>
+                            <li>Duffel Bag Strap</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$12,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                <img src="https://placehold.co/600x350/333/d4af37?text=Outdoor+Pack" alt="Outdoor" class="card-image">
+                <div class="package-content-box">
+                    <h3>Outdoor Collection</h3>
+                    <div class="package-contents">
+                        <strong>Option A:</strong> Deadshot Gloves, Deadeye Goggles, Hunting Boots, Jogging Pants<br><br>
+                        <strong>Option B:</strong> Deadeye Goggles, Hunting Boots, Outdoorsman Gloves, Jogging Pants
+                    </div>
+                    <span class="package-price">$20,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                <img src="https://placehold.co/600x350/333/d4af37?text=Tactical+Standard" alt="Tactical Standard" class="card-image">
+                <div class="package-content-box">
+                    <h3>Tactical Standard</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Deadshot Gloves & Deadeye Goggles</li>
+                            <li>Kevlar Insert</li>
+                            <li>Jogging Pants & Tactical Boots</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$30,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                <img src="https://placehold.co/600x350/333/d4af37?text=Heavy+Tactical" alt="Heavy Tactical" class="card-image">
+                <div class="package-content-box">
+                    <h3>Heavy Tactical</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Deadeye Goggles & Scrapping Handwraps</li>
+                            <li>Kevlar Insert</li>
+                            <li>Jogging Pants & Riot Control Boots</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$35,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                <img src="https://placehold.co/600x350/333/d4af37?text=LSPD+Pack" alt="LSPD" class="card-image">
+                <div class="package-content-box">
+                    <h3>LSPD</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Deadshot Gloves & Deadeye Goggles</li>
+                            <li>Kevlar Insert & Jogging Pants</li>
+                            <li>Riot Control Boots</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$25,000.00</span>
+                </div>
+            </div>
+
+            <div class="package-card">
+                <img src="https://placehold.co/600x350/333/d4af37?text=Mount+Zonah" alt="Mount Zonah" class="card-image">
+                <div class="package-content-box">
+                    <h3>Mount Zonah</h3>
+                    <div class="package-contents">
+                        <ul>
+                            <li>Police Cap</li>
+                            <li>Emergency Response Bag</li>
+                            <li>Jogging Pants & Lightfoot Shoes</li>
+                        </ul>
+                    </div>
+                    <span class="package-price">$18,000.00</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="contact" class="contact-box">
+            <h2>Ready to Order?</h2>
+            <p>To place an order or discuss custom tailoring needs, please contact Brooklynn.</p>
+            <div class="contact-number">#755854</div>
+        </div>
+
+    </div>
+
+    <footer style="text-align: center; padding: 2rem; color: #555; font-size: 0.8rem;">
+        &copy; Brooklynn's Needle & Thread. All Rights Reserved.
+    </footer>
+
+</body>
+</html>
