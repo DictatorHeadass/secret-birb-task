@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>16x16 Engraving Designer</title>
+    <title>16x16 Pro Engraving Designer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .grid-container {
@@ -31,41 +31,48 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center py-10 px-4">
 
-    <div class="max-w-3xl w-full text-center space-y-6">
+    <div class="max-w-4xl w-full text-center space-y-6">
         <div>
-            <h1 class="text-3xl font-bold text-slate-800">Coin Engraver</h1>
-            <p class="text-slate-600">Design your logo here. The circle border is removed so you can use the full 16x16 space.</p>
+            <h1 class="text-3xl font-bold text-slate-800">Pro Coin Engraver</h1>
+            <p class="text-slate-600">Clean 16x16 pixel engravings. Optimized for high-visibility silhouettes.</p>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-8 items-start justify-center">
+        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
             <!-- Drawing Area -->
-            <div class="w-full max-w-[400px]">
-                <div id="grid" class="grid-container shadow-xl rounded-lg overflow-hidden"></div>
-                <div class="flex justify-between mt-4">
-                    <button onclick="clearGrid()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">Clear Canvas</button>
-                    <button onclick="invertGrid()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded font-medium transition">Invert</button>
+            <div class="w-full max-w-[450px]">
+                <div id="grid" class="grid-container shadow-2xl rounded-lg overflow-hidden"></div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="clearGrid()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-medium transition">Clear</button>
+                    <button onclick="invertGrid()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white py-2 rounded font-medium transition">Invert</button>
+                    <button onclick="downloadImage()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded font-medium transition">Save PNG</button>
                 </div>
             </div>
 
             <!-- Presets Panel -->
-            <div class="bg-white p-6 rounded-xl shadow-md w-full md:w-80">
-                <h2 class="font-bold text-slate-700 mb-4 border-b pb-2 text-left">Engraving Presets</h2>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="loadPreset('sword')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Sword</button>
-                    <button onclick="loadPreset('heart')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Heart</button>
-                    <button onclick="loadPreset('dragon')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Serpent</button>
-                    <button onclick="loadPreset('skull')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Skull</button>
-                    <button onclick="loadPreset('star')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Star</button>
-                    <button onclick="loadPreset('diamond')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Diamond</button>
-                    <button onclick="loadPreset('crown')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Crown</button>
-                    <button onclick="loadPreset('cross')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">X-Mark</button>
-                    <button onclick="loadPreset('moon')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Crescent</button>
-                    <button onclick="loadPreset('anchor')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-blue-100 text-slate-700 text-sm transition">Anchor</button>
-                    <button onclick="loadPreset('circle')" class="text-left px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold transition col-span-2">Boundary Ref</button>
+            <div class="bg-white p-6 rounded-xl shadow-md w-full lg:w-96">
+                <h2 class="font-bold text-slate-700 mb-4 border-b pb-2 text-left">High-Quality Presets</h2>
+                <div class="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-2">
+                    <button onclick="loadPreset('sword')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">⚔️ Holy Sword</button>
+                    <button onclick="loadPreset('wolf')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">🐺 Wolf Head</button>
+                    <button onclick="loadPreset('shield')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">🛡️ Knight Shield</button>
+                    <button onclick="loadPreset('potion')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">🧪 Magic Flask</button>
+                    <button onclick="loadPreset('skull')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">💀 Clean Skull</button>
+                    <button onclick="loadPreset('dragon_head')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">🐲 Dragon</button>
+                    <button onclick="loadPreset('flame')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">🔥 Flame</button>
+                    <button onclick="loadPreset('crown')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">👑 Regal Crown</button>
+                    <button onclick="loadPreset('bolt')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">⚡ Lightning</button>
+                    <button onclick="loadPreset('clover')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">🍀 Luck Clover</button>
+                    <button onclick="loadPreset('eye')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">👁️ Mystic Eye</button>
+                    <button onclick="loadPreset('sun')" class="text-left px-3 py-2 rounded bg-slate-50 hover:bg-indigo-100 border border-slate-200 transition text-sm">☀️ Solar Crest</button>
+                </div>
+                <div class="mt-4 pt-4 border-t">
+                    <button onclick="loadPreset('circle')" class="w-full px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold transition">Boundary Reference</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <canvas id="exportCanvas" width="16" height="16" style="display:none;"></canvas>
 
     <script>
         const grid = document.getElementById('grid');
@@ -105,23 +112,47 @@
             cells.forEach(c => c.classList.toggle('active'));
         }
 
+        function downloadImage() {
+            const canvas = document.getElementById('exportCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 16, 16);
+            
+            cells.forEach((cell, i) => {
+                if (cell.classList.contains('active')) {
+                    const x = i % 16;
+                    const y = Math.floor(i / 16);
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            });
+
+            const link = document.createElement('a');
+            link.download = 'coin_engraving.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
         const presets = {
             circle: [4,5,6,7,8,9,10,11,18,19,20,21,22,23,24,25,26,27,33,34,45,46,48,49,62,63,64,65,78,79,80,81,94,95,96,97,110,111,112,113,126,127,128,129,142,143,144,145,158,159,160,161,174,175,176,177,190,191,193,194,205,206,210,211,212,213,214,215,216,217,218,219,220,221,228,229,230,231,232,233,234,235],
-            sword: [23,38,39,53,54,55,68,69,70,83,84,85,98,99,100,113,114,115,128,129,130,143,144,145,164,165,166,174,175,176,177,178,179,180,181,182,183,184,185,186,187,198,199,214,215,230,231],
-            heart: [35,36,37,42,43,44,50,51,52,53,54,57,58,59,60,61,65,66,67,68,69,70,71,72,73,74,75,76,77,78,81,82,83,84,85,86,87,88,89,90,91,92,93,94,97,98,99,100,101,102,103,104,105,106,107,108,109,110,114,115,116,117,118,119,120,121,122,123,124,125,131,132,133,134,135,136,137,138,139,140,148,149,150,151,152,153,154,155,165,166,167,168,169,170,182,183,184,185,199,200,215,216],
-            dragon: [39,40,41,53,57,58,68,74,83,90,99,100,101,102,103,104,105,112,113,114,115,116,117,118,119,120,121,128,129,130,131,132,133,134,135,136,137,144,145,146,147,153,154,168,169,170,185,186,187],
-            star: [23,24,39,40,55,56,71,72,87,88,103,104,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,132,133,134,135,136,137,138,139,140,141,142,143,153,154,155,156,157,158,167,168,169,170,171,172,173,174,184,185,188,189,201,202,204,205,217,218,221,222],
-            skull: [52,53,54,55,56,57,58,59,67,68,69,70,71,72,73,74,75,76,82,83,84,85,86,87,88,89,90,91,92,93,98,99,100,105,106,107,111,112,113,114,115,116,121,122,123,124,125,126,127,131,132,140,147,148,150,151,152,153,154,155,156,157,163,164,165,166,167,168,169,170,171,172,179,180,183,184,187,188,195,196,199,200,201,202,203,204,212,213,214,217,218,219],
-            diamond: [7,8,22,23,24,25,36,37,38,39,40,41,51,52,53,54,55,56,57,58,66,67,68,69,70,71,72,73,74,75,76,77,81,82,83,84,85,86,87,88,89,90,91,92,93,94,98,99,100,101,102,103,104,105,106,107,108,109,115,116,117,118,119,120,121,122,123,124,132,133,134,135,136,137,138,139,149,150,151,152,153,154,166,167,168,169,183,184],
-            crown: [50,54,58,62,65,66,69,70,73,74,77,78,81,82,85,86,89,90,93,94,97,98,101,102,105,106,109,110,113,114,115,116,117,118,119,120,121,122,123,124,125,126,129,130,131,132,133,134,135,136,137,138,139,140,141,142],
-            cross: [0,15,17,30,34,45,51,60,68,75,85,90,102,105,120,135,150,153,165,170,180,187,195,204,210,221,225,238,240,255],
-            moon: [37,38,39,40,51,52,53,54,55,56,66,67,68,69,70,71,72,81,82,83,84,97,98,99,113,114,115,129,130,131,145,146,147,148,161,162,163,164,165,166,167,177,178,179,180,181,182,183,194,195,196,197,198,199],
-            anchor: [23,24,39,40,55,56,71,72,87,88,103,104,115,116,117,118,119,120,133,134,135,136,137,138,146,147,148,149,150,151,152,153,154,155,156,157,161,162,163,172,173,174,177,178,189,190,193,194,206,207,211,212,221,222]
+            sword: [7,8,22,23,24,25,38,39,40,41,54,55,56,57,70,71,72,73,86,87,88,89,102,103,104,105,118,119,120,121,131,132,133,134,135,136,137,138,139,140,150,151,152,153,167,168,183,184,199,200,214,215,216,217,231,232],
+            wolf: [56,57,71,72,73,86,87,88,89,101,102,103,104,105,106,116,117,118,119,120,121,122,132,133,134,135,136,137,148,149,150,151,152,153,163,164,165,166,167,168,179,180,181,182,195,196,197,211,212,227,228,229,230],
+            shield: [34,35,36,37,38,39,40,41,42,43,44,45,49,50,51,52,53,54,55,56,57,58,59,60,65,66,67,68,69,70,71,72,73,74,75,76,81,82,83,84,85,86,87,88,89,90,91,92,97,98,99,100,101,102,103,104,105,106,107,108,114,115,116,117,118,119,120,121,122,123,131,132,133,134,135,136,137,138,139,140,148,149,150,151,152,153,154,155,166,167,168,169,183,184],
+            potion: [39,40,55,56,71,72,87,88,103,104,116,117,118,119,120,121,122,123,131,132,133,134,135,136,137,138,139,140,147,148,149,150,151,152,153,154,155,156,163,164,165,166,167,168,169,170,171,172,179,180,181,182,183,184,185,186,187,188,196,197,198,199,200,201,202,203,213,214,215,216,217,218],
+            skull: [36,37,38,39,40,41,42,43,51,52,53,54,55,56,57,58,59,60,66,67,68,69,70,71,72,73,74,75,76,77,82,83,84,85,86,87,88,89,90,91,92,93,99,100,101,104,105,106,115,116,117,122,123,124,132,133,140,141,148,149,150,153,154,155,164,165,166,167,168,169,170,171,181,182,185,186,197,198,199,200,201,202],
+            dragon_head: [37,38,39,40,52,53,54,55,56,66,67,68,69,70,71,82,83,87,97,98,99,100,101,102,113,114,115,116,117,118,129,130,131,132,145,146,147,148,162,163,178,179,180,195,196,211,212],
+            flame: [39,40,54,55,56,57,69,70,71,72,73,85,86,87,88,89,101,102,103,104,105,116,117,118,119,120,121,131,132,133,134,135,136,137,147,148,149,150,151,152,153,162,163,164,165,166,167,168,169,178,179,180,181,182,183,184,185,194,195,196,197,198,199,200,201,211,212,213,214,215,216,228,229],
+            crown: [66,70,74,77,81,82,85,86,89,90,93,94,97,98,101,102,105,106,109,110,113,114,115,116,117,118,119,120,121,122,123,124,125,126,129,130,131,132,133,134,135,136,137,138,139,140,141,142,146,147,148,149,150,151,152,153,154,155,156,157,158],
+            bolt: [58,73,74,88,89,90,103,104,105,106,118,119,120,121,113,114,115,116,130,131,132,145,146,161],
+            clover: [39,40,54,55,56,57,69,70,71,72,73,82,83,84,87,88,89,90,91,92,97,98,99,102,103,104,105,106,107,108,113,114,115,118,119,120,121,122,123,124,131,132,133,134,138,139,140,147,148,149,150,153,154,155,163,164,165,168,169,170,180,181,185,186,198,202,215,217,232],
+            eye: [84,85,86,87,88,89,90,91,98,99,100,101,102,103,104,105,106,107,108,109,115,116,117,118,121,122,123,124,131,132,133,134,135,136,137,138,139,140,147,148,149,150,151,152,153,154,155,156,165,166,167,168,169,170,119,120,135,136],
+            sun: [119,120,135,136,103,118,134,151,104,121,137,152,87,88,167,168,71,72,183,184,55,56,199,200,39,40,215,216,112,113,128,129,125,126,141,142,47,62,193,208,23,24,231,232]
         };
 
         function loadPreset(key) {
             clearGrid();
-            presets[key].forEach(index => cells[index].classList.add('active'));
+            presets[key].forEach(index => {
+                if(cells[index]) cells[index].classList.add('active');
+            });
         }
 
         createGrid();
