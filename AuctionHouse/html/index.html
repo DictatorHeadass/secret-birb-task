@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="marketplace" id="auctionHouse">
+
+        <header class="ah-header">
+            <h1 class="ah-title">Marketplace</h1>
+            <div class="ah-header-right">
+                <div class="ah-balance">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M3 21H21M3 10H21M5 10V21M19 10V21M10 10V14M14 10V14M10 14V21M14 14V21M12 3L2 8V10H22V8L12 3Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="balance-amount" id="playerBalance">$0</span>
+                </div>
+                <button class="ah-close-btn" id="closeBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+
+        <div class="ah-main">
+
+            <aside class="ah-sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Browse</h3>
+                    <button class="category-btn active" data-category="all">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        All Items
+                    </button>
+                    <button class="category-btn" data-category="weapons">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M15 15l6 6m-6-6v4.8m0-4.8h4.8M9 11.06V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6.06M9 11.06C7.75 11.06 6 11.06 6 13.5c0 2.5 3 2.5 3 5v3h6v-3c0-2.5 3-2.5 3-5 0-2.44-1.75-2.44-3-2.44">
+                            </path>
+                        </svg>
+                        Weapons
+                    </button>
+                    <button class="category-btn" data-category="armor">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                        Armor
+                    </button>
+                    <button class="category-btn" data-category="consumables">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        Consumables
+                    </button>
+                    <button class="category-btn" data-category="vehicles">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M5 17h14v-2H5v2zm0 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm14 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM7 5l1.5 6h7L17 5H7z">
+                            </path>
+                        </svg>
+                        Vehicles
+                    </button>
+                    <button class="category-btn" data-category="misc">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="19" cy="12" r="1"></circle>
+                            <circle cx="5" cy="12" r="1"></circle>
+                        </svg>
+                        Miscellaneous
+                    </button>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">My Listings</h3>
+                    <button class="category-btn" data-category="my-listings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Active Listings
+                    </button>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <button class="category-btn" data-category="create">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 5v14M5 12h14"></path>
+                        </svg>
+                        List Item
+                    </button>
+                    <button class="category-btn" data-category="create-vehicle">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 17h14v-2a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v2z"></path>
+                            <circle cx="7" cy="17" r="2"></circle>
+                            <circle cx="17" cy="17" r="2"></circle>
+                            <path d="M7 17v-2M17 17v-2"></path>
+                        </svg>
+                        List Vehicle
+                    </button>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title" style="color: var(--accent);">Dev Tools</h3>
+                    <button class="category-btn" id="devAddItemsBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 5v14M5 12h14"></path>
+                        </svg>
+                        Add Test Items
+                    </button>
+                    <button class="category-btn" id="devPopulateBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                        Populate Listings
+                    </button>
+                    <button class="category-btn" id="devAddVehiclesBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2">
+                            </path>
+                            <circle cx="7" cy="17" r="2"></circle>
+                            <circle cx="17" cy="17" r="2"></circle>
+                        </svg>
+                        Add Vehicles
+                    </button>
+                    <button class="category-btn" id="devSetBalanceBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Set Balance
+                    </button>
+                    <button class="category-btn" id="devClearInvBtn" style="color: var(--danger);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                        Clear Inventory
+                    </button>
+                </div>
+            </aside>
+
+
+            <main class="ah-content">
+
+                <div class="ah-toolbar" id="toolbar">
+                    <div class="search-wrapper">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search items...">
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-btn" data-view="grid" id="gridViewBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </button>
+                        <button class="view-btn active" data-view="list" id="listViewBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="8" y1="6" x2="21" y2="6"></line>
+                                <line x1="8" y1="12" x2="21" y2="12"></line>
+                                <line x1="8" y1="18" x2="21" y2="18"></line>
+                                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <select class="sort-select" id="sortSelect">
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="name">Name: A-Z</option>
+                    </select>
+                    <button class="btn-simulate" id="simulateBtn" title="Auto-generate listings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M1 20v-6h6"></path>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+
+
+                <div class="items-container" id="itemsContainer">
+                    <div class="items-grid" id="itemsGrid">
+                        <!-- Items will be dynamically inserted here -->
+                    </div>
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <circle cx="12" cy="16" r="0.5" fill="currentColor"></circle>
+                        </svg>
+                        <h3>No items found</h3>
+                        <p>Try adjusting your search or filters</p>
+                    </div>
+                </div>
+
+
+                <div class="create-auction-form" id="createAuctionForm" style="display: none;">
+                    <h2>List New Item</h2>
+                    <div class="form-group">
+                        <label>Select Item</label>
+                        <select id="auctionItem" class="form-input">
+                            <option value="">Choose an item from your inventory...</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="auctionQuantity" class="form-input" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input type="number" id="auctionStartBid" class="form-input" min="1" placeholder="0">
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="createAuctionBtn">List Item</button>
+                    <button class="btn-secondary" id="cancelCreateBtn">Cancel</button>
+                </div>
+
+                <div class="create-auction-form" id="createVehicleForm" style="display: none;">
+                    <h2>List Vehicle</h2>
+                    <div class="form-group">
+                        <label>Select Vehicle</label>
+                        <select id="vehicleSelect" class="form-input">
+                            <option value="">Choose a vehicle from your garage...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" id="vehiclePrice" class="form-input" min="1" placeholder="0">
+                    </div>
+                    <button class="btn-primary" id="createVehicleListingBtn">List Vehicle</button>
+                    <button class="btn-secondary" id="cancelVehicleBtn">Cancel</button>
+                </div>
+            </main>
+
+
+            <aside class="ah-details-panel" id="detailsPanel">
+                <button class="details-close-btn" id="closeDetailsBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <div class="details-content">
+                    <!-- Item Display -->
+                    <div class="details-item-display">
+                        <div class="item-frame-large">
+                            <img src="../item_Image_template.png" class="item-template-large" alt="Item Frame">
+                            <img src="" class="item-image-large" id="detailsItemImage" alt="Item">
+                        </div>
+                        <div class="item-stack-count" id="detailsStackCount">x1</div>
+                    </div>
+
+                    <!-- Item Info -->
+                    <div class="details-item-info">
+                        <h2 class="details-item-name" id="detailsItemName">Item Name</h2>
+                        <div class="details-item-meta">
+                            <span class="item-rarity-badge" id="detailsRarity">Common</span>
+                            <span class="item-category-badge" id="detailsCategory">Category</span>
+                        </div>
+                    </div>
+
+                    <!-- Listing Info -->
+                    <div class="details-auction-info">
+                        <div class="auction-seller">
+                            <span class="label">Seller:</span>
+                            <span id="detailsSeller">Player Name</span>
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="details-pricing">
+                        <div class="price-box">
+                            <span class="price-label">Price (Each)</span>
+                            <span class="price-value" id="detailsCurrentBid">$5,000</span>
+                        </div>
+                    </div>
+
+                    <!-- Quantity Selector -->
+                    <div class="quantity-selector" id="quantitySelector">
+                        <label class="quantity-label">Quantity</label>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" id="decreaseQty" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                            <input type="number" class="quantity-input" id="purchaseQuantity" value="1" min="1" max="1">
+                            <button class="quantity-btn" id="increaseQty" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="quantity-info">
+                            <span class="available-qty" id="availableQty">1 available</span>
+                            <span class="total-price" id="totalPrice">Total: $5,000</span>
+                        </div>
+                    </div>
+
+                    <!-- Buy Button -->
+                    <div class="bid-interface" id="bidInterface">
+                        <button class="btn-buyout" id="buyoutBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Bid Confirmation Modal -->
+        <div class="modal" id="bidModal">
+            <div class="modal-content">
+                <h2>Confirm Bid</h2>
+                <div class="modal-body">
+                    <p>Are you sure you want to place a bid of <strong id="modalBidAmount">$0</strong>?</p>
+                    <p class="modal-hint">You will be notified if you are outbid.</p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelBidBtn">Cancel</button>
+                    <button class="btn-primary" id="confirmBidBtn">Confirm Bid</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Confirmation Modal -->
+        <div class="modal" id="buyoutModal">
+            <div class="modal-content">
+                <h2>Confirm Purchase</h2>
+                <div class="modal-body">
+                    <p>Purchase <strong id="modalBuyoutItem">Item</strong> for <strong
+                            id="modalBuyoutAmount">$0</strong>?
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelBuyoutBtn">Cancel</button>
+                    <button class="btn-primary" id="confirmBuyoutBtn">Confirm Purchase</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remove Confirmation Modal -->
+        <div class="modal" id="removeModal">
+            <div class="modal-content">
+                <h2>Confirm Removal</h2>
+                <div class="modal-body">
+                    <p>Are you sure you want to remove <strong id="modalRemoveItemName">Item Name</strong>?</p>
+                    <p class="modal-hint">The item(s) will be returned to your inventory.</p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelRemoveBtn">Cancel</button>
+                    <button class="btn-danger" id="confirmRemoveBtn">Remove Listing</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
